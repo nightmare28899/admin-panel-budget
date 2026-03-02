@@ -1,0 +1,38 @@
+name: Deploy Admin Panel
+
+on:
+push:
+branches: ["main"]
+
+jobs:
+deploy:
+runs-on: ubuntu-latest
+steps:
+- name: Deploy via SSH
+uses: appleboy/ssh-action@v1.2.0
+with:
+host: ${{ secrets.VPS_HOST }}
+username: ${{ secrets.VPS_USER }}
+key: ${{ secrets.VPS_SSH_KEY }}
+port: ${{ secrets.VPS_PORT }}
+script: |
+set -e
+cd /root
+if [ ! -d admin-panel-budget ]; then
+git clone git@github.com:nightmare28899/admin-panel-budget.git
+fi
+cd /root/admin-panel-budget
+git fetch origin main
+git reset --hard origin/main
+docker rm -f admin-panel-budget 2>/dev/null || true
+docker build -t admin-panel-budget .
+docker run -d --name admin-panel-budget \
+--network back-end-budget-app_default \
+-e NEXT_PUBLIC_API_BASE_URL=https://kevinlg.cloud/api \
+-l traefik.enable=true \
+-l 'traefik.http.routers.admin.rule=Host(`admin.kevinlg.cloud`)' \
+-l traefik.http.routers.admin.entrypoints=websecure \
+-l traefik.http.routers.admin.tls=true \
+-l traefik.http.routers.admin.tls.certresolver=letsencrypt \
+-l traefik.http.services.admin.loadbalancer.server.port=3000 \
+admin-panel-budget
