@@ -1,4 +1,5 @@
 "use client";
+
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -12,21 +13,66 @@ const [error, setError] = useState("");
 const [loading, setLoading] = useState(false);
 
 async function onSubmit(e: FormEvent) {
-e.preventDefault(); setError(""); setLoading(true);
-try { const res = await api.login(email, password); saveAuth(res.accessToken, res.user); router.push("/dashboard/users"); }
-catch (err) { setError(err instanceof Error ? err.message : "Login failed"); }
-finally { setLoading(false); }
+e.preventDefault();
+setError("");
+setLoading(true);
+
+try {
+const res = await api.login(email, password);
+
+if ((res.user?.role || "").toLowerCase() !== "admin") {
+setError("Access denied. Only ADMIN users can access this platform.");
+setLoading(false);
+return;
 }
 
+saveAuth(res.accessToken, res.user);
+router.push("/dashboard/users");
+} catch (err) {
+setError(err instanceof Error ? err.message : "Login failed");
+} finally {
+setLoading(false);
+}
+}
 return (
-<main className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-100">
-<form onSubmit={onSubmit} className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
-<h1 className="text-2xl font-semibold">Admin Panel</h1>
-<input className="input" placeholder="Email" type="email" required value={email} onChange={(e)=>setEmail(e.target.value)} />
-<input className="input" placeholder="Password" type="password" required value={password} onChange={(e)=>setPassword(e.target.value)} />
-{error ? <p className="text-red-400 text-sm">{error}</p> : null}
-<button className="w-full rounded-lg bg-indigo-600 py-2">{loading ? "Signing in..." : "Sign in"}</button>
+<main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-6">
+<div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur p-8 shadow-2xl">
+<h1 className="text-2xl font-semibold mb-2">Admin Panel</h1>
+<p className="text-slate-400 mb-6">Sign in with an ADMIN account.</p>
+
+<form onSubmit={onSubmit} className="space-y-4">
+<div>
+<label className="block text-sm mb-1">Email</label>
+<input
+type="email"
+required
+value={email}
+onChange={(e) => setEmail(e.target.value)}
+className="input"
+/>
+</div>
+
+<div>
+<label className="block text-sm mb-1">Password</label>
+<input
+type="password"
+required
+value={password}
+onChange={(e) => setPassword(e.target.value)}
+className="input"
+/>
+</div>
+
+{error ? <p className="text-sm text-red-400 whitespace-pre-wrap">{error}</p> : null}
+
+<button
+disabled={loading}
+className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 py-2 font-medium"
+>
+{loading ? "Signing in..." : "Sign in"}
+</button>
 </form>
+</div>
 </main>
 );
 }
