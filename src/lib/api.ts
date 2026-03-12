@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-    (process.env.NEXT_PUBLIC_API_BASE_URL || "https://kevinlg.cloud/api").replace(/\/+$/, "");
+    (process.env.NEXT_PUBLIC_API_URL || "https://app.kevinlg.cloud/api").replace(/\/+$/, "");
 
 export type LoginResponse = {
     accessToken: string;
@@ -105,4 +105,10 @@ export const api = {
 
     disableUser: (token: string, id: string) =>
         request<{ message: string; user?: UserRow }>(`/users/${id}`, { method: "DELETE" }, token),
+
+    refreshToken: (refreshToken: string) =>
+        request<LoginResponse>("/auth/refresh", {
+            method: "POST",
+            body: JSON.stringify({ refreshToken }),
+        }),
 };

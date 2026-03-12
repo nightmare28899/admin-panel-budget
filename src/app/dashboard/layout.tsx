@@ -1,9 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { clearAuth, getToken, getUser } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { LogoutButton } from "./LogoutButton";
 
 type SessionUser = {
     name?: string;
@@ -11,31 +9,24 @@ type SessionUser = {
     role?: string;
 };
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const router = useRouter();
-    const [user, setUser] = useState<SessionUser | null>(null);
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+    const userCookie = cookieStore.get("admin_user")?.value;
 
-    useEffect(() => {
-        const token = getToken();
-        const me = getUser<SessionUser>();
+    if (!token || !userCookie) {
+        redirect("/login");
+    }
 
-        if (!token || !me) {
-            router.replace("/login");
-            return;
-        }
+    let user: SessionUser | null = null;
+    try {
+        user = JSON.parse(userCookie);
+    } catch {
+        redirect("/login");
+    }
 
-        if ((me.role || "").toLowerCase() !== "admin") {
-            clearAuth();
-            router.replace("/login");
-            return;
-        }
-
-        setUser(me);
-    }, [router]);
-
-    function logout() {
-        clearAuth();
-        router.replace("/login");
+    if ((user?.role || "").toLowerCase() !== "admin") {
+        redirect("/login");
     }
 
     return (
@@ -51,12 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <span className="text-slate-300">
                             {user?.name || user?.email} {user?.role ? `(${user.role})` : ""}
                         </span>
-                        <button
-                            onClick={logout}
-                            className="rounded-lg border border-slate-700 px-3 py-1.5 hover:bg-slate-800 transition-colors duration-200 hover:text-white"
-                        >
-                            Logout
-                        </button>
+                        <LogoutButton />
                     </div>
                 </div>
             </header>

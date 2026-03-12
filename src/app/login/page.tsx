@@ -2,8 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import { saveAuth } from "@/lib/auth";
+import { loginAction } from "@/lib/actions";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -18,16 +17,17 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const res = await api.login(email, password);
+            const res = await loginAction(email, password);
 
-            if ((res.user?.role || "").toLowerCase() !== "admin") {
-                setError("Access denied. Only ADMIN users can access this platform.");
+            if (res.error) {
+                setError(res.error);
                 setLoading(false);
                 return;
             }
 
-            saveAuth(res.accessToken, res.user);
-            router.push("/dashboard/users");
+            if (res.success) {
+                router.push("/dashboard/users");
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : "Login failed");
         } finally {

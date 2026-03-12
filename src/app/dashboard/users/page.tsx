@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, UserRow } from "@/lib/api";
-import { getToken } from "@/lib/auth";
+import { UserRow } from "@/lib/api";
+import { getUsersAction, disableUserAction, updateUserAction } from "@/lib/actions";
 
 export default function UsersPage() {
     const [users, setUsers] = useState<UserRow[]>([]);
@@ -13,19 +13,20 @@ export default function UsersPage() {
     const [editForm, setEditForm] = useState({ name: "", dailyBudget: 0, currency: "MXN" });
     const [actionLoading, setActionLoading] = useState(false);
 
-    const loadUsers = () => {
-        const token = getToken();
-        if (!token) {
-            setError("No auth token found. Please login again.");
-            setLoading(false);
-            return;
-        }
-
+    const loadUsers = async () => {
         setLoading(true);
-        api.getUsers(token, true)
-            .then((res) => setUsers(Array.isArray(res.users) ? res.users : []))
-            .catch((e) => setError(e instanceof Error ? e.message : "Failed to load users"))
-            .finally(() => setLoading(false));
+        try {
+            const res = await getUsersAction(true);
+            if (res.error) {
+                setError(res.error);
+            } else {
+                setUsers(Array.isArray(res.data?.users) ? res.data.users : []);
+            }
+        } catch (e: any) {
+            setError(e.message || "Failed to load users");
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -34,12 +35,12 @@ export default function UsersPage() {
 
     const handleDelete = async (id: string) => {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
-        const token = getToken();
-        if (!token) return;
 
         setActionLoading(true);
         try {
-            await api.disableUser(token, id);
+            const res = await disableUserAction(id);
+            if (res.error) throw new Error(res.error);
+            
             setUsers((prev) =>
                 prev.map((u) => (u.id === id ? { ...u, isActive: false } : u))
             );
@@ -63,12 +64,11 @@ export default function UsersPage() {
         e.preventDefault();
         if (!editingUser) return;
 
-        const token = getToken();
-        if (!token) return;
-
         setActionLoading(true);
         try {
-            await api.updateUser(token, editingUser.id, editForm);
+            const res = await updateUserAction(editingUser.id, editForm);
+            if (res.error) throw new Error(res.error);
+
             setUsers((prev) =>
                 prev.map((u) =>
                     u.id === editingUser.id
