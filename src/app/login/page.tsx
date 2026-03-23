@@ -39,7 +39,7 @@ export default function LoginPage() {
         <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-6">
             <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur p-8 shadow-2xl transition-all hover:border-slate-700 hover:shadow-indigo-500/10">
                 <h1 className="text-2xl font-semibold mb-2">Admin Panel</h1>
-                <p className="text-slate-400 mb-6">Sign in with an ADMIN account.</p>
+                <p className="text-slate-400 mb-6">Sign in to continue.</p>
 
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div>

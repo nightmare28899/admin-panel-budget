@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "./LogoutButton";
+import { DashboardShell } from "./DashboardShell";
 
 type SessionUser = {
     name?: string;
@@ -29,32 +28,5 @@ export default async function DashboardLayout({ children }: { children: React.Re
         redirect("/login");
     }
 
-    return (
-        <div className="min-h-screen bg-slate-950 text-slate-100">
-            <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20 shadow-sm transition-colors duration-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-lg font-semibold">Budget Admin</h1>
-                        <p className="text-xs text-slate-400">Users Management</p>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-sm">
-                        <span className="text-slate-300">
-                            {user?.name || user?.email} {user?.role ? `(${user.role})` : ""}
-                        </span>
-                        <LogoutButton />
-                    </div>
-                </div>
-            </header>
-
-            <div className="max-w-7xl mx-auto px-6 py-6">
-                <nav className="mb-6 flex gap-3 text-sm">
-                    <Link href="/dashboard/users" className="rounded-lg border border-slate-700 px-3 py-1.5 hover:bg-slate-800 transition-colors duration-200 hover:text-white">
-                        Users
-                    </Link>
-                </nav>
-                {children}
-            </div>
-        </div>
-    );
+    return <DashboardShell user={user ?? {}}>{children}</DashboardShell>;
 }
