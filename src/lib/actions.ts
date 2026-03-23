@@ -12,7 +12,7 @@ export async function loginAction(email: string, password: string) {
         const res = await api.login(email, password);
 
         if ((res.user?.role || "").toLowerCase() !== "admin") {
-            return { error: "Access denied. Only ADMIN users can access this platform." };
+            return { error: "You don’t have permissions to access this platform." };
         }
 
         const cookieStore = await cookies();

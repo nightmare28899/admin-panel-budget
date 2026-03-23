@@ -18,7 +18,7 @@ export function LogoutButton() {
         <button
             disabled={loading}
             onClick={handleLogout}
-            className="rounded-lg border border-slate-700 px-3 py-1.5 hover:bg-slate-800 transition-colors duration-200 hover:text-white disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-slate-700 px-3 py-1.5 hover:bg-slate-800 transition-colors duration-200 hover:text-white disabled:opacity-50"
         >
             {loading ? "Logging out..." : "Logout"}
         </button>
