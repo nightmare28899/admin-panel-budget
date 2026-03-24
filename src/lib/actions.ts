@@ -145,3 +145,7 @@ export async function updateUserAction(id: string, payload: UpdateUserPayload) {
 export async function disableUserAction(id: string) {
     return withAuthRetry((token) => api.disableUser(token, id));
 }
+
+export async function activateUserAction(id: string) {
+    return withAuthRetry((token) => api.activateUser(token, id));
+}
