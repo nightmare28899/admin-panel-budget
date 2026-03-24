@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { UserRow } from "@/lib/api";
 import { getUsersAction, disableUserAction, updateUserAction } from "@/lib/actions";
@@ -11,7 +12,6 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
 
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
-  const [userToInactivate, setUserToInactivate] = useState<UserRow | null>(null);
   const [editForm, setEditForm] = useState({ name: "", dailyBudget: 0, currency: "MXN" });
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -61,20 +61,25 @@ export default function UsersPage() {
     };
   }, [users]);
 
-  const handleInactivateUser = async () => {
-    if (!userToInactivate) return;
+  const handleToggleUserStatus = async (target: UserRow) => {
+    if ((target.role || "").toLowerCase() === "admin") {
+      alert("Admin users cannot be inactivated from this panel.");
+      return;
+    }
+
+    if (!target.isActive) {
+      alert("Reactivating users is not available yet.");
+      return;
+    }
 
     setActionLoading(true);
     try {
-      const res = await disableUserAction(userToInactivate.id);
+      const res = await disableUserAction(target.id);
       if (res.error) throw new Error(res.error);
 
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userToInactivate.id ? { ...u, isActive: false } : u)),
-      );
-      setUserToInactivate(null);
+      setUsers((prev) => prev.map((u) => (u.id === target.id ? { ...u, isActive: false } : u)));
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to inactivate user");
+      alert(err instanceof Error ? err.message : "Failed to update user status");
     } finally {
       setActionLoading(false);
     }
@@ -120,13 +125,26 @@ export default function UsersPage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-950 p-5 md:p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b1836]">
+        <div className="flex flex-wrap items-center gap-6 border-b border-slate-800 px-5 py-3 text-sm text-slate-300 md:px-6">
+          <span className="font-semibold text-indigo-300">Overview</span>
+          <span className="text-slate-400">Activity</span>
+          <span className="text-slate-400">Settings</span>
+          <span className="text-slate-400">Collaborators</span>
+          <span className="text-slate-400">Notifications</span>
+        </div>
+
+        <div className="flex flex-col gap-4 border-b border-slate-800 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-6">
           <div>
-            <h2 className="text-2xl font-semibold text-white">Users</h2>
+            <h2 className="text-2xl font-semibold text-white">Users Dashboard</h2>
             <p className="mt-1 text-sm text-slate-400">Manage and monitor platform accounts.</p>
           </div>
+          <span className="inline-flex w-fit rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-300">
+            Production
+          </span>
+        </div>
 
+        <div className="px-5 py-4 md:px-6">
           <div className="w-full md:w-80">
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">
               Search users
@@ -141,10 +159,10 @@ export default function UsersPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatCard label="Total" value={totals.all} />
-          <StatCard label="Active" value={totals.active} accent="text-emerald-300" />
-          <StatCard label="Disabled" value={totals.disabled} accent="text-rose-300" />
+        <div className="grid grid-cols-2 gap-px border-t border-slate-800 bg-slate-800 md:grid-cols-4">
+          <StatCard label="Total users" value={totals.all} />
+          <StatCard label="Active users" value={totals.active} accent="text-emerald-300" />
+          <StatCard label="Disabled users" value={totals.disabled} accent="text-rose-300" />
           <StatCard label="Admins" value={totals.admins} accent="text-indigo-300" />
         </div>
       </div>
@@ -180,15 +198,13 @@ export default function UsersPage() {
                   >
                     <td className="p-3">
                       {u.avatarUrl ? (
-                        <img
+                        <Image
                           src={u.avatarUrl}
-                          alt={u.name}
+                          alt={u.name || "User avatar"}
+                          width={36}
+                          height={36}
+                          unoptimized
                           className="h-9 w-9 rounded-full border border-slate-700 object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                            e.currentTarget.nextElementSibling?.classList.add("flex");
-                          }}
                         />
                       ) : null}
                       <div
@@ -226,15 +242,23 @@ export default function UsersPage() {
                         >
                           Edit
                         </button>
-                        {u.isActive && (
-                          <button
-                            onClick={() => setUserToInactivate(u)}
-                            disabled={actionLoading}
-                            className="cursor-pointer rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-rose-200 transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-500/20 disabled:opacity-50"
-                          >
-                            Inactivate
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleToggleUserStatus(u)}
+                          disabled={actionLoading || (u.role || "").toLowerCase() === "admin"}
+                          className={`relative inline-flex h-7 w-14 items-center rounded-full border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+                            u.isActive
+                              ? "border-emerald-500/40 bg-emerald-500/20"
+                              : "border-slate-600 bg-slate-700/60"
+                          }`}
+                          title={(u.role || "").toLowerCase() === "admin" ? "Admin users cannot be inactivated" : u.isActive ? "Click to inactivate" : "User is inactive"}
+                        >
+                          <span
+                            className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                              u.isActive ? "translate-x-8" : "translate-x-1"
+                            }`}
+                          />
+                          <span className="sr-only">Toggle user status</span>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -245,40 +269,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {userToInactivate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="animate-modal-enter w-full max-w-md space-y-4 rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-            <h3 className="text-xl font-medium text-white">Confirm Inactivation</h3>
-            <p className="text-sm text-slate-300">
-              Are you sure that you want to inactivate this user? Remember that we don’t delete
-              users.
-            </p>
-            <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-3 text-sm">
-              <p className="font-medium text-slate-100">{userToInactivate.name || "Unnamed user"}</p>
-              <p className="text-slate-400">{userToInactivate.email}</p>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setUserToInactivate(null)}
-                disabled={actionLoading}
-                className="cursor-pointer px-4 py-2 text-slate-300 transition-colors duration-200 hover:text-white disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleInactivateUser}
-                disabled={actionLoading}
-                className="cursor-pointer rounded-lg bg-rose-600 px-4 py-2 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-500 active:translate-y-0 disabled:opacity-50"
-              >
-                {actionLoading ? "Inactivating..." : "Yes, inactivate"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {editingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
@@ -347,9 +337,9 @@ export default function UsersPage() {
 
 function StatCard({ label, value, accent = "text-white" }: { label: string; value: number; accent?: string }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+    <div className="bg-[#0b1836] p-4">
       <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold ${accent}`}>{value}</p>
+      <p className={`mt-1 text-3xl font-semibold ${accent}`}>{value}</p>
     </div>
   );
 }

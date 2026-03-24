@@ -65,16 +65,27 @@ async function getRefreshToken() {
     return cookieStore.get(REFRESH_KEY)?.value;
 }
 
+function getErrorMessage(error: unknown): string {
+    if (error instanceof Error) return error.message;
+    if (typeof error === "string") return error;
+    return "Action failed";
+}
+
+function isUnauthorizedError(error: unknown): boolean {
+    const message = getErrorMessage(error);
+    return message.includes("401") || message.toLowerCase().includes("unauthorized");
+}
+
 async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promise<{ data?: T; error?: string }> {
-    let token = await getToken();
+    const token = await getToken();
     if (!token) return { error: "Unauthorized" };
 
     try {
         const data = await actionFn(token);
         return { data };
-    } catch (err: any) {
+    } catch (err: unknown) {
         // Assume 401 means the token is expired/invalid
-        if (err.message && err.message.includes("401")) {
+        if (isUnauthorizedError(err)) {
             console.log("[Auth] Token expired, attempting to refresh...");
             const refreshToken = await getRefreshToken();
 
@@ -86,7 +97,7 @@ async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promis
             try {
                 const refreshed = await api.refreshToken(refreshToken);
                 const cookieStore = await cookies();
-                
+
                 cookieStore.set(TOKEN_KEY, refreshed.accessToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
@@ -94,7 +105,7 @@ async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promis
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7,
                 });
-                
+
                 cookieStore.set(REFRESH_KEY, refreshed.refreshToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
@@ -106,14 +117,14 @@ async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promis
                 console.log("[Auth] Token refresh successful. Retrying action.");
                 const data = await actionFn(refreshed.accessToken);
                 return { data };
-            } catch (refreshErr) {
+            } catch {
                 console.log("[Auth] Token refresh failed. Logging out.");
                 await logoutAction();
                 return { error: "Session expired. Please log in again." };
             }
         }
 
-        return { error: err.message || "Action failed" };
+        return { error: getErrorMessage(err) };
     }
 }
 
@@ -121,7 +132,13 @@ export async function getUsersAction(includeDisabled = true) {
     return withAuthRetry((token) => api.getUsers(token, includeDisabled));
 }
 
-export async function updateUserAction(id: string, payload: any) {
+type UpdateUserPayload = {
+    name?: string;
+    dailyBudget?: number;
+    currency?: string;
+};
+
+export async function updateUserAction(id: string, payload: UpdateUserPayload) {
     return withAuthRetry((token) => api.updateUser(token, id, payload));
 }
 
