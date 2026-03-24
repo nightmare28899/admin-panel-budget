@@ -22,10 +22,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-slate-800/80 bg-gradient-to-b from-[#0b1530] via-[#0b1735] to-[#0a1329] p-4 text-slate-200">
-      <div className="mb-5 flex items-center gap-2 px-2">
-        <div className="h-2.5 w-2.5 rounded-full bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.9)]" />
-        <p className="text-sm font-semibold tracking-wide text-slate-100">Budget Panel</p>
+    <div className="flex h-full flex-col overflow-y-auto bg-slate-950 px-6 py-8">
+      <div className="mb-8 flex items-center gap-x-3 px-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+        </div>
+        <p className="font-semibold tracking-wide text-white">Budget Panel</p>
       </div>
 
       <p className="px-2 pb-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">Navigation</p>
@@ -37,10 +41,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               key={item.label}
               href={item.href}
               onClick={onNavigate}
-              className={`block rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 active
-                  ? "border border-indigo-400/30 bg-indigo-500/20 text-indigo-200"
-                  : "border border-transparent text-slate-300 hover:border-slate-700 hover:bg-slate-800/40"
+                  ? "bg-slate-800 text-white"
+                  : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
               }`}
             >
               {item.label}
@@ -64,44 +68,39 @@ export function DashboardShell({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#070f23] text-slate-100">
-      <div className="mx-auto flex w-full max-w-[1400px] gap-5 p-4 md:p-6">
-        <aside className="hidden w-72 shrink-0 md:block">
-          <SidebarContent />
-        </aside>
+    <div className="flex h-screen w-full bg-slate-950 font-sans text-slate-200 overflow-hidden">
+      <aside className="hidden w-72 shrink-0 md:flex flex-col border-r border-slate-800 bg-slate-950 z-10 relative">
+        <SidebarContent />
+      </aside>
 
-        <div className="min-w-0 flex-1 space-y-4">
-          <header className="sticky top-3 z-30 rounded-2xl border border-slate-800/80 bg-[#0a1530]/90 p-3 backdrop-blur">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setMobileSidebarOpen(true)}
-                  className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800 md:hidden"
-                  aria-label="Open sidebar"
-                >
-                  ☰
-                </button>
-                <div className="relative w-[260px] max-w-[70vw]">
-                  <input
-                    type="text"
-                    placeholder="Search"
-                    className="w-full rounded-lg border border-slate-700 bg-[#0b1b3a] px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500"
-                  />
+      <div className="flex flex-1 flex-col min-w-0 overflow-y-auto">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-950 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-x-4">
+              <button
+                onClick={() => setMobileSidebarOpen(true)}
+                className="text-slate-400 hover:text-white md:hidden"
+                aria-label="Open sidebar"
+              >
+                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                 </svg>
+              </button>
+            </div>
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+                <div className="text-sm font-semibold leading-6 text-white hidden sm:block">
+                  {user?.name || user?.email} <span className="text-slate-400 font-normal">{user?.role ? `(${user.role})` : ""}</span>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-3 text-sm">
-                <span className="hidden text-slate-300 lg:inline">
-                  {user?.name || user?.email} {user?.role ? `(${user.role})` : ""}
-                </span>
+                <div className="hidden sm:block h-6 w-px bg-slate-800" aria-hidden="true" />
                 <LogoutButton />
-              </div>
             </div>
           </header>
 
-          <main className="rounded-2xl border border-slate-800/80 bg-[#0a1631]/80 p-4 md:p-6">{children}</main>
+          <main className="flex-1">
+             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+               {children}
+             </div>
+          </main>
         </div>
-      </div>
 
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
@@ -110,7 +109,7 @@ export function DashboardShell({
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <aside className="relative my-3 ml-3 h-[calc(100%-1.5rem)] w-80 max-w-[88vw] overflow-hidden rounded-2xl border border-slate-800 bg-[#070f23] p-4 shadow-2xl">
+            <aside className="relative my-3 ml-3 h-[calc(100%-1.5rem)] w-80 max-w-[88vw] overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-2xl flex flex-col">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-medium text-slate-300">Navigation</p>
               <button

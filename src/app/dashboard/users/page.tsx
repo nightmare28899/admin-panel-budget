@@ -16,6 +16,7 @@ export default function UsersPage() {
 
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [confirmingUser, setConfirmingUser] = useState<UserRow | null>(null);
 
     const showToast = (message: string, type: 'success' | 'error' = 'success') => {
         setToast({ message, type });
@@ -42,22 +43,23 @@ export default function UsersPage() {
         loadUsers();
     }, []);
 
-    const handleToggleStatus = async (user: UserRow) => {
-        if (user.role.toLowerCase() === "admin") return;
+    const executeToggleStatus = async () => {
+        if (!confirmingUser) return;
 
         setActionLoading(true);
         try {
-            const res = user.isActive ? await disableUserAction(user.id) : await activateUserAction(user.id);
+            const res = confirmingUser.isActive ? await disableUserAction(confirmingUser.id) : await activateUserAction(confirmingUser.id);
             if (res.error) throw new Error(res.error);
 
             setUsers((prev) =>
-                prev.map((u) => (u.id === user.id ? { ...u, isActive: !user.isActive } : u))
+                prev.map((u) => (u.id === confirmingUser.id ? { ...u, isActive: !confirmingUser.isActive } : u))
             );
-            showToast(`User ${user.isActive ? "disabled" : "activated"} successfully`, "success");
+            showToast(`User ${confirmingUser.isActive ? "disabled" : "activated"} successfully`, "success");
         } catch (err) {
-            showToast(err instanceof Error ? err.message : `Failed to ${user.isActive ? "disable" : "activate"} user`, "error");
+            showToast(err instanceof Error ? err.message : `Failed to ${confirmingUser.isActive ? "disable" : "activate"} user`, "error");
         } finally {
             setActionLoading(false);
+            setConfirmingUser(null);
         }
     };
 
@@ -213,7 +215,7 @@ export default function UsersPage() {
                                             <button
                                                 role="switch"
                                                 aria-checked={u.isActive}
-                                                onClick={() => handleToggleStatus(u)}
+                                                onClick={() => setConfirmingUser(u)}
                                                 disabled={actionLoading || u.role.toLowerCase() === "admin"}
                                                 className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${u.role.toLowerCase() === "admin" ? "opacity-30 cursor-not-allowed" : ""} ${u.isActive ? "bg-emerald-500 hover:bg-emerald-400" : "bg-slate-600 hover:bg-slate-500"} align-middle`}
                                                 title={u.role.toLowerCase() === "admin" ? "Admins cannot be disabled" : u.isActive ? "Disable User" : "Activate User"}
@@ -296,6 +298,36 @@ export default function UsersPage() {
                 <div className={`fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 animate-in slide-in-from-bottom-5 font-medium border ${toast.type === 'error' ? 'bg-red-950/80 text-red-200 border-red-800' : 'bg-green-950/80 text-green-200 border-green-800'
                     }`}>
                     {toast.message}
+                </div>
+            )}
+
+            {confirmingUser && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-slate-900 border border-slate-700/80 rounded-xl max-w-sm w-full p-6 space-y-4 shadow-2xl animate-modal-enter">
+                        <h3 className="text-xl font-medium text-white">Change User Status</h3>
+                        <p className="text-slate-300 text-sm">
+                            Are you sure you want to {confirmingUser.isActive ? "disable" : "activate"} <strong>{confirmingUser.name}</strong>?
+                        </p>
+                        <div className="flex justify-end gap-3 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => setConfirmingUser(null)}
+                                disabled={actionLoading}
+                                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white disabled:opacity-50 transition-colors duration-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={executeToggleStatus}
+                                disabled={actionLoading}
+                                className={`px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors duration-200 ${
+                                    confirmingUser.isActive ? "bg-rose-600 hover:bg-rose-500" : "bg-emerald-600 hover:bg-emerald-500"
+                                }`}
+                            >
+                                {actionLoading ? "Processing..." : "Confirm"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </section>
