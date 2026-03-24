@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { UserRow } from "@/lib/api";
-import { getUsersAction, disableUserAction, updateUserAction } from "@/lib/actions";
+import { getUsersAction, disableUserAction, updateUserAction, activateUserAction } from "@/lib/actions";
 
 export default function UsersPage() {
     const [users, setUsers] = useState<UserRow[]>([]);
@@ -14,7 +15,7 @@ export default function UsersPage() {
     const [actionLoading, setActionLoading] = useState(false);
 
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
-    const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const showToast = (message: string, type: 'success' | 'error' = 'success') => {
         setToast({ message, type });
@@ -41,21 +42,22 @@ export default function UsersPage() {
         loadUsers();
     }, []);
 
-    const handleDelete = async (id: string) => {
+    const handleToggleStatus = async (user: UserRow) => {
+        if (user.role.toLowerCase() === "admin") return;
+
         setActionLoading(true);
         try {
-            const res = await disableUserAction(id);
+            const res = user.isActive ? await disableUserAction(user.id) : await activateUserAction(user.id);
             if (res.error) throw new Error(res.error);
 
             setUsers((prev) =>
-                prev.map((u) => (u.id === id ? { ...u, isActive: false } : u))
+                prev.map((u) => (u.id === user.id ? { ...u, isActive: !user.isActive } : u))
             );
-            showToast("User deleted successfully", "success");
+            showToast(`User ${user.isActive ? "disabled" : "activated"} successfully`, "success");
         } catch (err) {
-            showToast(err instanceof Error ? err.message : "Failed to delete user", "error");
+            showToast(err instanceof Error ? err.message : `Failed to ${user.isActive ? "disable" : "activate"} user`, "error");
         } finally {
             setActionLoading(false);
-            setDeletingUserId(null);
         }
     };
 
@@ -93,91 +95,141 @@ export default function UsersPage() {
         }
     };
 
+    const filteredUsers = users.filter(u =>
+        (u.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (u.email || "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white">Users</h2>
-            <p className="text-sm text-slate-300">Total: {users.length}</p>
+        <section className="space-y-8">
+            {/* Stats row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-800/80 rounded-2xl overflow-hidden border border-slate-800/80 shadow-sm">
+                <div className="bg-slate-900/50 p-6 flex flex-col justify-center">
+                    <p className="text-sm font-medium text-slate-400">Total users</p>
+                    <p className="mt-2 text-3xl font-semibold text-white">{users.length}</p>
+                </div>
+                <div className="bg-slate-900/50 p-6 flex flex-col justify-center">
+                    <p className="text-sm font-medium text-slate-400">Active users</p>
+                    <p className="mt-2 text-3xl font-semibold text-white">{users.filter(u => u.isActive).length}</p>
+                </div>
+                <div className="bg-slate-900/50 p-6 flex flex-col justify-center">
+                    <p className="text-sm font-medium text-slate-400">Inactive users</p>
+                    <p className="mt-2 text-3xl font-semibold text-white">{users.filter(u => !u.isActive).length}</p>
+                </div>
+                <div className="bg-slate-900/50 p-6 flex flex-col justify-center">
+                    <p className="text-sm font-medium text-slate-400">Admin accounts</p>
+                    <p className="mt-2 text-3xl font-semibold text-white">{users.filter(u => u.role.toLowerCase() === 'admin').length}</p>
+                </div>
+            </div>
 
-            {loading && <p className="text-amber-300">Loading users...</p>}
-            {error && <p className="text-red-400 break-all">{error}</p>}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <h3 className="text-base font-semibold leading-7 text-white">Latest activity</h3>
+                <div className="w-full sm:w-auto relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg className="w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input
+                        type="search"
+                        placeholder="Search users..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full sm:w-64 pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-800 rounded-lg text-sm text-slate-200 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-500"
+                    />
+                </div>
+            </div>
 
-            <div className="overflow-x-auto rounded-xl border border-slate-700">
-                <table className="w-full text-sm text-slate-100">
-                    <thead className="bg-slate-800">
-                        <tr>
-                            <th className="p-3 text-left">Avatar</th>
-                            <th className="p-3 text-left">Name</th>
-                            <th className="p-3 text-left">Email</th>
-                            <th className="p-3 text-left">Role</th>
-                            <th className="p-3 text-left">Status</th>
-                            <th className="p-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {!loading && users.length === 0 ? (
+            {loading && <p className="text-indigo-400 text-sm">Loading users...</p>}
+            {error && <p className="text-red-400 text-sm break-all">{error}</p>}
+
+            <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
+                <div className="inline-block min-w-full py-2 align-middle px-4 sm:px-6 lg:px-8">
+                    <table className="min-w-full text-left text-sm whitespace-nowrap">
+                        <thead className="border-b border-slate-800 text-slate-400">
                             <tr>
-                                <td className="p-3" colSpan={6}>No users found</td>
+                                <th scope="col" className="py-3 pl-0 pr-3 font-semibold">User</th>
+                                <th scope="col" className="px-3 py-3 font-semibold">Email</th>
+                                <th scope="col" className="px-3 py-3 font-semibold">Role</th>
+                                <th scope="col" className="px-3 py-3 font-semibold">Status</th>
+                                <th scope="col" className="relative py-3 pl-3 pr-0 text-right font-medium">
+                                    <span className="sr-only">Actions</span>
+                                </th>
                             </tr>
-                        ) : (
-                            users.map((u) => (
-                                <tr key={u.id} className="border-t border-slate-800 transition-colors duration-150 hover:bg-slate-800/40">
-                                    <td className="p-3">
-                                        {u.avatarUrl ? (
-                                            <img
-                                                src={u.avatarUrl}
-                                                alt={u.name}
-                                                className="h-8 w-8 rounded-full object-cover"
-                                                onError={(e) => {
-                                                    // Hide broken image and show initial letter
-                                                    e.currentTarget.style.display = "none";
-                                                    e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                                                    e.currentTarget.nextElementSibling?.classList.add("flex");
-                                                }}
-                                            />
-                                        ) : null}
-                                        <div
-                                            className={`h-8 w-8 rounded-full bg-slate-700 items-center justify-center text-xs ${u.avatarUrl ? "hidden" : "flex"
-                                                }`}
-                                        >
-                                            {(u.name || "U").slice(0, 1).toUpperCase()}
-                                        </div>
-                                    </td>
-                                    <td className="p-3">{u.name}</td>
-                                    <td className="p-3">{u.email}</td>
-                                    <td className="p-3">{u.role}</td>
-                                    <td className="p-3">
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium ${u.isActive
-                                                ? "bg-green-500/20 text-green-400"
-                                                : "bg-red-500/20 text-red-400"
-                                                }`}
-                                        >
-                                            {u.isActive ? "Active" : "Disabled"}
-                                        </span>
-                                    </td>
-                                    <td className="p-3 text-right space-x-2">
-                                        <button
-                                            onClick={() => openEdit(u)}
-                                            disabled={actionLoading}
-                                            className="text-indigo-400 hover:text-indigo-300 disabled:opacity-50 transition-colors duration-200"
-                                        >
-                                            Edit
-                                        </button>
-                                        {u.isActive && (
-                                            <button
-                                                onClick={() => setDeletingUserId(u.id)}
-                                                disabled={actionLoading}
-                                                className="text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors duration-200"
-                                            >
-                                                Delete
-                                            </button>
-                                        )}
-                                    </td>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60">
+                            {!loading && filteredUsers.length === 0 ? (
+                                <tr>
+                                    <td className="py-8 text-center text-slate-500" colSpan={5}>No users found</td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                filteredUsers.map((u) => (
+                                    <tr key={u.id} className="transition-colors hover:bg-slate-800/30 group">
+                                        <td className="py-4 pl-0 pr-3 flex items-center gap-x-4">
+                                            {u.avatarUrl ? (
+                                                <Image
+                                                    src={u.avatarUrl}
+                                                    alt={u.name || "User Avatar"}
+                                                    width={32}
+                                                    height={32}
+                                                    unoptimized
+                                                    className="h-8 w-8 rounded-full bg-slate-800 object-cover"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = "none";
+                                                        e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                                                        e.currentTarget.nextElementSibling?.classList.add("flex");
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div
+                                                className={`h-8 w-8 rounded-full bg-slate-800 items-center justify-center text-xs text-slate-300 font-medium ${u.avatarUrl ? "hidden" : "flex"}`}
+                                            >
+                                                {(u.name || "U").slice(0, 1).toUpperCase()}
+                                            </div>
+                                            <span className="font-medium text-slate-200 group-hover:text-white transition-colors">{u.name}</span>
+                                        </td>
+                                        <td className="px-3 py-4 text-slate-400">{u.email}</td>
+                                        <td className="px-3 py-4 text-slate-400">
+                                            <span className="inline-flex items-center rounded-md bg-slate-400/10 px-2 py-1 text-xs font-medium text-slate-400 ring-1 ring-inset ring-slate-400/20">
+                                                {u.role}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-4">
+                                            <div className="flex items-center gap-x-2">
+                                                <div className={`flex-none rounded-full p-1 border ${u.isActive ? "bg-emerald-500/10 border-emerald-500/20" : "bg-slate-500/10 border-slate-500/20"}`}>
+                                                    <div className={`h-1.5 w-1.5 rounded-full ${u.isActive ? "bg-emerald-500" : "bg-slate-500"}`} />
+                                                </div>
+                                                <span className="text-slate-300">{u.isActive ? "Active" : "Disabled"}</span>
+                                            </div>
+                                        </td>
+                                        <td className="relative py-4 pl-3 pr-0 text-right space-x-4">
+                                            <button
+                                                onClick={() => openEdit(u)}
+                                                disabled={actionLoading}
+                                                className="text-indigo-400 hover:text-indigo-300 disabled:opacity-50 transition-colors duration-200 font-medium"
+                                            >
+                                                Edit<span className="sr-only">, {u.name}</span>
+                                            </button>
+                                            <button
+                                                role="switch"
+                                                aria-checked={u.isActive}
+                                                onClick={() => handleToggleStatus(u)}
+                                                disabled={actionLoading || u.role.toLowerCase() === "admin"}
+                                                className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${u.role.toLowerCase() === "admin" ? "opacity-30 cursor-not-allowed" : ""} ${u.isActive ? "bg-emerald-500 hover:bg-emerald-400" : "bg-slate-600 hover:bg-slate-500"} align-middle`}
+                                                title={u.role.toLowerCase() === "admin" ? "Admins cannot be disabled" : u.isActive ? "Disable User" : "Activate User"}
+                                            >
+                                                <span className="sr-only">Toggle user status</span>
+                                                <span
+                                                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-900 shadow ring-0 transition duration-200 ease-in-out ${u.isActive ? "translate-x-5" : "translate-x-0"}`}
+                                                />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {editingUser && (
@@ -236,32 +288,6 @@ export default function UsersPage() {
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            )}
-
-            {deletingUserId && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-sm w-full p-6 space-y-4 animate-modal-enter shadow-2xl">
-                        <h3 className="text-xl font-medium text-white">Delete User</h3>
-                        <p className="text-slate-300 text-sm">Are you sure you want to delete this user? This action cannot be undone.</p>
-                        <div className="flex justify-end gap-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={() => setDeletingUserId(null)}
-                                disabled={actionLoading}
-                                className="px-4 py-2 text-slate-300 hover:text-white disabled:opacity-50 transition-colors duration-200"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => handleDelete(deletingUserId)}
-                                disabled={actionLoading}
-                                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg disabled:opacity-50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20 active:translate-y-0 active:scale-95"
-                            >
-                                {actionLoading ? "Deleting..." : "Delete"}
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}
