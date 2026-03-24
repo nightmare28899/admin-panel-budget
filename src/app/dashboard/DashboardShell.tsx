@@ -10,6 +10,23 @@ type SessionUser = {
   role?: string;
 };
 
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <div className="h-full rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-950 to-slate-900 p-4">
+      <p className="px-2 pb-3 text-xs uppercase tracking-wide text-slate-500">Modules</p>
+      <nav className="space-y-2">
+        <Link
+          href="/dashboard/users"
+          onClick={onNavigate}
+          className="block rounded-lg border border-indigo-500/40 bg-indigo-600/20 px-3 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-indigo-500/25"
+        >
+          Users
+        </Link>
+      </nav>
+    </div>
+  );
+}
+
 export function DashboardShell({
   user,
   children,
@@ -17,19 +34,19 @@ export function DashboardShell({
   user: SessionUser;
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setSidebarOpen((prev) => !prev)}
-              className="cursor-pointer rounded-lg border border-slate-700 px-3 py-1.5 hover:bg-slate-800 transition-colors duration-200"
-              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              onClick={() => setMobileSidebarOpen(true)}
+              className="cursor-pointer rounded-lg border border-slate-700 px-3 py-1.5 transition-colors duration-200 hover:bg-slate-800 md:hidden"
+              aria-label="Open sidebar"
             >
-              {sidebarOpen ? "✕" : "☰"}
+              ☰
             </button>
             <div>
               <h1 className="text-lg font-semibold">Budget Admin</h1>
@@ -37,8 +54,8 @@ export function DashboardShell({
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-slate-300 hidden sm:inline">
+          <div className="flex items-center gap-3 text-sm md:gap-4">
+            <span className="hidden text-slate-300 sm:inline">
               {user?.name || user?.email} {user?.role ? `(${user.role})` : ""}
             </span>
             <LogoutButton />
@@ -46,27 +63,38 @@ export function DashboardShell({
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex gap-6">
-        <aside
-          className={`overflow-hidden transition-all duration-300 ${
-            sidebarOpen ? "w-56 opacity-100" : "w-0 opacity-0"
-          }`}
-        >
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-            <p className="px-2 pb-2 text-xs uppercase tracking-wide text-slate-500">
-              Modules
-            </p>
-            <Link
-              href="/dashboard/users"
-              className="block rounded-lg px-3 py-2 text-sm font-medium bg-indigo-600/20 text-indigo-300 border border-indigo-500/40"
-            >
-              Users
-            </Link>
-          </div>
+      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-6 md:px-6">
+        <aside className="hidden w-64 shrink-0 md:block">
+          <SidebarContent />
         </aside>
 
-        <main className="flex-1 min-w-0">{children}</main>
+        <main className="min-w-0 flex-1 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 md:p-6">
+          {children}
+        </main>
       </div>
+
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <button
+            aria-label="Close sidebar backdrop"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <aside className="relative h-full w-72 max-w-[85vw] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-300">Navigation</p>
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                className="cursor-pointer rounded-lg border border-slate-700 px-2.5 py-1 text-sm hover:bg-slate-800"
+                aria-label="Close sidebar"
+              >
+                ✕
+              </button>
+            </div>
+            <SidebarContent onNavigate={() => setMobileSidebarOpen(false)} />
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
