@@ -82,6 +82,11 @@ export default function UsersPage() {
       setUsers((prev) =>
         prev.map((u) => (u.id === target.id ? { ...u, isActive: !u.isActive } : u)),
       );
+
+      const message =
+        (res.data as { message?: string } | undefined)?.message ||
+        (target.isActive ? "User inactivated successfully" : "User activated successfully");
+      alert(message);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to update user status");
     } finally {
@@ -120,6 +125,7 @@ export default function UsersPage() {
         ),
       );
       setEditingUser(null);
+      alert((res.data as { message?: string } | undefined)?.message || "User updated successfully");
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to update user");
     } finally {
@@ -254,7 +260,7 @@ export default function UsersPage() {
                               ? "border-emerald-500/40 bg-emerald-500/20"
                               : "border-slate-600 bg-slate-700/60"
                           }`}
-                          title={(u.role || "").toLowerCase() === "admin" ? "Admin users cannot be inactivated" : u.isActive ? "Click to inactivate" : "User is inactive"}
+                          title={(u.role || "").toLowerCase() === "admin" ? "Admin users cannot be inactivated" : u.isActive ? "Click to inactivate" : "Click to activate"}
                         >
                           <span
                             className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${

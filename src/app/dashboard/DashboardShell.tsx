@@ -110,7 +110,7 @@ export function DashboardShell({
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <aside className="relative h-full w-80 max-w-[88vw] border-r border-slate-800 bg-[#070f23] p-4">
+          <aside className="relative my-3 ml-3 h-[calc(100%-1.5rem)] w-80 max-w-[88vw] overflow-hidden rounded-2xl border border-slate-800 bg-[#070f23] p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-medium text-slate-300">Navigation</p>
               <button
