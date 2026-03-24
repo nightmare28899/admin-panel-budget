@@ -12,7 +12,7 @@ type SessionUser = {
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <div className="h-full rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-950 to-slate-900 p-4">
+    <div className="rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-950 to-slate-900 p-4">
       <p className="px-2 pb-3 text-xs uppercase tracking-wide text-slate-500">Modules</p>
       <nav className="space-y-2">
         <Link
@@ -80,7 +80,7 @@ export function DashboardShell({
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <aside className="relative h-full w-72 max-w-[85vw] p-4">
+          <aside className="relative h-full w-72 max-w-[85vw] border-r border-slate-800 bg-slate-950/95 p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-medium text-slate-300">Navigation</p>
               <button
