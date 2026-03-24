@@ -106,6 +106,16 @@ export const api = {
     disableUser: (token: string, id: string) =>
         request<{ message: string; user?: UserRow }>(`/users/${id}`, { method: "DELETE" }, token),
 
+    activateUser: (token: string, id: string) =>
+        request<{ message: string; user: UserRow }>(
+            `/users/${id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({ isActive: true }),
+            },
+            token,
+        ),
+
     refreshToken: (refreshToken: string) =>
         request<LoginResponse>("/auth/refresh", {
             method: "POST",

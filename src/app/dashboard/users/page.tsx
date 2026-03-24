@@ -3,7 +3,12 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { UserRow } from "@/lib/api";
-import { getUsersAction, disableUserAction, updateUserAction } from "@/lib/actions";
+import {
+  activateUserAction,
+  getUsersAction,
+  disableUserAction,
+  updateUserAction,
+} from "@/lib/actions";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -67,17 +72,16 @@ export default function UsersPage() {
       return;
     }
 
-    if (!target.isActive) {
-      alert("Reactivating users is not available yet.");
-      return;
-    }
-
     setActionLoading(true);
     try {
-      const res = await disableUserAction(target.id);
+      const res = target.isActive
+        ? await disableUserAction(target.id)
+        : await activateUserAction(target.id);
       if (res.error) throw new Error(res.error);
 
-      setUsers((prev) => prev.map((u) => (u.id === target.id ? { ...u, isActive: false } : u)));
+      setUsers((prev) =>
+        prev.map((u) => (u.id === target.id ? { ...u, isActive: !u.isActive } : u)),
+      );
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to update user status");
     } finally {
@@ -245,7 +249,7 @@ export default function UsersPage() {
                         <button
                           onClick={() => handleToggleUserStatus(u)}
                           disabled={actionLoading || (u.role || "").toLowerCase() === "admin"}
-                          className={`relative inline-flex h-7 w-14 items-center rounded-full border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+                          className={`relative inline-flex h-7 w-14 cursor-pointer items-center rounded-full border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
                             u.isActive
                               ? "border-emerald-500/40 bg-emerald-500/20"
                               : "border-slate-600 bg-slate-700/60"
