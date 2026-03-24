@@ -49,21 +49,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </nav>
 
-      <div className="mt-auto space-y-2 border-t border-slate-800/80 pt-4">
-        <p className="px-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">Your teams</p>
-        {[
-          "Planetaria",
-          "Protocol",
-          "Tailwind Labs",
-        ].map((team) => (
-          <div key={team} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-400">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-700 bg-slate-800 text-[10px] text-slate-300">
-              {team[0]}
-            </span>
-            <span>{team}</span>
-          </div>
-        ))}
-      </div>
+
     </div>
   );
 }
