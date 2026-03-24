@@ -10,11 +10,17 @@ import {
   updateUserAction,
 } from "@/lib/actions";
 
+type ToastState = {
+  type: "success" | "error";
+  message: string;
+} | null;
+
 export default function UsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [toast, setToast] = useState<ToastState>(null);
 
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [editForm, setEditForm] = useState({ name: "", dailyBudget: 0, currency: "MXN" });
@@ -42,6 +48,13 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
+  useEffect(() => {
+    if (!toast) return;
+
+    const timer = setTimeout(() => setToast(null), 3200);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
@@ -68,7 +81,7 @@ export default function UsersPage() {
 
   const handleToggleUserStatus = async (target: UserRow) => {
     if ((target.role || "").toLowerCase() === "admin") {
-      alert("Admin users cannot be inactivated from this panel.");
+      setToast({ type: "error", message: "Admin users cannot be inactivated from this panel." });
       return;
     }
 
@@ -86,9 +99,12 @@ export default function UsersPage() {
       const message =
         (res.data as { message?: string } | undefined)?.message ||
         (target.isActive ? "User inactivated successfully" : "User activated successfully");
-      alert(message);
+      setToast({ type: "success", message });
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to update user status");
+      setToast({
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed to update user status",
+      });
     } finally {
       setActionLoading(false);
     }
@@ -125,9 +141,15 @@ export default function UsersPage() {
         ),
       );
       setEditingUser(null);
-      alert((res.data as { message?: string } | undefined)?.message || "User updated successfully");
+      setToast({
+        type: "success",
+        message: (res.data as { message?: string } | undefined)?.message || "User updated successfully",
+      });
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to update user");
+      setToast({
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed to update user",
+      });
     } finally {
       setActionLoading(false);
     }
@@ -135,6 +157,30 @@ export default function UsersPage() {
 
   return (
     <section className="space-y-5">
+      {toast && (
+        <div className="fixed right-4 top-4 z-[60] w-[min(92vw,420px)] animate-[fadeIn_.2s_ease-out]">
+          <div
+            className={`rounded-xl border px-4 py-3 shadow-2xl backdrop-blur ${
+              toast.type === "success"
+                ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-100"
+                : "border-rose-400/40 bg-rose-500/15 text-rose-100"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 text-lg">{toast.type === "success" ? "✅" : "⚠️"}</span>
+              <p className="text-sm font-medium leading-5">{toast.message}</p>
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                className="ml-auto rounded-md px-2 text-slate-300 transition hover:bg-white/10 hover:text-white"
+                aria-label="Close notification"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b1836]">
         <div className="flex flex-wrap items-center gap-6 border-b border-slate-800 px-5 py-3 text-sm text-slate-300 md:px-6">
           <span className="font-semibold text-indigo-300">Overview</span>
