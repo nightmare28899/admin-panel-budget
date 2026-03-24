@@ -83,15 +83,9 @@ async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promis
     try {
         const data = await actionFn(token);
         return { data };
-<<<<<<< Updated upstream
     } catch (err: unknown) {
         // Assume 401 means the token is expired/invalid
         if (isUnauthorizedError(err)) {
-=======
-    } catch (err) {
-        // Assume 401 means the token is expired/invalid
-        if (err instanceof Error && err.message.includes("401")) {
->>>>>>> Stashed changes
             console.log("[Auth] Token expired, attempting to refresh...");
             const refreshToken = await getRefreshToken();
 
@@ -130,11 +124,7 @@ async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promis
             }
         }
 
-<<<<<<< Updated upstream
         return { error: getErrorMessage(err) };
-=======
-        return { error: err instanceof Error ? err.message : "Action failed" };
->>>>>>> Stashed changes
     }
 }
 
@@ -142,7 +132,6 @@ export async function getUsersAction(includeDisabled = true) {
     return withAuthRetry((token) => api.getUsers(token, includeDisabled));
 }
 
-<<<<<<< Updated upstream
 type UpdateUserPayload = {
     name?: string;
     dailyBudget?: number;
@@ -150,10 +139,6 @@ type UpdateUserPayload = {
 };
 
 export async function updateUserAction(id: string, payload: UpdateUserPayload) {
-=======
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateUserAction(id: string, payload: any) {
->>>>>>> Stashed changes
     return withAuthRetry((token) => api.updateUser(token, id, payload));
 }
 

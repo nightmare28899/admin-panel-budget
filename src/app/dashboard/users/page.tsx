@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { UserRow } from "@/lib/api";
 import { getUsersAction, disableUserAction, updateUserAction } from "@/lib/actions";
 
