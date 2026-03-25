@@ -92,6 +92,7 @@ export const api = {
             name?: string;
             dailyBudget?: number;
             currency?: string;
+            password?: string;
         },
     ) =>
         request<{ message: string; user: UserRow }>(
