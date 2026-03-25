@@ -10,6 +10,7 @@ export type LoginResponse = {
         name: string;
         role: string;
         isActive?: boolean;
+        isPremium?: boolean;
     };
 };
 
@@ -23,6 +24,7 @@ export type UserRow = {
     currency?: string;
     dailyBudget?: number;
     isActive?: boolean;
+    isPremium?: boolean;
     deletedAt?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -93,6 +95,7 @@ export const api = {
             dailyBudget?: number;
             currency?: string;
             password?: string;
+            isPremium?: boolean;
         },
     ) =>
         request<{ message: string; user: UserRow }>(
