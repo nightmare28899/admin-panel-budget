@@ -136,6 +136,7 @@ type UpdateUserPayload = {
     name?: string;
     dailyBudget?: number;
     currency?: string;
+    password?: string;
 };
 
 export async function updateUserAction(id: string, payload: UpdateUserPayload) {
