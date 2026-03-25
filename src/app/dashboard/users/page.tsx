@@ -92,6 +92,29 @@ export default function UsersPage() {
     });
   };
 
+  const togglePremium = async (target: UserRow) => {
+    setActionLoading(true);
+    try {
+      const res = await updateUserAction(target.id, { isPremium: !target.isPremium });
+      if (res.error) throw new Error(res.error);
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === target.id ? { ...u, isPremium: !target.isPremium } : u,
+        ),
+      );
+
+      showToast(
+        `Premium ${target.isPremium ? "disabled" : "enabled"} for ${target.name}`,
+        "success",
+      );
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to update premium status", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
@@ -206,6 +229,9 @@ export default function UsersPage() {
                 <th scope="col" className="px-3 py-3 font-semibold">
                   Status
                 </th>
+                <th scope="col" className="px-3 py-3 font-semibold">
+                  Premium
+                </th>
                 <th scope="col" className="relative py-3 pl-3 pr-0 text-right font-medium">
                   <span className="sr-only">Actions</span>
                 </th>
@@ -214,7 +240,7 @@ export default function UsersPage() {
             <tbody className="divide-y divide-slate-800/60">
               {!loading && filteredUsers.length === 0 ? (
                 <tr>
-                  <td className="py-8 text-center text-slate-500" colSpan={5}>
+                  <td className="py-8 text-center text-slate-500" colSpan={6}>
                     No users found
                   </td>
                 </tr>
@@ -260,6 +286,17 @@ export default function UsersPage() {
                         <span className="text-slate-300">{u.isActive ? "Active" : "Disabled"}</span>
                       </div>
                     </td>
+                    <td className="px-3 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          u.isPremium
+                            ? "bg-amber-500/20 text-amber-300"
+                            : "bg-slate-500/20 text-slate-300"
+                        }`}
+                      >
+                        {u.isPremium ? "Premium" : "Free"}
+                      </span>
+                    </td>
                     <td className="relative space-x-4 py-4 pl-3 pr-0 text-right">
                       <button
                         onClick={() => openEdit(u)}
@@ -267,6 +304,15 @@ export default function UsersPage() {
                         className="font-medium text-indigo-400 transition-colors duration-200 hover:text-indigo-300 disabled:opacity-50"
                       >
                         Edit<span className="sr-only">, {u.name}</span>
+                      </button>
+                      <button
+                        onClick={() => togglePremium(u)}
+                        disabled={actionLoading}
+                        className={`font-medium transition-colors duration-200 disabled:opacity-50 ${
+                          u.isPremium ? "text-amber-400 hover:text-amber-300" : "text-slate-300 hover:text-white"
+                        }`}
+                      >
+                        {u.isPremium ? "Remove Premium" : "Make Premium"}
                       </button>
                       <button
                         role="switch"

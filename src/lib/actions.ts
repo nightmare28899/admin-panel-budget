@@ -137,6 +137,7 @@ type UpdateUserPayload = {
     dailyBudget?: number;
     currency?: string;
     password?: string;
+    isPremium?: boolean;
 };
 
 export async function updateUserAction(id: string, payload: UpdateUserPayload) {
