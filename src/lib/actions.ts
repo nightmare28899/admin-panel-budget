@@ -14,6 +14,10 @@ const USER_KEY = "admin_user";
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
+function isAdminRole(role: string | undefined): boolean {
+    return (role || "").toLowerCase() === "admin";
+}
+
 function setSessionCookies(cookieStore: CookieStore, session: LoginResponse) {
     cookieStore.set(TOKEN_KEY, session.accessToken, {
         httpOnly: true,
@@ -50,7 +54,7 @@ export async function loginAction(email: string, password: string) {
     try {
         const res = await api.login(email, password);
 
-        if ((res.user?.role || "").toLowerCase() !== "admin") {
+        if (!isAdminRole(res.user?.role)) {
             return { error: "You don’t have permissions to access this platform." };
         }
 
@@ -65,6 +69,16 @@ export async function loginAction(email: string, password: string) {
 
 export async function logoutAction() {
     const cookieStore = await cookies();
+    const token = cookieStore.get(TOKEN_KEY)?.value;
+
+    try {
+        if (token) {
+            await api.logout(token);
+        }
+    } catch {
+        // Best-effort server-side revocation only.
+    }
+
     clearSessionCookies(cookieStore);
     return { success: true };
 }
@@ -78,6 +92,10 @@ export async function renewSessionAction() {
 
     try {
         const refreshed = await api.refreshToken(refreshToken);
+        if (!isAdminRole(refreshed.user?.role)) {
+            await logoutAction();
+            return { error: "You don’t have permissions to access this platform." };
+        }
         const cookieStore = await cookies();
         setSessionCookies(cookieStore, refreshed);
         return { success: true };

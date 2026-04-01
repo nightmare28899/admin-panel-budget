@@ -30,6 +30,18 @@ export type UserRow = {
     updatedAt?: string;
 };
 
+export type CurrentUserResponse = {
+    message: string;
+    isAuthenticated: boolean;
+    account: {
+        isActive: boolean;
+        isPremium: boolean;
+        isDisabled: boolean;
+        deletedAt?: string | null;
+    } | null;
+    user: UserRow | null;
+};
+
 export type SendTestPushResponse = {
     message: string;
     tokenCount: number;
@@ -67,6 +79,16 @@ export const api = {
             method: "POST",
             body: JSON.stringify({ email, password }),
         }),
+
+    logout: (token: string) =>
+        request<{ message: string }>("/auth/logout", {
+            method: "POST",
+        }, token),
+
+    getMe: (token: string) =>
+        request<CurrentUserResponse>("/users/me", {
+            method: "GET",
+        }, token),
 
     getUsers: (token: string, includeDisabled = true) =>
         request<{ users: UserRow[]; count: number; message: string }>(
