@@ -9,8 +9,10 @@ import {
   updateUserAction,
   activateUserAction,
 } from "@/lib/actions";
+import { useSessionRenewal } from "@/app/SessionRenewalProvider";
 
 export default function UsersPage() {
+  const { runServerAction } = useSessionRenewal();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -35,11 +37,13 @@ export default function UsersPage() {
 
   const loadUsers = async () => {
     setLoading(true);
+    setError("");
     try {
-      const res = await getUsersAction(true);
+      const res = await runServerAction(() => getUsersAction(true));
       if (res.error) {
         setError(res.error);
       } else {
+        setError("");
         setUsers(Array.isArray(res.data?.users) ? res.data.users : []);
       }
     } catch (e) {
@@ -58,9 +62,11 @@ export default function UsersPage() {
 
     setActionLoading(true);
     try {
-      const res = confirmingUser.isActive
-        ? await disableUserAction(confirmingUser.id)
-        : await activateUserAction(confirmingUser.id);
+      const res = await runServerAction(() =>
+        confirmingUser.isActive
+          ? disableUserAction(confirmingUser.id)
+          : activateUserAction(confirmingUser.id),
+      );
       if (res.error) throw new Error(res.error);
 
       setUsers((prev) =>
@@ -95,7 +101,9 @@ export default function UsersPage() {
   const togglePremium = async (target: UserRow) => {
     setActionLoading(true);
     try {
-      const res = await updateUserAction(target.id, { isPremium: !target.isPremium });
+      const res = await runServerAction(() =>
+        updateUserAction(target.id, { isPremium: !target.isPremium }),
+      );
       if (res.error) throw new Error(res.error);
 
       setUsers((prev) =>
@@ -128,7 +136,9 @@ export default function UsersPage() {
         ...(editForm.password.trim() ? { password: editForm.password.trim() } : {}),
       };
 
-      const res = await updateUserAction(editingUser.id, payload);
+      const res = await runServerAction(() =>
+        updateUserAction(editingUser.id, payload),
+      );
       if (res.error) throw new Error(res.error);
 
       setUsers((prev) =>

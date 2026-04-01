@@ -1,11 +1,50 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { api } from "./api";
+import { api, LoginResponse } from "./api";
+import {
+    ActionResult,
+    SESSION_EXPIRED_MESSAGE,
+    isUnauthorizedError,
+} from "./session";
 
 const TOKEN_KEY = "admin_token";
 const REFRESH_KEY = "admin_refresh_token";
 const USER_KEY = "admin_user";
+
+type CookieStore = Awaited<ReturnType<typeof cookies>>;
+
+function setSessionCookies(cookieStore: CookieStore, session: LoginResponse) {
+    cookieStore.set(TOKEN_KEY, session.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+    });
+
+    cookieStore.set(REFRESH_KEY, session.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+    });
+
+    cookieStore.set(USER_KEY, JSON.stringify(session.user), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+    });
+}
+
+function clearSessionCookies(cookieStore: CookieStore) {
+    cookieStore.delete(TOKEN_KEY);
+    cookieStore.delete(REFRESH_KEY);
+    cookieStore.delete(USER_KEY);
+}
 
 export async function loginAction(email: string, password: string) {
     try {
@@ -16,30 +55,7 @@ export async function loginAction(email: string, password: string) {
         }
 
         const cookieStore = await cookies();
-
-        cookieStore.set(TOKEN_KEY, res.accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-        });
-
-        cookieStore.set(REFRESH_KEY, res.refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-        });
-
-        cookieStore.set(USER_KEY, JSON.stringify(res.user), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-        });
+        setSessionCookies(cookieStore, res);
 
         return { success: true };
     } catch (err) {
@@ -49,10 +65,26 @@ export async function loginAction(email: string, password: string) {
 
 export async function logoutAction() {
     const cookieStore = await cookies();
-    cookieStore.delete(TOKEN_KEY);
-    cookieStore.delete(REFRESH_KEY);
-    cookieStore.delete(USER_KEY);
+    clearSessionCookies(cookieStore);
     return { success: true };
+}
+
+export async function renewSessionAction() {
+    const refreshToken = await getRefreshToken();
+    if (!refreshToken) {
+        await logoutAction();
+        return { error: SESSION_EXPIRED_MESSAGE };
+    }
+
+    try {
+        const refreshed = await api.refreshToken(refreshToken);
+        const cookieStore = await cookies();
+        setSessionCookies(cookieStore, refreshed);
+        return { success: true };
+    } catch {
+        await logoutAction();
+        return { error: SESSION_EXPIRED_MESSAGE };
+    }
 }
 
 async function getToken() {
@@ -71,57 +103,24 @@ function getErrorMessage(error: unknown): string {
     return "Action failed";
 }
 
-function isUnauthorizedError(error: unknown): boolean {
-    const message = getErrorMessage(error);
-    return message.includes("401") || message.toLowerCase().includes("unauthorized");
-}
-
-async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promise<{ data?: T; error?: string }> {
+async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promise<ActionResult<T>> {
     const token = await getToken();
-    if (!token) return { error: "Unauthorized" };
+    if (!token) {
+        return {
+            error: SESSION_EXPIRED_MESSAGE,
+            requiresSessionRenewal: true,
+        };
+    }
 
     try {
         const data = await actionFn(token);
         return { data };
     } catch (err: unknown) {
-        // Assume 401 means the token is expired/invalid
         if (isUnauthorizedError(err)) {
-            console.log("[Auth] Token expired, attempting to refresh...");
-            const refreshToken = await getRefreshToken();
-
-            if (!refreshToken) {
-                await logoutAction();
-                return { error: "Session expired. Please log in again." };
-            }
-
-            try {
-                const refreshed = await api.refreshToken(refreshToken);
-                const cookieStore = await cookies();
-
-                cookieStore.set(TOKEN_KEY, refreshed.accessToken, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "lax",
-                    path: "/",
-                    maxAge: 60 * 60 * 24 * 7,
-                });
-
-                cookieStore.set(REFRESH_KEY, refreshed.refreshToken, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "lax",
-                    path: "/",
-                    maxAge: 60 * 60 * 24 * 7,
-                });
-
-                console.log("[Auth] Token refresh successful. Retrying action.");
-                const data = await actionFn(refreshed.accessToken);
-                return { data };
-            } catch {
-                console.log("[Auth] Token refresh failed. Logging out.");
-                await logoutAction();
-                return { error: "Session expired. Please log in again." };
-            }
+            return {
+                error: SESSION_EXPIRED_MESSAGE,
+                requiresSessionRenewal: true,
+            };
         }
 
         return { error: getErrorMessage(err) };

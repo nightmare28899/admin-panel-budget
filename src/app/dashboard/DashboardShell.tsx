@@ -14,7 +14,7 @@ type SessionUser = {
 const NAV_ITEMS = [
   { label: "Overview", href: "/dashboard/users" },
   { label: "Users", href: "/dashboard/users" },
-  { label: "Deployments", href: "/dashboard/users" },
+  { label: "Notifications", href: "/dashboard/notifications" },
   { label: "Settings", href: "/dashboard/users" },
 ];
 

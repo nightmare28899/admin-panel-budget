@@ -30,6 +30,14 @@ export type UserRow = {
     updatedAt?: string;
 };
 
+export type SendTestPushResponse = {
+    message: string;
+    tokenCount: number;
+    successCount: number;
+    failureCount: number;
+    invalidTokensRemoved: number;
+};
+
 async function request<T>(
     path: string,
     init: RequestInit = {},
@@ -125,4 +133,21 @@ export const api = {
             method: "POST",
             body: JSON.stringify({ refreshToken }),
         }),
+
+    sendTestPush: (
+        token: string,
+        payload: {
+            userId: string;
+            title: string;
+            body: string;
+        },
+    ) =>
+        request<SendTestPushResponse>(
+            "/notifications/test-push",
+            {
+                method: "POST",
+                body: JSON.stringify(payload),
+            },
+            token,
+        ),
 };
