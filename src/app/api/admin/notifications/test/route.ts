@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { api } from "@/lib/api";
 import { SESSION_EXPIRED_MESSAGE, isUnauthorizedError } from "@/lib/session";
+import { getValidatedAdminToken } from "@/lib/adminSession";
 
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_token")?.value;
+  const token = await getValidatedAdminToken();
 
   if (!token) {
     return NextResponse.json(

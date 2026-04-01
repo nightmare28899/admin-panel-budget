@@ -10,7 +10,6 @@ import {
 
 const TOKEN_KEY = "admin_token";
 const REFRESH_KEY = "admin_refresh_token";
-const USER_KEY = "admin_user";
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
@@ -22,7 +21,7 @@ function setSessionCookies(cookieStore: CookieStore, session: LoginResponse) {
     cookieStore.set(TOKEN_KEY, session.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "strict",
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 1 week
     });
@@ -30,15 +29,7 @@ function setSessionCookies(cookieStore: CookieStore, session: LoginResponse) {
     cookieStore.set(REFRESH_KEY, session.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-    });
-
-    cookieStore.set(USER_KEY, JSON.stringify(session.user), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "strict",
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 1 week
     });
@@ -47,7 +38,6 @@ function setSessionCookies(cookieStore: CookieStore, session: LoginResponse) {
 function clearSessionCookies(cookieStore: CookieStore) {
     cookieStore.delete(TOKEN_KEY);
     cookieStore.delete(REFRESH_KEY);
-    cookieStore.delete(USER_KEY);
 }
 
 export async function loginAction(email: string, password: string) {
