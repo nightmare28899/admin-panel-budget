@@ -307,47 +307,54 @@ export default function UsersPage() {
                         {u.isPremium ? "Premium" : "Free"}
                       </span>
                     </td>
-                    <td className="relative space-x-4 py-4 pl-3 pr-0 text-right">
-                      <button
-                        onClick={() => openEdit(u)}
-                        disabled={actionLoading}
-                        className="font-medium text-indigo-400 transition-colors duration-200 hover:text-indigo-300 disabled:opacity-50"
-                      >
-                        Edit<span className="sr-only">, {u.name}</span>
-                      </button>
-                      <div className="inline-flex items-center gap-2 align-middle">
-                        <span className="text-xs text-slate-400">Premium</span>
+                    <td className="relative py-4 pl-3 pr-0 text-right">
+                      <div className="inline-flex flex-col items-end gap-2">
                         <button
-                          role="switch"
-                          aria-checked={Boolean(u.isPremium)}
-                          onClick={() => togglePremium(u)}
+                          onClick={() => openEdit(u)}
                           disabled={actionLoading}
-                          className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent align-middle transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
-                            u.isPremium ? "bg-amber-500 hover:bg-amber-400" : "bg-slate-600 hover:bg-slate-500"
-                          }`}
-                          title={u.isPremium ? "Disable premium" : "Enable premium"}
+                          className="inline-flex items-center rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300 transition-colors duration-200 hover:bg-indigo-500/20 hover:text-indigo-200 disabled:opacity-50"
                         >
-                          <span className="sr-only">Toggle premium status</span>
-                          <span
-                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-900 shadow ring-0 transition duration-200 ease-in-out ${
-                              u.isPremium ? "translate-x-5" : "translate-x-0"
-                            }`}
-                          />
+                          Edit<span className="sr-only">, {u.name}</span>
                         </button>
+
+                        <div className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-2.5 py-1.5">
+                          <span className="text-[11px] font-medium tracking-wide text-slate-400">PREMIUM</span>
+                          <button
+                            role="switch"
+                            aria-checked={Boolean(u.isPremium)}
+                            onClick={() => togglePremium(u)}
+                            disabled={actionLoading}
+                            className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent align-middle transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                              u.isPremium ? "bg-amber-500 hover:bg-amber-400" : "bg-slate-600 hover:bg-slate-500"
+                            }`}
+                            title={u.isPremium ? "Disable premium" : "Enable premium"}
+                          >
+                            <span className="sr-only">Toggle premium status</span>
+                            <span
+                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-900 shadow ring-0 transition duration-200 ease-in-out ${
+                                u.isPremium ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        <div className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-2.5 py-1.5">
+                          <span className="text-[11px] font-medium tracking-wide text-slate-400">ACCOUNT</span>
+                          <button
+                            role="switch"
+                            aria-checked={u.isActive}
+                            onClick={() => setConfirmingUser(u)}
+                            disabled={actionLoading || u.role.toLowerCase() === "admin"}
+                            className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent align-middle transition-colors duration-200 ease-in-out focus:outline-none ${u.role.toLowerCase() === "admin" ? "cursor-not-allowed opacity-30" : ""} ${u.isActive ? "bg-emerald-500 hover:bg-emerald-400" : "bg-slate-600 hover:bg-slate-500"}`}
+                            title={u.role.toLowerCase() === "admin" ? "Admins cannot be disabled" : u.isActive ? "Disable User" : "Activate User"}
+                          >
+                            <span className="sr-only">Toggle user status</span>
+                            <span
+                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-900 shadow ring-0 transition duration-200 ease-in-out ${u.isActive ? "translate-x-5" : "translate-x-0"}`}
+                            />
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        role="switch"
-                        aria-checked={u.isActive}
-                        onClick={() => setConfirmingUser(u)}
-                        disabled={actionLoading || u.role.toLowerCase() === "admin"}
-                        className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent align-middle transition-colors duration-200 ease-in-out focus:outline-none ${u.role.toLowerCase() === "admin" ? "cursor-not-allowed opacity-30" : ""} ${u.isActive ? "bg-emerald-500 hover:bg-emerald-400" : "bg-slate-600 hover:bg-slate-500"}`}
-                        title={u.role.toLowerCase() === "admin" ? "Admins cannot be disabled" : u.isActive ? "Disable User" : "Activate User"}
-                      >
-                        <span className="sr-only">Toggle user status</span>
-                        <span
-                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-900 shadow ring-0 transition duration-200 ease-in-out ${u.isActive ? "translate-x-5" : "translate-x-0"}`}
-                        />
-                      </button>
                     </td>
                   </tr>
                 ))
