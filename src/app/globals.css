@@ -13,3 +13,16 @@
 .animate-modal-enter {
   animation: modal-enter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes login-shake {
+  0%,
+  100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+
+.animate-login-shake {
+  animation: login-shake 280ms ease-in-out;
+}
