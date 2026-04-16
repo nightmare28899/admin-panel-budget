@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/lib/actions";
 
@@ -13,9 +13,14 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+    useEffect(() => {
+        if (!toast) return;
+        const timeout = setTimeout(() => setToast(null), 3500);
+        return () => clearTimeout(timeout);
+    }, [toast]);
+
     const showToast = (message: string, type: "success" | "error" = "success") => {
         setToast({ message, type });
-        setTimeout(() => setToast(null), 3000);
     };
 
     async function onSubmit(e: FormEvent) {
@@ -48,14 +53,29 @@ export default function LoginPage() {
     return (
         <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-6">
             {toast && (
-                <div
-                    className={`fixed top-6 right-6 z-50 rounded-md px-4 py-2 text-sm font-medium shadow-lg ${
-                        toast.type === "error"
-                            ? "bg-red-500/90 text-white"
-                            : "bg-emerald-500/90 text-white"
-                    }`}
-                >
-                    {toast.message}
+                <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
+                    <div
+                        role="status"
+                        aria-live="polite"
+                        className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-2xl backdrop-blur ${
+                            toast.type === "error"
+                                ? "border-red-400/40 bg-red-500/15 text-red-100"
+                                : "border-emerald-400/40 bg-emerald-500/15 text-emerald-100"
+                        }`}
+                    >
+                        <span className="mt-0.5 text-base" aria-hidden>
+                            {toast.type === "error" ? "⚠️" : "✅"}
+                        </span>
+                        <p className="flex-1 font-medium">{toast.message}</p>
+                        <button
+                            type="button"
+                            onClick={() => setToast(null)}
+                            className="rounded-md px-2 py-1 text-xs text-slate-200/90 hover:bg-white/10"
+                            aria-label="Dismiss notification"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -70,7 +90,10 @@ export default function LoginPage() {
                             type="email"
                             required
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                if (error) setError("");
+                            }}
                             placeholder="you@company.com"
                             className="input"
                         />
@@ -83,7 +106,10 @@ export default function LoginPage() {
                                 type={showPassword ? "text" : "password"}
                                 required
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (error) setError("");
+                                }}
                                 placeholder="Enter your password"
                                 className="input pr-12"
                             />
@@ -98,7 +124,17 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    {error ? <p className="text-sm text-red-400 whitespace-pre-wrap">{error}</p> : null}
+                    {error ? (
+                        <div
+                            role="alert"
+                            className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+                        >
+                            <p className="font-medium">{error}</p>
+                            <p className="mt-1 text-xs text-red-100/80">
+                                Please verify your email/password and try again.
+                            </p>
+                        </div>
+                    ) : null}
 
                     <button
                         disabled={loading}
