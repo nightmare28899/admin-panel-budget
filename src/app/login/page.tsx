@@ -145,18 +145,6 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    {error ? (
-                        <div
-                            role="alert"
-                            className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
-                        >
-                            <p className="font-medium">{error}</p>
-                            <p className="mt-1 text-xs text-red-100/80">
-                                Please verify your email/password and try again.
-                            </p>
-                        </div>
-                    ) : null}
-
                     <button
                         disabled={loading}
                         className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 py-2 font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/20 active:translate-y-0"
