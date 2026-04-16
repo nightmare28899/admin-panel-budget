@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UserRow } from "@/lib/api";
 import {
   getUsersAction,
@@ -35,7 +35,7 @@ export default function UsersPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -51,11 +51,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [runServerAction]);
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   const executeToggleStatus = async () => {
     if (!confirmingUser) return;
