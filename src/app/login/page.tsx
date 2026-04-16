@@ -12,6 +12,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    const [shakeForm, setShakeForm] = useState(false);
 
     useEffect(() => {
         if (!toast) return;
@@ -21,6 +22,11 @@ export default function LoginPage() {
 
     const showToast = (message: string, type: "success" | "error" = "success") => {
         setToast({ message, type });
+    };
+
+    const triggerErrorFeedback = () => {
+        setShakeForm(false);
+        requestAnimationFrame(() => setShakeForm(true));
     };
 
     async function onSubmit(e: FormEvent) {
@@ -33,6 +39,7 @@ export default function LoginPage() {
 
             if (res.error) {
                 setError(res.error);
+                triggerErrorFeedback();
                 showToast(res.error, "error");
                 setLoading(false);
                 return;
@@ -44,6 +51,7 @@ export default function LoginPage() {
         } catch (err) {
             const message = err instanceof Error ? err.message : "Login failed";
             setError(message);
+            triggerErrorFeedback();
             showToast(message, "error");
         } finally {
             setLoading(false);
@@ -79,7 +87,12 @@ export default function LoginPage() {
                 </div>
             )}
 
-            <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur p-8 shadow-2xl transition-all hover:border-slate-700 hover:shadow-indigo-500/10">
+            <div
+                className={`w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur p-8 shadow-2xl transition-all hover:border-slate-700 hover:shadow-indigo-500/10 ${
+                    shakeForm ? "animate-login-shake" : ""
+                }`}
+                onAnimationEnd={() => setShakeForm(false)}
+            >
                 <h1 className="text-2xl font-semibold mb-2">Admin Panel</h1>
                 <p className="text-slate-400 mb-6">Sign in to continue.</p>
 
@@ -95,7 +108,11 @@ export default function LoginPage() {
                                 if (error) setError("");
                             }}
                             placeholder="you@company.com"
-                            className="input"
+                            className={`input ${
+                                error
+                                    ? "border-red-400/60 focus:border-red-400 focus:ring-red-500/50"
+                                    : ""
+                            }`}
                         />
                     </div>
 
@@ -111,7 +128,11 @@ export default function LoginPage() {
                                     if (error) setError("");
                                 }}
                                 placeholder="Enter your password"
-                                className="input pr-12"
+                                className={`input pr-12 ${
+                                    error
+                                        ? "border-red-400/60 focus:border-red-400 focus:ring-red-500/50"
+                                        : ""
+                                }`}
                             />
                             <button
                                 type="button"
