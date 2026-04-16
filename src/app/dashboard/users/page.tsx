@@ -29,6 +29,9 @@ export default function UsersPage() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmingUser, setConfirmingUser] = useState<UserRow | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const USERS_PER_PAGE = 10;
 
   const showToast = (message: string, type: "success" | "error" = "success") => {
     setToast({ message, type });
@@ -56,6 +59,10 @@ export default function UsersPage() {
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const executeToggleStatus = async () => {
     if (!confirmingUser) return;
@@ -168,6 +175,18 @@ export default function UsersPage() {
       (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * USERS_PER_PAGE;
+  const endIndex = startIndex + USERS_PER_PAGE;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   return (
     <section className="space-y-8">
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-800/80 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
@@ -255,7 +274,7 @@ export default function UsersPage() {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((u) => (
+                paginatedUsers.map((u) => (
                   <tr key={u.id} className="group transition-colors hover:bg-slate-800/30">
                     <td className="flex items-center gap-x-4 py-4 pl-0 pr-3">
                       {u.avatarUrl ? (
@@ -363,6 +382,37 @@ export default function UsersPage() {
           </table>
         </div>
       </div>
+
+      {!loading && filteredUsers.length > 0 && (
+        <div className="flex flex-col items-start justify-between gap-3 border-t border-slate-800/60 pt-4 text-sm text-slate-400 sm:flex-row sm:items-center">
+          <p>
+            Showing <span className="font-medium text-slate-200">{startIndex + 1}</span>-
+            <span className="font-medium text-slate-200">{Math.min(endIndex, filteredUsers.length)}</span> of{" "}
+            <span className="font-medium text-slate-200">{filteredUsers.length}</span> users
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={safeCurrentPage === 1}
+              className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="px-2 text-slate-300">
+              Page <span className="font-semibold text-white">{safeCurrentPage}</span> of{" "}
+              <span className="font-semibold text-white">{totalPages}</span>
+            </span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={safeCurrentPage === totalPages}
+              className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {editingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">

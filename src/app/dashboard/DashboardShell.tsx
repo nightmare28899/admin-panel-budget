@@ -12,11 +12,11 @@ type SessionUser = {
 };
 
 const NAV_ITEMS = [
-  { label: "Overview", href: "/dashboard/users" },
+  { label: "Overview", href: null },
   { label: "Users", href: "/dashboard/users" },
   { label: "Notifications", href: "/dashboard/notifications" },
-  { label: "Settings", href: "/dashboard/users" },
-];
+  { label: "Settings", href: null },
+] as const;
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -35,7 +35,20 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <p className="px-2 pb-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">Navigation</p>
       <nav className="space-y-2">
         {NAV_ITEMS.map((item) => {
-          const active = pathname === item.href;
+          const active = item.href ? pathname === item.href : false;
+
+          if (!item.href) {
+            return (
+              <span
+                key={item.label}
+                className="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed"
+                aria-disabled="true"
+              >
+                {item.label}
+              </span>
+            );
+          }
+
           return (
             <Link
               key={item.label}
