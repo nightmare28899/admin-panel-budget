@@ -50,6 +50,27 @@ export type SendTestPushResponse = {
     invalidTokensRemoved: number;
 };
 
+function parseApiErrorMessage(raw: string, status: number): string {
+    if (!raw) return `Request failed (${status})`;
+
+    try {
+        const parsed = JSON.parse(raw) as { message?: string | string[] };
+        const message = parsed?.message;
+
+        if (Array.isArray(message) && message.length > 0) {
+            return message.join("\n");
+        }
+
+        if (typeof message === "string" && message.trim()) {
+            return message;
+        }
+    } catch {
+        // If it's not JSON, fall back to plain text.
+    }
+
+    return raw;
+}
+
 async function request<T>(
     path: string,
     init: RequestInit = {},
@@ -67,7 +88,7 @@ async function request<T>(
 
     if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || `Request failed (${res.status})`);
+        throw new Error(parseApiErrorMessage(text, res.status));
     }
 
     return res.json() as Promise<T>;
