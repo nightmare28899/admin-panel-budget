@@ -11,6 +11,12 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+    const showToast = (message: string, type: "success" | "error" = "success") => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     async function onSubmit(e: FormEvent) {
         e.preventDefault();
@@ -22,6 +28,7 @@ export default function LoginPage() {
 
             if (res.error) {
                 setError(res.error);
+                showToast(res.error, "error");
                 setLoading(false);
                 return;
             }
@@ -30,7 +37,9 @@ export default function LoginPage() {
                 router.push("/dashboard/users");
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Login failed");
+            const message = err instanceof Error ? err.message : "Login failed";
+            setError(message);
+            showToast(message, "error");
         } finally {
             setLoading(false);
         }
@@ -38,6 +47,18 @@ export default function LoginPage() {
 
     return (
         <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-6">
+            {toast && (
+                <div
+                    className={`fixed top-6 right-6 z-50 rounded-md px-4 py-2 text-sm font-medium shadow-lg ${
+                        toast.type === "error"
+                            ? "bg-red-500/90 text-white"
+                            : "bg-emerald-500/90 text-white"
+                    }`}
+                >
+                    {toast.message}
+                </div>
+            )}
+
             <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur p-8 shadow-2xl transition-all hover:border-slate-700 hover:shadow-indigo-500/10">
                 <h1 className="text-2xl font-semibold mb-2">Admin Panel</h1>
                 <p className="text-slate-400 mb-6">Sign in to continue.</p>
