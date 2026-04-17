@@ -48,6 +48,7 @@ export type SendTestPushResponse = {
     successCount: number;
     failureCount: number;
     invalidTokensRemoved: number;
+    failureReasons?: Record<string, number>;
 };
 
 function parseApiErrorMessage(raw: string, status: number): string {

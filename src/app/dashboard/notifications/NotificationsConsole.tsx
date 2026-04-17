@@ -37,6 +37,7 @@ type SendPushResult = {
   successCount: number;
   failureCount: number;
   invalidTokensRemoved: number;
+  failureReasons?: Record<string, number>;
 };
 
 async function fetchUsers(): Promise<UserOption[]> {
@@ -89,6 +90,10 @@ async function sendTestPush(
     successCount: Number(payload?.successCount || 0),
     failureCount: Number(payload?.failureCount || 0),
     invalidTokensRemoved: Number(payload?.invalidTokensRemoved || 0),
+    failureReasons:
+      payload?.failureReasons && typeof payload.failureReasons === "object"
+        ? payload.failureReasons
+        : {},
   };
 }
 
@@ -96,7 +101,7 @@ export default function NotificationsConsole() {
   const { runRequest } = useSessionRenewal();
   const [form] = Form.useForm<SendPushPayload>();
   const [result, setResult] = useState<{
-    type: "success" | "error";
+    type: "success" | "warning" | "error";
     message: string;
   } | null>(null);
 
@@ -108,9 +113,20 @@ export default function NotificationsConsole() {
   const sendMutation = useMutation({
     mutationFn: (values: SendPushPayload) => runRequest(() => sendTestPush(values)),
     onSuccess: (payload) => {
+      const failures = Object.entries(payload.failureReasons || {})
+        .map(([code, count]) => `${code} (${count})`)
+        .join(", ");
+      const hasNoDelivery = payload.tokenCount > 0 && payload.successCount === 0;
+      const hasNoRegisteredDevice = payload.tokenCount === 0;
+
       setResult({
-        type: "success",
-        message: `${payload.message} Accepted: ${payload.successCount}/${payload.tokenCount}.`,
+        type: hasNoDelivery || hasNoRegisteredDevice ? "warning" : "success",
+        message: [
+          `${payload.message} Accepted: ${payload.successCount}/${payload.tokenCount}.`,
+          payload.failureCount > 0 && failures ? `Failures: ${failures}.` : "",
+        ]
+          .filter(Boolean)
+          .join(" "),
       });
       form.setFieldsValue({
         title: "Test notification",
