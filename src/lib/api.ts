@@ -72,7 +72,7 @@ function parseApiErrorMessage(raw: string, status: number): string {
     return raw;
 }
 
-async function request<T>(
+export async function request<T>(
     path: string,
     init: RequestInit = {},
     token?: string,
