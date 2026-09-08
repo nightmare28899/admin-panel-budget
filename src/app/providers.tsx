@@ -2,7 +2,8 @@
 
 import { PropsWithChildren, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ConfigProvider, theme } from "antd";
+import { ConfigProvider } from "antd";
+import { antdSharedTheme } from "@/lib/antdTheme";
 import { SessionRenewalProvider } from "./SessionRenewalProvider";
 
 export function Providers({ children }: PropsWithChildren) {
@@ -20,17 +21,7 @@ export function Providers({ children }: PropsWithChildren) {
   );
 
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: theme.darkAlgorithm,
-        token: {
-          colorPrimary: "#6366F1",
-          borderRadius: 16,
-          colorBgBase: "#020617",
-          colorTextBase: "#E2E8F0",
-        },
-      }}
-    >
+    <ConfigProvider theme={antdSharedTheme}>
       <QueryClientProvider client={queryClient}>
         <SessionRenewalProvider>{children}</SessionRenewalProvider>
       </QueryClientProvider>

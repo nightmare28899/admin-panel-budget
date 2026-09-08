@@ -1,8 +1,41 @@
 @import "tailwindcss";
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
 
-.input { 
-  @apply w-full rounded-lg bg-slate-800/50 border border-slate-700 px-3 py-2 text-slate-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 hover:border-slate-600; 
+  --bg-0: oklch(15% 0.013 258);
+  --bg-1: oklch(18% 0.015 258);
+  --bg-2: oklch(23% 0.019 258);
+  --bg-3: oklch(30% 0.024 258);
+  --border: oklch(44% 0.03 258 / 0.55);
+  --border-soft: oklch(44% 0.03 258 / 0.3);
+  --text-1: oklch(94% 0.008 258);
+  --text-2: oklch(80% 0.019 258);
+  --text-3: oklch(68% 0.026 258);
+  --emerald: oklch(72% 0.19 162);
+  --emerald-dim: oklch(72% 0.19 162 / 0.16);
+  --emerald-text: oklch(82% 0.15 162);
+  --gold: oklch(77% 0.165 70);
+  --gold-dim: oklch(77% 0.165 70 / 0.18);
+  --gold-text: oklch(85% 0.13 70);
+  --rose: oklch(64% 0.208 25);
+  --rose-dim: oklch(64% 0.208 25 / 0.16);
+  --rose-text: oklch(74% 0.18 25);
+  --info: oklch(80% 0.134 212);
+  --info-dim: oklch(80% 0.134 212 / 0.16);
+  --info-text: oklch(88% 0.11 212);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-display);
+}
+
+.input {
+  @apply w-full rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)] px-3 py-2 text-[var(--text-1)] transition-all duration-200 placeholder:text-[var(--text-3)] hover:border-[var(--border)] focus:border-[var(--emerald)] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/40;
 }
 
 @keyframes modal-enter {
@@ -25,4 +58,13 @@
 
 .animate-login-shake {
   animation: login-shake 280ms ease-in-out;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(0.75rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.2s ease-out forwards;
 }

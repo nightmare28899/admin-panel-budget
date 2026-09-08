@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { UserRow } from "@/lib/api";
 import {
   getUsersAction,
@@ -10,6 +10,33 @@ import {
   activateUserAction,
 } from "@/lib/actions";
 import { useSessionRenewal } from "@/app/SessionRenewalProvider";
+import { useHeaderSlot } from "../DashboardShell";
+import { Avatar } from "@/components/ui/Avatar";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { MetricCardsSkeleton, SkeletonBlock, TableSkeleton } from "@/components/ui/ContentSkeleton";
+import { Modal } from "@/components/ui/Modal";
+import { Toast, ToastType } from "@/components/ui/Toast";
+import { Toggle } from "@/components/ui/Toggle";
+import {
+  clampDailyBudgetInput,
+  DAILY_BUDGET_MAX,
+  normalizeSupportedCurrency,
+  SUPPORTED_CURRENCIES,
+} from "@/lib/financePreferences";
+
+type StatusFilter = "all" | "active" | "premium";
+
+const STATUS_FILTERS: Array<{ key: StatusFilter; label: string }> = [
+  { key: "all", label: "All" },
+  { key: "active", label: "Active" },
+  { key: "premium", label: "Premium" },
+];
+
+function formatDailyBudget(value: UserRow["dailyBudget"]): string {
+  const amount = Number(value ?? 0);
+  return Number.isFinite(amount) ? amount.toFixed(2) : "0.00";
+}
 
 export default function UsersPage() {
   const { runServerAction } = useSessionRenewal();
@@ -26,14 +53,21 @@ export default function UsersPage() {
   });
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [confirmingUser, setConfirmingUser] = useState<UserRow | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const setHeaderSlot = useHeaderSlot();
 
   const USERS_PER_PAGE = 10;
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
+  const showToast = (message: string, type: ToastType = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
@@ -62,7 +96,76 @@ export default function UsersPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, statusFilter]);
+
+  useEffect(() => {
+    setHeaderSlot(
+      <div className="group relative">
+        <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+          <svg
+            className="h-[15px] w-[15px] text-[var(--text-3)] transition-colors group-focus-within:text-[var(--emerald-text)]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.8}
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </div>
+        <input
+          id="users-search"
+          name="usersSearch"
+          type="search"
+          aria-label="Search users"
+          placeholder="Search users…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-32 rounded-full border border-[var(--border-soft)] bg-[var(--bg-2)] py-[7px] pl-9 pr-[14px] text-sm text-[var(--text-1)] placeholder:text-[var(--text-3)] outline-none transition-colors focus:border-[var(--emerald)] sm:w-[240px]"
+        />
+      </div>,
+    );
+    return () => setHeaderSlot(null);
+  }, [searchQuery, setHeaderSlot]);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (menuRef.current?.contains(target)) return;
+      if (menuButtonRef.current?.contains(target)) return;
+      setOpenMenuId(null);
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenMenuId(null);
+    }
+
+    function handleScroll() {
+      setOpenMenuId(null);
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [openMenuId]);
+
+  const toggleMenu = (id: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    if (openMenuId === id) {
+      setOpenMenuId(null);
+      setMenuPosition(null);
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({ top: rect.bottom + 6, left: Math.max(8, rect.right - 200) });
+    setOpenMenuId(id);
+  };
 
   const executeToggleStatus = async () => {
     if (!confirmingUser) return;
@@ -96,11 +199,12 @@ export default function UsersPage() {
   };
 
   const openEdit = (user: UserRow) => {
+    setOpenMenuId(null);
     setEditingUser(user);
     setEditForm({
       name: user.name || "",
       dailyBudget: user.dailyBudget || 0,
-      currency: user.currency || "MXN",
+      currency: normalizeSupportedCurrency(user.currency),
       password: "",
     });
   };
@@ -169,11 +273,15 @@ export default function UsersPage() {
     }
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
       (u.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+      (u.email || "").toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    if (statusFilter === "active") return Boolean(u.isActive);
+    if (statusFilter === "premium") return Boolean(u.isPremium);
+    return true;
+  });
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -187,353 +295,416 @@ export default function UsersPage() {
     }
   }, [currentPage, totalPages]);
 
+  const totalUsers = users.length;
+  const activeUsers = users.filter((u) => u.isActive).length;
+  const premiumUsers = users.filter((u) => u.isPremium).length;
+  const adminUsers = users.filter((u) => u.role.toLowerCase() === "admin").length;
+  const activePct = totalUsers ? Math.round((activeUsers / totalUsers) * 100) : 0;
+  const premiumPct = totalUsers ? Math.round((premiumUsers / totalUsers) * 100) : 0;
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const newThisMonth = users.filter(
+    (u) => u.createdAt && new Date(u.createdAt) >= monthStart,
+  ).length;
+
   return (
-    <section className="space-y-8">
-      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-800/80 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex flex-col justify-center bg-slate-900/50 p-6">
-          <p className="text-sm font-medium text-slate-400">Total users</p>
-          <p className="mt-2 text-3xl font-semibold text-white">{users.length}</p>
-        </div>
-        <div className="flex flex-col justify-center bg-slate-900/50 p-6">
-          <p className="text-sm font-medium text-slate-400">Active users</p>
-          <p className="mt-2 text-3xl font-semibold text-white">{users.filter((u) => u.isActive).length}</p>
-        </div>
-        <div className="flex flex-col justify-center bg-slate-900/50 p-6">
-          <p className="text-sm font-medium text-slate-400">Inactive users</p>
-          <p className="mt-2 text-3xl font-semibold text-white">{users.filter((u) => !u.isActive).length}</p>
-        </div>
-        <div className="flex flex-col justify-center bg-slate-900/50 p-6">
-          <p className="text-sm font-medium text-slate-400">Admin accounts</p>
-          <p className="mt-2 text-3xl font-semibold text-white">
-            {users.filter((u) => u.role.toLowerCase() === "admin").length}
+    <section>
+      {loading ? (
+        <MetricCardsSkeleton count={4} className="mb-6 sm:grid-cols-2 lg:grid-cols-4" />
+      ) : (
+        <div className="relative mb-6 flex flex-col overflow-hidden rounded-2xl border border-[var(--emerald)]/25 bg-[var(--bg-2)]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:flex-row">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_0%_0%,var(--emerald-dim),transparent_55%)]"
+            aria-hidden="true"
+          />
+        <div className="relative flex-1 border-b border-[var(--border-soft)] px-6 py-5 sm:border-b-0 sm:border-r">
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Total users</p>
+          <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--text-1)]">{totalUsers}</p>
+          <p className="mt-2 text-[11.5px] text-[var(--text-3)]">
+            {newThisMonth > 0 ? (
+              <span className="inline-flex items-center gap-1 text-[var(--emerald-text)]">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>
+                  <path d="M7 17 17 7M9 7h8v8" />
+                </svg>
+                {newThisMonth} this month
+              </span>
+            ) : (
+              "No new signups"
+            )}
           </p>
         </div>
-      </div>
+        <div className="relative flex-1 border-b border-[var(--border-soft)] px-6 py-5 sm:border-b-0 sm:border-r">
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Active users</p>
+          <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--text-1)]">{activeUsers}</p>
+          <p className="mt-2 text-[11.5px] text-[var(--text-3)]">{activePct}% of total</p>
+        </div>
+        <div className="relative flex-1 border-b border-[var(--border-soft)] px-6 py-5 sm:border-b-0 sm:border-r">
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Premium accounts</p>
+          <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--gold-text)]">{premiumUsers}</p>
+          <p className="mt-2 text-[11.5px] text-[var(--gold-text)]">{premiumPct}% of total</p>
+        </div>
+        <div className="relative flex-1 px-6 py-5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Admin accounts</p>
+          <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--text-1)]">{adminUsers}</p>
+          <p className="mt-2 text-[11.5px] text-[var(--text-3)]">Elevated access</p>
+        </div>
+        </div>
+      )}
 
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <h3 className="text-base font-semibold leading-7 text-white">Latest activity</h3>
-        <div className="group relative w-full sm:w-auto">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <svg
-              className="h-4 w-4 text-slate-500 transition-colors group-focus-within:text-indigo-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+      <div className="mb-3.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[14.5px] font-medium text-[var(--text-1)]">All users</span>
+          {loading ? (
+            <SkeletonBlock className="h-3 w-6" aria-hidden="true" />
+          ) : (
+            <span className="font-mono text-xs tabular-nums text-[var(--text-3)]">{filteredUsers.length}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          {STATUS_FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setStatusFilter(f.key)}
+              className={`cursor-pointer rounded-full px-[13px] py-1.5 text-xs transition-colors ${
+                statusFilter === f.key
+                  ? "bg-[var(--emerald-dim)] font-medium text-[var(--emerald-text)]"
+                  : "text-[var(--text-3)] hover:text-[var(--text-1)]"
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-          <input
-            type="search"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-800 bg-slate-900/50 py-2 pl-10 pr-4 text-sm text-slate-200 placeholder:text-slate-500 outline-none transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:w-64"
-          />
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {loading && <p className="text-sm text-indigo-400">Loading users...</p>}
-      {error && <p className="break-all text-sm text-red-400">{error}</p>}
+      {error && <p className="mb-3 break-all text-sm text-[var(--rose)]">{error}</p>}
 
-      <div className="-mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div className="inline-block min-w-full px-4 py-2 align-middle sm:px-6 lg:px-8">
+      {loading ? (
+        <TableSkeleton rows={7} columns={6} />
+      ) : (
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--emerald)]/25 bg-[var(--bg-2)]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_0%_0%,var(--emerald-dim),transparent_55%)]"
+            aria-hidden="true"
+          />
+        <div className="relative overflow-x-auto">
           <table className="min-w-full whitespace-nowrap text-left text-sm">
-            <thead className="border-b border-slate-800 text-slate-400">
-              <tr>
-                <th scope="col" className="py-3 pl-0 pr-3 font-semibold">
+            <thead>
+              <tr className="border-b border-[var(--border-soft)]">
+                <th scope="col" className="px-6 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
                   User
                 </th>
-                <th scope="col" className="px-3 py-3 font-semibold">
-                  Email
-                </th>
-                <th scope="col" className="px-3 py-3 font-semibold">
+                <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
                   Role
                 </th>
-                <th scope="col" className="px-3 py-3 font-semibold">
-                  Account Status
+                <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
+                  Status
                 </th>
-                <th scope="col" className="px-3 py-3 font-semibold">
-                  Premium Access
+                <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
+                  Plan
                 </th>
-                <th scope="col" className="relative py-3 pl-3 pr-0 text-right font-medium">
-                  <span className="sr-only">Actions</span>
+                <th scope="col" className="px-3 py-3 text-right text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
+                  Daily budget
+                </th>
+                <th scope="col" className="px-6 py-3 text-right text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
+                  Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody>
               {!loading && filteredUsers.length === 0 ? (
                 <tr>
-                  <td className="py-8 text-center text-slate-500" colSpan={6}>
+                  <td className="px-6 py-8 text-center text-[var(--text-3)]" colSpan={6}>
                     No users found
                   </td>
                 </tr>
               ) : (
-                paginatedUsers.map((u) => (
-                  <tr key={u.id} className="group transition-colors hover:bg-slate-800/30">
-                    <td className="flex items-center gap-x-4 py-4 pl-0 pr-3">
-                      {u.avatarUrl ? (
-                        <Image
-                          src={u.avatarUrl}
-                          alt={u.name || "User Avatar"}
-                          width={32}
-                          height={32}
-                          unoptimized
-                          className="h-8 w-8 rounded-full bg-slate-800 object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                            e.currentTarget.nextElementSibling?.classList.add("flex");
-                          }}
-                        />
-                      ) : null}
-                      <div
-                        className={`h-8 w-8 rounded-full bg-slate-800 items-center justify-center text-xs font-medium text-slate-300 ${u.avatarUrl ? "hidden" : "flex"}`}
-                      >
-                        {(u.name || "U").slice(0, 1).toUpperCase()}
-                      </div>
-                      <span className="font-medium text-slate-200 transition-colors group-hover:text-white">{u.name}</span>
-                    </td>
-                    <td className="px-3 py-4 text-slate-400">{u.email}</td>
-                    <td className="px-3 py-4 text-slate-400">
-                      <span className="inline-flex items-center rounded-md bg-slate-400/10 px-2 py-1 text-xs font-medium text-slate-400 ring-1 ring-inset ring-slate-400/20">
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-3 py-4">
-                      <div className="flex items-center gap-x-2">
-                        <div
-                          className={`flex-none rounded-full border p-1 ${u.isActive ? "border-emerald-500/20 bg-emerald-500/10" : "border-slate-500/20 bg-slate-500/10"}`}
-                        >
-                          <div className={`h-1.5 w-1.5 rounded-full ${u.isActive ? "bg-emerald-500" : "bg-slate-500"}`} />
+                paginatedUsers.map((u) => {
+                  return (
+                    <tr
+                      key={u.id}
+                      className="group border-b border-[var(--border-soft)] transition-colors last:border-b-0 hover:bg-[var(--bg-3)]/40"
+                    >
+                      <td className="px-6 py-3.5">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <Avatar name={u.name} avatarUrl={u.avatarUrl} size={34} />
+                          <div className="min-w-0">
+                            <div className="truncate text-[13.5px] font-medium text-[var(--text-1)]">{u.name}</div>
+                            <div className="truncate font-mono text-[11.5px] text-[var(--text-3)]">{u.email}</div>
+                          </div>
                         </div>
-                        <span className="text-slate-300">{u.isActive ? "Active" : "Disabled"}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                          u.isPremium
-                            ? "bg-amber-500/20 text-amber-300"
-                            : "bg-slate-500/20 text-slate-300"
-                        }`}
-                      >
-                        {u.isPremium ? "Premium" : "Free"}
-                      </span>
-                    </td>
-                    <td className="relative py-4 pl-3 pr-0 text-right">
-                      <div className="inline-flex flex-col items-end gap-2">
-                        <button
-                          onClick={() => openEdit(u)}
-                          disabled={actionLoading}
-                          className="inline-flex items-center rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300 transition-colors duration-200 hover:bg-indigo-500/20 hover:text-indigo-200 disabled:opacity-50"
-                        >
-                          Edit<span className="sr-only">, {u.name}</span>
-                        </button>
-
-                        <div className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-2.5 py-1.5">
-                          <span className="text-[11px] font-medium tracking-wide text-slate-400">PREMIUM</span>
+                      </td>
+                      <td className="px-3 py-3.5">
+                        <Badge ring>{u.role}</Badge>
+                      </td>
+                      <td className="px-3 py-3.5">
+                        <div className="flex items-center gap-[7px]">
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${u.isActive ? "bg-[var(--emerald)]" : "bg-[var(--text-3)]"}`}
+                            style={{
+                              boxShadow: `0 0 0 3px ${u.isActive ? "var(--emerald-dim)" : "var(--bg-3)"}`,
+                            }}
+                          />
+                          <span className="text-[12.5px] text-[var(--text-2)]">{u.isActive ? "Active" : "Disabled"}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3.5">
+                        {u.isPremium ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--gold-dim)] px-[9px] py-[3px] text-[11.5px] font-medium text-[var(--gold-text)]">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 2 9.5 8.5 3 9.3l5 4.4L6.4 20 12 16.3 17.6 20 16 13.7l5-4.4-6.5-.8Z" />
+                            </svg>
+                            Premium
+                          </span>
+                        ) : (
+                          <span className="text-[12.5px] text-[var(--text-3)]">Free</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3.5 text-right font-mono text-[13px] tabular-nums text-[var(--text-1)]">
+                        {u.currency ? `${u.currency} ` : ""}
+                        {formatDailyBudget(u.dailyBudget)}
+                      </td>
+                      <td className="px-6 py-3.5">
+                        <div className="flex items-center justify-end gap-1">
                           <button
-                            role="switch"
-                            aria-checked={Boolean(u.isPremium)}
-                            onClick={() => togglePremium(u)}
+                            type="button"
+                            onClick={() => openEdit(u)}
                             disabled={actionLoading}
-                            className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent align-middle transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
-                              u.isPremium ? "bg-amber-500 hover:bg-amber-400" : "bg-slate-600 hover:bg-slate-500"
-                            }`}
-                            title={u.isPremium ? "Disable premium" : "Enable premium"}
+                            title={`Edit ${u.name}`}
+                            aria-label={`Edit ${u.name}`}
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            <span className="sr-only">Toggle premium status</span>
-                            <span
-                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-900 shadow ring-0 transition duration-200 ease-in-out ${
-                                u.isPremium ? "translate-x-5" : "translate-x-0"
-                              }`}
-                            />
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}>
+                              <path d="M12 20h9" />
+                              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                            </svg>
                           </button>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-2.5 py-1.5">
-                          <span className="text-[11px] font-medium tracking-wide text-slate-400">ACCOUNT</span>
                           <button
-                            role="switch"
-                            aria-checked={u.isActive}
-                            onClick={() => setConfirmingUser(u)}
-                            disabled={actionLoading || u.role.toLowerCase() === "admin"}
-                            className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent align-middle transition-colors duration-200 ease-in-out focus:outline-none ${u.role.toLowerCase() === "admin" ? "cursor-not-allowed opacity-30" : ""} ${u.isActive ? "bg-emerald-500 hover:bg-emerald-400" : "bg-slate-600 hover:bg-slate-500"}`}
-                            title={u.role.toLowerCase() === "admin" ? "Admins cannot be disabled" : u.isActive ? "Disable User" : "Activate User"}
+                            type="button"
+                            ref={openMenuId === u.id ? menuButtonRef : undefined}
+                            onClick={(e) => toggleMenu(u.id, e)}
+                            disabled={actionLoading}
+                            title="More actions"
+                            aria-label="More actions"
+                            aria-haspopup="menu"
+                            aria-expanded={openMenuId === u.id}
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            <span className="sr-only">Toggle user status</span>
-                            <span
-                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-900 shadow ring-0 transition duration-200 ease-in-out ${u.isActive ? "translate-x-5" : "translate-x-0"}`}
-                            />
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}>
+                              <circle cx="12" cy="5" r="1.4" />
+                              <circle cx="12" cy="12" r="1.4" />
+                              <circle cx="12" cy="19" r="1.4" />
+                            </svg>
                           </button>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
-      </div>
 
-      {!loading && filteredUsers.length > 0 && (
-        <div className="flex flex-col items-start justify-between gap-3 border-t border-slate-800/60 pt-4 text-sm text-slate-400 sm:flex-row sm:items-center">
-          <p>
-            Showing <span className="font-medium text-slate-200">{startIndex + 1}</span>-
-            <span className="font-medium text-slate-200">{Math.min(endIndex, filteredUsers.length)}</span> of{" "}
-            <span className="font-medium text-slate-200">{filteredUsers.length}</span> users
-          </p>
+        {!loading && filteredUsers.length > 0 && (
+          <div className="relative flex flex-col items-start justify-between gap-3 px-6 py-3.5 text-xs text-[var(--text-3)] sm:flex-row sm:items-center">
+            <p>
+              Showing <span className="text-[var(--text-2)]">{startIndex + 1}</span>-
+              <span className="text-[var(--text-2)]">{Math.min(endIndex, filteredUsers.length)}</span> of{" "}
+              <span className="text-[var(--text-2)]">{filteredUsers.length}</span> users
+            </p>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={safeCurrentPage === 1}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <span className="px-2 text-slate-300">
-              Page <span className="font-semibold text-white">{safeCurrentPage}</span> of{" "}
-              <span className="font-semibold text-white">{totalPages}</span>
-            </span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={safeCurrentPage === totalPages}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={safeCurrentPage === 1}
+                className="cursor-pointer rounded-lg border border-[var(--border-soft)] px-3 py-1.5 text-[var(--text-2)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="px-2 text-[var(--text-2)]">
+                Page <span className="font-semibold text-[var(--text-1)]">{safeCurrentPage}</span> of{" "}
+                <span className="font-semibold text-[var(--text-1)]">{totalPages}</span>
+              </span>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={safeCurrentPage === totalPages}
+                className="cursor-pointer rounded-lg border border-[var(--border-soft)] px-3 py-1.5 text-[var(--text-2)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
           </div>
+        )}
         </div>
       )}
 
-      {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="animate-modal-enter w-full max-w-md space-y-4 rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-            <h3 className="text-xl font-medium text-white">Edit User</h3>
+      {openMenuId &&
+        menuPosition &&
+        typeof document !== "undefined" &&
+        createPortal(
+          (() => {
+            const menuUser = users.find((u) => u.id === openMenuId);
+            if (!menuUser) return null;
+            const menuUserIsAdmin = menuUser.role.toLowerCase() === "admin";
+            return (
+              <div
+                ref={menuRef}
+                role="menu"
+                style={{ position: "fixed", top: menuPosition.top, left: menuPosition.left }}
+                className="z-50 w-[200px] rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] p-2 shadow-2xl"
+              >
+                <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
+                  <span className="text-[12px] text-[var(--text-2)]">Premium</span>
+                  <Toggle
+                    checked={Boolean(menuUser.isPremium)}
+                    onChange={() => togglePremium(menuUser)}
+                    disabled={actionLoading}
+                    onColor="gold"
+                    title={menuUser.isPremium ? "Disable premium" : "Enable premium"}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
+                  <span
+                    className={`text-[12px] ${menuUserIsAdmin ? "text-[var(--text-3)]" : "text-[var(--text-2)]"}`}
+                  >
+                    Account active
+                  </span>
+                  <Toggle
+                    checked={Boolean(menuUser.isActive)}
+                    onChange={() => {
+                      setConfirmingUser(menuUser);
+                      setOpenMenuId(null);
+                    }}
+                    disabled={actionLoading || menuUserIsAdmin}
+                    onColor="emerald"
+                    title={
+                      menuUserIsAdmin
+                        ? "Admins cannot be disabled"
+                        : menuUser.isActive
+                          ? "Disable user"
+                          : "Activate user"
+                    }
+                    className={menuUserIsAdmin ? "cursor-not-allowed opacity-30" : ""}
+                  />
+                </div>
+              </div>
+            );
+          })(),
+          document.body,
+        )}
+
+      <Modal open={Boolean(editingUser)} onClose={() => setEditingUser(null)} title="Edit User">
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm text-slate-300">Name</label>
+                <label htmlFor="edit-user-name" className="mb-1 block text-sm text-[var(--text-2)]">Name</label>
                 <input
+                  id="edit-user-name"
+                  name="name"
                   type="text"
+                  autoComplete="name"
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  placeholder="Jane Doe"
                   className="input"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm text-slate-300">Daily Budget</label>
+                <label htmlFor="edit-user-daily-budget" className="mb-1 block text-sm text-[var(--text-2)]">Daily Budget</label>
                 <input
+                  id="edit-user-daily-budget"
+                  name="dailyBudget"
                   type="number"
+                  autoComplete="off"
                   step="0.01"
                   min="0"
+                  max={DAILY_BUDGET_MAX}
                   required
                   value={editForm.dailyBudget}
                   onChange={(e) =>
-                    setEditForm({ ...editForm, dailyBudget: parseFloat(e.target.value) || 0 })
+                    setEditForm({ ...editForm, dailyBudget: clampDailyBudgetInput(e.target.value) })
                   }
+                  placeholder="0.00"
                   className="input"
                 />
+                <p className="mt-1 text-xs text-[var(--text-3)]">
+                  Maximum {DAILY_BUDGET_MAX.toLocaleString()} per day.
+                </p>
               </div>
               <div>
-                <label className="mb-1 block text-sm text-slate-300">Currency</label>
-                <input
-                  type="text"
+                <label htmlFor="edit-user-currency" className="mb-1 block text-sm text-[var(--text-2)]">Currency</label>
+                <select
+                  id="edit-user-currency"
+                  name="currency"
                   required
                   value={editForm.currency}
-                  onChange={(e) => setEditForm({ ...editForm, currency: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, currency: normalizeSupportedCurrency(e.target.value) })
+                  }
                   className="input"
-                />
+                >
+                  {SUPPORTED_CURRENCIES.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm text-slate-300">Temporary Password (optional)</label>
+                <label htmlFor="edit-user-password" className="mb-1 block text-sm text-[var(--text-2)]">Temporary Password (optional)</label>
                 <input
+                  id="edit-user-password"
+                  name="password"
                   type="text"
+                  autoComplete="new-password"
                   minLength={6}
                   value={editForm.password}
                   onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                   placeholder="Set a temporary password"
                   className="input"
                 />
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-[var(--text-3)]">
                   Leave empty to keep current password. Minimum 6 characters.
                 </p>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setEditingUser(null)}
-                  disabled={actionLoading}
-                  className="px-4 py-2 text-slate-300 transition-colors duration-200 hover:text-white disabled:opacity-50"
-                >
+                <Button type="button" variant="ghost" onClick={() => setEditingUser(null)} disabled={actionLoading}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={actionLoading}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20 active:translate-y-0 active:scale-95 disabled:opacity-50"
-                >
+                </Button>
+                <Button type="submit" variant="primary" disabled={actionLoading}>
                   {actionLoading ? "Saving..." : "Save Changes"}
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {toast && (
-        <div
-          className={`animate-in fixed bottom-4 right-4 z-50 slide-in-from-bottom-5 rounded-xl border px-6 py-3 font-medium shadow-lg ${
-            toast.type === "error"
-              ? "border-red-800 bg-red-950/80 text-red-200"
-              : "border-green-800 bg-green-950/80 text-green-200"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} />}
 
-      {confirmingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="animate-modal-enter w-full max-w-sm space-y-4 rounded-xl border border-slate-700/80 bg-slate-900 p-6 shadow-2xl">
-            <h3 className="text-xl font-medium text-white">Change User Status</h3>
-            <p className="text-sm text-slate-300">
-              Are you sure you want to {confirmingUser.isActive ? "disable" : "activate"}{" "}
-              <strong>{confirmingUser.name}</strong>?
+      <Modal
+        open={Boolean(confirmingUser)}
+        onClose={() => setConfirmingUser(null)}
+        title="Change User Status"
+        maxWidth="max-w-sm"
+      >
+            <p className="text-sm text-[var(--text-2)]">
+              Are you sure you want to {confirmingUser?.isActive ? "disable" : "activate"}{" "}
+              <strong>{confirmingUser?.name}</strong>?
             </p>
             <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => setConfirmingUser(null)}
-                disabled={actionLoading}
-                className="px-4 py-2 text-sm font-medium text-slate-300 transition-colors duration-200 hover:text-white disabled:opacity-50"
-              >
+              <Button type="button" variant="ghost" onClick={() => setConfirmingUser(null)} disabled={actionLoading}>
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={confirmingUser?.isActive ? "danger" : "success"}
                 onClick={executeToggleStatus}
                 disabled={actionLoading}
-                className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors duration-200 disabled:opacity-50 ${
-                  confirmingUser.isActive
-                    ? "bg-rose-600 hover:bg-rose-500"
-                    : "bg-emerald-600 hover:bg-emerald-500"
-                }`}
               >
                 {actionLoading ? "Processing..." : "Confirm"}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </section>
   );
 }

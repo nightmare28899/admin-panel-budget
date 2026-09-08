@@ -10,13 +10,13 @@ import {
   Input,
   Select,
   Space,
-  Spin,
   Typography,
 } from "antd";
 import {
   SessionRenewalRequiredError,
   useSessionRenewal,
 } from "@/app/SessionRenewalProvider";
+import { FormSkeleton } from "@/components/ui/ContentSkeleton";
 
 type UserOption = {
   id: string;
@@ -152,10 +152,10 @@ export default function NotificationsConsole() {
   return (
     <Space orientation="vertical" size={24} className="flex w-full">
       <div className="space-y-2">
-        <Typography.Title level={2} style={{ margin: 0, color: "#F8FAFC" }}>
+        <Typography.Title level={2} style={{ margin: 0 }}>
           Push Notifications
         </Typography.Title>
-        <Typography.Paragraph style={{ margin: 0, color: "#94A3B8" }}>
+        <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
           Send a test push from the admin panel to a mobile user with a
           registered device token.
         </Typography.Paragraph>
@@ -198,9 +198,7 @@ export default function NotificationsConsole() {
           ) : null}
 
           {usersQuery.isLoading ? (
-            <div className="flex min-h-40 items-center justify-center">
-              <Spin size="large" />
-            </div>
+            <FormSkeleton />
           ) : (
             <Form<SendPushPayload>
               form={form}
@@ -232,7 +230,7 @@ export default function NotificationsConsole() {
                 label="Notification title"
                 rules={[{ required: true, message: "Enter a notification title" }]}
               >
-                <Input maxLength={120} />
+                <Input maxLength={120} placeholder="e.g. Budget reminder" />
               </Form.Item>
 
               <Form.Item
@@ -240,7 +238,7 @@ export default function NotificationsConsole() {
                 label="Notification body"
                 rules={[{ required: true, message: "Enter a notification body" }]}
               >
-                <Input.TextArea rows={4} maxLength={240} showCount />
+                <Input.TextArea rows={4} maxLength={240} showCount placeholder="Write the message this user will see" />
               </Form.Item>
 
               <Space size={12}>

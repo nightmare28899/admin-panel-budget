@@ -1,73 +1,98 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { AppShell, useHeaderSlot, type AppShellNavItem } from "@/components/layout/AppShell";
 import { LogoutButton } from "./LogoutButton";
+
+export { useHeaderSlot };
 
 type SessionUser = {
   name?: string;
   email?: string;
   role?: string;
+  avatarUrl?: string | null;
+  isPremium?: boolean;
 };
 
-const NAV_ITEMS = [
-  { label: "Overview", href: null },
-  { label: "Users", href: "/dashboard/users" },
-  { label: "Notifications", href: "/dashboard/notifications" },
-  { label: "Settings", href: null },
-] as const;
+const PAGE_TITLES: Record<string, string> = {
+  "/dashboard/users": "Users",
+  "/dashboard/profile": "My Profile",
+  "/dashboard/notifications": "Notifications",
+};
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+const NAV_ITEMS: AppShellNavItem[] = [
+  {
+    label: "Overview",
+    href: null,
+    soon: true,
+    icon: (
+      <>
+        <path d="M3 11.5 12 4l9 7.5" />
+        <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" />
+      </>
+    ),
+  },
+  {
+    label: "Users",
+    href: "/dashboard/users",
+    icon: (
+      <>
+        <path d="M17 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 5 18.5V20" />
+        <circle cx="9.5" cy="8.5" r="3.5" />
+        <path d="M19 20v-1.5a3.5 3.5 0 0 0-2.5-3.36" />
+        <path d="M15 5.13a3.5 3.5 0 0 1 0 6.74" />
+      </>
+    ),
+  },
+  {
+    label: "Notifications",
+    href: "/dashboard/notifications",
+    icon: (
+      <>
+        <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </>
+    ),
+  },
+  {
+    label: "Settings",
+    href: null,
+    soon: true,
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.63 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.63a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.37 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z" />
+      </>
+    ),
+  },
+  {
+    label: "My Profile",
+    href: "/dashboard/profile",
+    icon: (
+      <>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" />
+      </>
+    ),
+  },
+];
 
+function HeaderActions() {
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-slate-950 px-6 py-8">
-      <div className="mb-8 flex items-center gap-x-3 px-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]">
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-        </div>
-        <p className="font-semibold tracking-wide text-white">Budget Panel</p>
-      </div>
-
-      <p className="px-2 pb-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">Navigation</p>
-      <nav className="space-y-2">
-        {NAV_ITEMS.map((item) => {
-          const active = item.href ? pathname === item.href : false;
-
-          if (!item.href) {
-            return (
-              <span
-                key={item.label}
-                className="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed"
-                aria-disabled="true"
-              >
-                {item.label}
-              </span>
-            );
-          }
-
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={onNavigate}
-              className={`flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
-              }`}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-
-    </div>
+    <>
+      <Link
+        href="/dashboard/notifications"
+        aria-label="Notifications"
+        title="Notifications"
+        className="flex h-[34px] w-[34px] items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+          <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+      </Link>
+      <LogoutButton />
+    </>
   );
 }
 
@@ -78,65 +103,16 @@ export function DashboardShell({
   user: SessionUser;
   children: React.ReactNode;
 }) {
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-
   return (
-    <div className="flex h-screen w-full bg-slate-950 font-sans text-slate-200 overflow-hidden">
-      <aside className="hidden w-72 shrink-0 md:flex flex-col border-r border-slate-800 bg-slate-950 z-10 relative">
-        <SidebarContent />
-      </aside>
-
-      <div className="flex flex-1 flex-col min-w-0 overflow-y-auto">
-        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-950 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-x-4">
-              <button
-                onClick={() => setMobileSidebarOpen(true)}
-                className="text-slate-400 hover:text-white md:hidden"
-                aria-label="Open sidebar"
-              >
-                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                 </svg>
-              </button>
-            </div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-                <div className="text-sm font-semibold leading-6 text-white hidden sm:block">
-                  {user?.name || user?.email} <span className="text-slate-400 font-normal">{user?.role ? `(${user.role})` : ""}</span>
-                </div>
-                <div className="hidden sm:block h-6 w-px bg-slate-800" aria-hidden="true" />
-                <LogoutButton />
-            </div>
-          </header>
-
-          <main className="flex-1">
-             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-               {children}
-             </div>
-          </main>
-        </div>
-
-      {mobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            aria-label="Close sidebar backdrop"
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
-            <aside className="relative my-3 ml-3 h-[calc(100%-1.5rem)] w-80 max-w-[88vw] overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-2xl flex flex-col">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-300">Navigation</p>
-              <button
-                onClick={() => setMobileSidebarOpen(false)}
-                className="rounded-lg border border-slate-700 px-2.5 py-1 text-sm hover:bg-slate-800"
-                aria-label="Close sidebar"
-              >
-                ✕
-              </button>
-            </div>
-            <SidebarContent onNavigate={() => setMobileSidebarOpen(false)} />
-          </aside>
-        </div>
-      )}
-    </div>
+    <AppShell
+      navItems={NAV_ITEMS}
+      pageTitles={PAGE_TITLES}
+      defaultTitle="Dashboard"
+      user={user}
+      profileHref="/dashboard/profile"
+      headerActions={<HeaderActions />}
+    >
+      {children}
+    </AppShell>
   );
 }
