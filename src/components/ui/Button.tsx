@@ -4,7 +4,7 @@ export type ButtonVariant = "primary" | "outline" | "ghost" | "danger" | "succes
 export type ButtonSize = "sm" | "md";
 
 const BASE_CLASSES =
-  "inline-flex items-center justify-center gap-1.5 cursor-pointer select-none whitespace-nowrap transition-all duration-150 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100";
+  "inline-flex items-center justify-center gap-1.5 cursor-pointer select-none whitespace-nowrap transition-all duration-150 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100 motion-reduce:transition-none";
 
 // Soft layered shadow (many thin stops) instead of a single flat blob — reads as real elevation on a dark surface.
 const LIFT_SHADOW =
@@ -32,19 +32,36 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 export function Button({
   variant = "primary",
   size = "md",
+  loading = false,
   className = "",
+  disabled,
   children,
   ...rest
 }: {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  loading?: boolean;
   className?: string;
 } & ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       className={`${BASE_CLASSES} ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`}
       {...rest}
+      disabled={disabled || loading}
+      aria-busy={loading || rest["aria-busy"]}
     >
+      {loading && (
+        <svg
+          className="h-4 w-4 animate-spin motion-reduce:animate-none"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" d="M12 3a9 9 0 1 0 9 9" />
+        </svg>
+      )}
       {children}
     </button>
   );

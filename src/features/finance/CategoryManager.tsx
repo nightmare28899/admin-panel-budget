@@ -12,7 +12,7 @@ export function CategoryManager({ categories, onCreate, onUpdate, onDelete }: { 
   return <section>
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <h2 className="text-lg font-semibold text-[var(--text-1)]">Category list</h2>
-      <Button type="button" variant="primary" onClick={() => setOpen(true)}>Add category</Button>
+      <Button type="button" variant="tinted" onClick={() => setOpen(true)}>Add category</Button>
     </div>
     <List
       bordered
@@ -23,7 +23,7 @@ export function CategoryManager({ categories, onCreate, onUpdate, onDelete }: { 
             <Button
               key="edit"
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => {
                 setEditing(category);
@@ -33,7 +33,7 @@ export function CategoryManager({ categories, onCreate, onUpdate, onDelete }: { 
             >
               Edit
             </Button>,
-            <Popconfirm key="delete" title="Delete category? Expenses must not reference it." onConfirm={() => onDelete(category.id)}>
+            <Popconfirm key="delete" title="Delete category? Expenses must not reference it." okButtonProps={{ danger: true, shape: "round" }} cancelButtonProps={{ shape: "round" }} onConfirm={() => onDelete(category.id)}>
               <Button type="button" variant="danger" size="sm">Delete</Button>
             </Popconfirm>,
           ]}

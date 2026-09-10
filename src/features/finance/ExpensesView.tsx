@@ -179,7 +179,7 @@ export function ExpensesView() {
           </div>
           <Button
             type="button"
-            variant="primary"
+            variant="tinted"
             onClick={() => {
               setEditing(undefined);
               setDrawer(true);

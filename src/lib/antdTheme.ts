@@ -16,6 +16,10 @@ const GOLD = "#f69e0b";
 const ROSE = "#ef4444";
 const INFO = "#22d3ee";
 
+const BG_3_ALPHA_MEDIUM = "rgba(38, 46, 58, 0.6)"; // BG_3 @ 60% — outlined buttons
+const BUTTON_LIFT_SHADOW =
+  "inset 0 1px 0 rgba(255,255,255,0.16), 0 1px 2px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.28)";
+
 export const antdSharedTheme: ThemeConfig = {
   algorithm: antdTheme.darkAlgorithm,
   token: {
@@ -35,5 +39,28 @@ export const antdSharedTheme: ThemeConfig = {
     colorBorderSecondary: BORDER_SOFT,
     borderRadius: 10, // matches --radius-md (0.625rem) in globals.css
     fontFamily: "var(--font-geist-sans), sans-serif",
+  },
+  components: {
+    Button: {
+      fontWeight: 500,
+      primaryColor: BG_0,
+      dangerColor: BG_0,
+      defaultColor: TEXT_1,
+      defaultBg: BG_3_ALPHA_MEDIUM,
+      defaultBorderColor: BORDER,
+      defaultHoverBg: BG_3,
+      defaultHoverColor: TEXT_1,
+      defaultHoverBorderColor: TEXT_3,
+      defaultActiveBg: BG_2,
+      defaultActiveColor: TEXT_1,
+      defaultActiveBorderColor: BORDER,
+      defaultShadow: "none",
+      primaryShadow: BUTTON_LIFT_SHADOW,
+      dangerShadow: BUTTON_LIFT_SHADOW,
+      paddingInline: 20,
+      paddingInlineSM: 12,
+      contentFontSize: 14,
+      contentFontSizeSM: 12,
+    },
   },
 };

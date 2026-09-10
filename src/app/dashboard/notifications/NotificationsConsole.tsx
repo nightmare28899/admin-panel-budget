@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Alert,
-  Button,
   Card,
   Form,
   Input,
@@ -17,6 +16,7 @@ import {
   useSessionRenewal,
 } from "@/app/SessionRenewalProvider";
 import { FormSkeleton } from "@/components/ui/ContentSkeleton";
+import { Button } from "@/components/ui/Button";
 
 type UserOption = {
   id: string;
@@ -190,7 +190,7 @@ export default function NotificationsConsole() {
                   : "Unknown error"
               }
               action={
-                <Button size="small" onClick={() => usersQuery.refetch()}>
+                <Button type="button" variant="outline" size="sm" onClick={() => void usersQuery.refetch()}>
                   Retry
                 </Button>
               }
@@ -243,13 +243,15 @@ export default function NotificationsConsole() {
 
               <Space size={12}>
                 <Button
-                  type="primary"
-                  htmlType="submit"
+                  type="submit"
+                  variant="primary"
                   loading={sendMutation.isPending}
                 >
                   Send test push
                 </Button>
                 <Button
+                  type="button"
+                  variant="ghost"
                   onClick={() => {
                     form.resetFields();
                     setResult(null);

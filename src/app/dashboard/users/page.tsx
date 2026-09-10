@@ -515,24 +515,28 @@ export default function UsersPage() {
             </p>
 
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={safeCurrentPage === 1}
-                className="cursor-pointer rounded-lg border border-[var(--border-soft)] px-3 py-1.5 text-[var(--text-2)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
-              </button>
+              </Button>
               <span className="px-2 text-[var(--text-2)]">
                 Page <span className="font-semibold text-[var(--text-1)]">{safeCurrentPage}</span> of{" "}
                 <span className="font-semibold text-[var(--text-1)]">{totalPages}</span>
               </span>
-              <button
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={safeCurrentPage === totalPages}
-                className="cursor-pointer rounded-lg border border-[var(--border-soft)] px-3 py-1.5 text-[var(--text-2)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         )}

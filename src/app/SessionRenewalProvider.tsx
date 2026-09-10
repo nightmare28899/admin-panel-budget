@@ -11,6 +11,7 @@ import {
 import { Modal, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { logoutAction, renewSessionAction } from "@/lib/actions";
+import { Button } from "@/components/ui/Button";
 import {
   ActionResult,
   SESSION_EXPIRED_MESSAGE,
@@ -130,13 +131,18 @@ export function SessionRenewalProvider({ children }: PropsWithChildren) {
         closable={false}
         maskClosable={false}
         keyboard={!loading}
-        okText="Renew session"
-        cancelText="Close session"
-        okButtonProps={{ loading }}
-        cancelButtonProps={{ disabled: loading }}
-        onOk={renewSession}
         onCancel={closeSession}
         title="Session expired"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => void closeSession()} disabled={loading}>
+              Close session
+            </Button>
+            <Button type="button" variant="primary" onClick={() => void renewSession()} loading={loading}>
+              Renew session
+            </Button>
+          </div>
+        }
       >
         <Typography.Paragraph style={{ marginBottom: 0 }}>
           {message}

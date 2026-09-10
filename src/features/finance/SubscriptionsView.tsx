@@ -219,9 +219,8 @@ export function SubscriptionsView() {
                             </Button>
                             <Button
                               type="button"
-                              variant="ghost"
+                              variant="danger"
                               size="sm"
-                              className="text-[var(--rose)] hover:bg-[var(--rose)]/10 hover:text-[var(--rose)]"
                               onClick={() => setConfirmingDelete(charge)}
                             >
                               Delete

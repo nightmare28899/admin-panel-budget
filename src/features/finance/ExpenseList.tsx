@@ -60,7 +60,7 @@ export function ExpenseList({
           { title: "Expense", dataIndex: "title", render: (value: string, row: Expense) => <><strong className="text-[var(--text-1)]">{value}</strong>{row.merchantName && <div className="text-xs text-[var(--text-3)]">{row.merchantName}</div>}</> },
           { title: "Category", render: (_: unknown, row: Expense) => row.category ? <Tag color={row.category.color ?? undefined}>{row.category.name}</Tag> : "—" },
           { title: "Amount", render: (_: unknown, row: Expense) => <span className="font-mono tabular-nums text-[var(--text-1)]">{row.currency} {Number(row.cost).toFixed(2)}</span> },
-          { title: "Actions", render: (_: unknown, row: Expense) => <div className="flex gap-2"><Button type="button" variant="outline" size="sm" onClick={() => onEdit(row)}>Edit</Button>{row.imageUrl && <Button type="button" variant="outline" size="sm" onClick={() => onReceipt(row)} aria-label={`View receipt for ${row.title}`}>Receipt</Button>}<Popconfirm title="Delete expense?" onConfirm={() => onDelete(row.id)}><Button type="button" variant="danger" size="sm">Delete</Button></Popconfirm></div> },
+          { title: "Actions", render: (_: unknown, row: Expense) => <div className="flex gap-2"><Button type="button" variant="outline" size="sm" onClick={() => onEdit(row)}>Edit</Button>{row.imageUrl && <Button type="button" variant="outline" size="sm" onClick={() => onReceipt(row)} aria-label={`View receipt for ${row.title}`}>Receipt</Button>}<Popconfirm title="Delete expense?" okButtonProps={{ danger: true, shape: "round" }} cancelButtonProps={{ shape: "round" }} onConfirm={() => onDelete(row.id)}><Button type="button" variant="danger" size="sm">Delete</Button></Popconfirm></div> },
         ]}
       />
     </>
