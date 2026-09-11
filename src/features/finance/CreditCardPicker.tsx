@@ -28,7 +28,7 @@ export function CreditCardPicker({
 
   return (
     <div
-      className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-2 pt-1"
+      className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-4 pt-4"
       role="radiogroup"
       aria-label="Credit card"
     >
