@@ -1,6 +1,10 @@
 import { request } from "./api";
 import type { Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
 import type {
+  CreditCardOverviewResponse,
+  CreditCardWritePayload,
+} from "@/features/finance/credit-cards.types";
+import type {
   CreditCardSummary,
   ConfirmStatementImportPayload,
   ConfirmStatementImportResponse,
@@ -28,6 +32,14 @@ export const userApi = {
   updateCategory: (token: string, id: string, body: CategoryWritePayload) => request<Category>(`/categories/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
   deleteCategory: (token: string, id: string) => request<unknown>(`/categories/${id}`, { method: "DELETE" }, token),
   creditCards: (token: string) => request<CreditCardSummary[]>("/credit-cards", { method: "GET" }, token),
+  creditCardsOverview: (token: string, query: string) =>
+    request<CreditCardOverviewResponse>(`/credit-cards/overview?${query}`, { method: "GET" }, token),
+  createCreditCard: (token: string, body: CreditCardWritePayload) =>
+    request<CreditCardSummary>("/credit-cards", { method: "POST", body: JSON.stringify(body) }, token),
+  updateCreditCard: (token: string, id: string, body: Partial<CreditCardWritePayload> & { isActive?: boolean }) =>
+    request<CreditCardSummary>(`/credit-cards/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
+  deactivateCreditCard: (token: string, id: string) =>
+    request<unknown>(`/credit-cards/${id}`, { method: "DELETE" }, token),
   statementImports: (token: string, query: string) =>
     request<StatementImportListResponse>(`/statement-imports?${query}`, { method: "GET" }, token),
   statementImport: (token: string, id: string) =>

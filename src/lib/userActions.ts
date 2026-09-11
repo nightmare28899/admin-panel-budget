@@ -4,6 +4,7 @@ import type {
   CategoryWritePayload,
   ExpenseWritePayload,
 } from "@/features/finance/finance.types";
+import type { CreditCardWritePayload } from "@/features/finance/credit-cards.types";
 import type {
   ConfirmStatementImportPayload,
   UpdateStatementRowsPayload,
@@ -146,6 +147,25 @@ export async function getCategoriesAction() {
 
 export async function getCreditCardsAction() {
   return withUser((token) => userApi.creditCards(token), true);
+}
+
+export async function getCreditCardsOverviewAction(query: string) {
+  return withUser((token) => userApi.creditCardsOverview(token, query), true);
+}
+
+export async function createCreditCardAction(body: CreditCardWritePayload) {
+  return withFreshUser((token) => userApi.createCreditCard(token, body));
+}
+
+export async function updateCreditCardAction(
+  id: string,
+  body: Partial<CreditCardWritePayload> & { isActive?: boolean },
+) {
+  return withFreshUser((token) => userApi.updateCreditCard(token, id, body));
+}
+
+export async function deactivateCreditCardAction(id: string) {
+  return withFreshUser((token) => userApi.deactivateCreditCard(token, id));
 }
 
 export async function getStatementImportsAction(query: string) {

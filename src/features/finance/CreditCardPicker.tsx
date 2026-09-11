@@ -1,48 +1,9 @@
 import type { CreditCardSummary } from "./statement-import.types";
-
-// No stored brand color to fall back on: pick a deterministic gradient from
-// the card id so the same card always renders the same way across reloads.
-// Kept vivid on purpose — this mirrors the "gamified finance" card-wallet
-// look the user pointed at, as opposed to the app's usual muted surfaces.
-const FALLBACK_GRADIENTS = [
-  "linear-gradient(135deg, #10b981, #047857)",
-  "linear-gradient(135deg, #38bdf8, #0369a1)",
-  "linear-gradient(135deg, #f59e0b, #b45309)",
-  "linear-gradient(135deg, #a855f7, #6b21a8)",
-  "linear-gradient(135deg, #64748b, #334155)",
-];
-
-function fallbackGradient(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i += 1) {
-    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  }
-  return FALLBACK_GRADIENTS[hash % FALLBACK_GRADIENTS.length];
-}
-
-function ChipIcon() {
-  return (
-    <div className="relative h-6 w-8 shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-yellow-200 to-yellow-500">
-      <div className="absolute inset-x-1 top-[5px] h-px bg-yellow-800/40" />
-      <div className="absolute inset-x-1 top-[11px] h-px bg-yellow-800/40" />
-      <div className="absolute inset-x-1 top-[17px] h-px bg-yellow-800/40" />
-      <div className="absolute inset-y-1 left-1/2 w-px -translate-x-1/2 bg-yellow-800/40" />
-    </div>
-  );
-}
-
-function ContactlessIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white/70" aria-hidden="true">
-      <path
-        d="M4 14a11 11 0 0 1 16 0M7 17.5a6.5 6.5 0 0 1 10 0M10 21a2 2 0 0 1 4 0"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+import {
+  creditCardBackground,
+  CreditCardChipIcon,
+  CreditCardContactlessIcon,
+} from "./creditCardVisuals";
 
 type CreditCardPickerProps = {
   cards: CreditCardSummary[];
@@ -88,7 +49,7 @@ export function CreditCardPicker({
 
       {cards.map((card) => {
         const selected = card.id === selectedCardId;
-        const background = card.color || fallbackGradient(card.id);
+        const background = creditCardBackground(card);
         return (
           <button
             key={card.id}
@@ -114,7 +75,7 @@ export function CreditCardPicker({
                 {card.bank}
               </span>
               <div className="flex items-center gap-2">
-                <ContactlessIcon />
+                <CreditCardContactlessIcon />
                 {selected && (
                   <span className="flex h-6 w-6 animate-badge-pop items-center justify-center rounded-full bg-white text-xs font-bold text-[var(--emerald-text)] shadow-sm">
                     ✓
@@ -123,7 +84,7 @@ export function CreditCardPicker({
               </div>
             </div>
 
-            <ChipIcon />
+            <CreditCardChipIcon />
 
             <div className="relative">
               <p className="font-mono text-[15px] tracking-[0.15em] text-white drop-shadow-sm">

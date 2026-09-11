@@ -14,6 +14,7 @@ type FinanceUser = {
 
 const PAGE_TITLES: Record<string, string> = {
   "/finance/expenses": "Expenses",
+  "/finance/cards": "My Cards",
   "/finance/statements": "Card statements",
   "/finance/categories": "Categories",
   "/finance/subscriptions": "Subscriptions",
@@ -29,6 +30,15 @@ const NAV_ITEMS: AppShellNavItem[] = [
         <path d="M6 3h9l3 3v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
         <path d="M15 3v3h3" />
         <path d="M8 12h8M8 16h8M8 8h4" />
+      </>
+    ),
+  },
+  {
+    label: "My Cards",
+    href: "/finance/cards",
+    icon: (
+      <>
+        <path d="M3 6h18v12H3zM3 10h18M7 15h3" />
       </>
     ),
   },
