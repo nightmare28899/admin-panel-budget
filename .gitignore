@@ -45,3 +45,6 @@ next-env.d.ts
 .SKILLS/
 # Local AI runtime state
 .atl/
+
+# CodeGraph local index
+.codegraph/

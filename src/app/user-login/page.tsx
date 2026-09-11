@@ -1,12 +1,26 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { userGoogleLoginAction, userLoginAction } from "@/lib/userActions";
 import { signInWithGoogle } from "@/lib/googleAuth";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+
+function SessionExpiredNotice() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("reason") !== "expired") return null;
+
+  return (
+    <div
+      role="status"
+      className="mb-4 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]"
+    >
+      Your session expired. Please sign in again.
+    </div>
+  );
+}
 
 export default function UserLoginPage() {
   const router = useRouter();
@@ -67,6 +81,10 @@ export default function UserLoginPage() {
         </div>
         <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">Personal finance</h1>
         <p className="mt-1.5 mb-6 text-sm text-[var(--text-3)]">Sign in with an existing Budget account.</p>
+
+        <Suspense fallback={null}>
+          <SessionExpiredNotice />
+        </Suspense>
 
         {error && (
           <div role="alert" className="mb-4 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]">
