@@ -42,6 +42,19 @@ export function MetricCardsSkeleton({
   );
 }
 
+export function CreditCardsSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <div aria-busy="true">
+      <LoadingStatus label="Loading credit cards" />
+      <div className="flex gap-4 overflow-hidden" aria-hidden="true">
+        {Array.from({ length: count }, (_, index) => (
+          <SkeletonBlock key={index} className="h-40 w-56 shrink-0 rounded-[28px]" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function TableSkeleton({ rows = 6, columns = 5 }: { rows?: number; columns?: number }) {
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--border-soft)]" aria-busy="true">

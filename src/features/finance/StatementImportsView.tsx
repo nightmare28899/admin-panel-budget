@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Badge, type BadgeVariant } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { ListSkeleton } from "@/components/ui/ContentSkeleton";
+import { CreditCardsSkeleton, ListSkeleton } from "@/components/ui/ContentSkeleton";
 import { CreditCardPicker } from "./CreditCardPicker";
 import {
   createStatementImportAction,
@@ -252,26 +252,32 @@ export function StatementImportsView() {
         </div>
       )}
 
+      <Card title="Credit card" className="mb-4 !p-5">
+        <p className="mb-3 text-xs text-[var(--text-3)]">
+          Optional — tag the statement you are about to upload with one of your cards.
+        </p>
+        {loading && !history ? (
+          <CreditCardsSkeleton />
+        ) : (
+          <>
+            <CreditCardPicker
+              cards={cards}
+              selectedCardId={selectedCardId}
+              onSelect={setSelectedCardId}
+              emptyMessage={cardsError ? "Cards unavailable" : "No active cards"}
+            />
+            {cardsError && (
+              <p className="mt-1.5 text-xs text-[var(--gold-text)]">
+                Cards could not be loaded. You can still upload the statement without selecting one.
+              </p>
+            )}
+          </>
+        )}
+      </Card>
+
       <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
         <Card title="Upload statement" className="!p-5">
           <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm text-[var(--text-2)]">
-                Credit card <span className="text-[var(--text-3)]">(optional)</span>
-              </label>
-              <CreditCardPicker
-                cards={cards}
-                selectedCardId={selectedCardId}
-                onSelect={setSelectedCardId}
-                emptyMessage={cardsError ? "Cards unavailable" : "No active cards"}
-              />
-              {cardsError && (
-                <p className="mt-1.5 text-xs text-[var(--gold-text)]">
-                  Cards could not be loaded. You can still upload the statement without selecting one.
-                </p>
-              )}
-            </div>
-
             <div>
               <label htmlFor="statement-file" className="mb-1.5 block text-sm text-[var(--text-2)]">
                 Statement PDF
