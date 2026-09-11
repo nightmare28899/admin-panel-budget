@@ -16,6 +16,11 @@ const GOLD = "#f69e0b";
 const ROSE = "#ef4444";
 const INFO = "#22d3ee";
 
+// Low-alpha variants (same hex as BG_3/BORDER_SOFT, alpha added) so antd
+// surfaces that must let the AppShell's fixed backdrop show through — the
+// Table body/header — read as translucent glass instead of an opaque panel.
+const BG_3_ALPHA_LOW = "rgba(38, 46, 58, 0.28)"; // BG_3 @ ~28% — row hover
+const BG_3_ALPHA_LOWER = "rgba(38, 46, 58, 0.16)"; // BG_3 @ ~16% — striped/expanded rows
 const BG_3_ALPHA_MEDIUM = "rgba(38, 46, 58, 0.6)"; // BG_3 @ 60% — outlined buttons
 const BUTTON_LIFT_SHADOW =
   "inset 0 1px 0 rgba(255,255,255,0.16), 0 1px 2px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.28)";
@@ -61,6 +66,28 @@ export const antdSharedTheme: ThemeConfig = {
       paddingInlineSM: 12,
       contentFontSize: 14,
       contentFontSizeSM: 12,
+    },
+    // Table stays transparent (body + header + footer) so the AppShell's
+    // fixed radial backdrop is visible through it — only row hover/selection
+    // get a faint --bg-3 wash instead of antd's opaque default.
+    Table: {
+      colorBgContainer: "transparent",
+      headerBg: "transparent",
+      footerBg: "transparent",
+      headerColor: TEXT_2,
+      headerSplitColor: BORDER_SOFT,
+      borderColor: BORDER_SOFT,
+      rowHoverBg: BG_3_ALPHA_LOW,
+      rowSelectedBg: BG_3_ALPHA_LOW,
+      rowSelectedHoverBg: BG_3_ALPHA_LOW,
+      rowExpandedBg: BG_3_ALPHA_LOWER,
+    },
+    Popconfirm: {
+      colorBgElevated: BG_3,
+    },
+    Modal: {
+      contentBg: BG_2,
+      headerBg: BG_2,
     },
   },
 };

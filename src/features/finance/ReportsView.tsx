@@ -1,11 +1,15 @@
 "use client";
 
 import { DatePicker, Segmented } from "antd";
+import { BarChartOutlined, SwapOutlined, WalletOutlined } from "@ant-design/icons";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
+import { StatCard } from "@/components/ui/StatCard";
 import { ChartSkeleton, MetricCardsSkeleton } from "@/components/ui/ContentSkeleton";
+import { Sparkline, TrendBadge } from "@/components/ui/TrendBadge";
+import type { Delta } from "@/components/ui/TrendBadge";
 import { getExpensesAction, getUserMeAction } from "@/lib/userActions";
 import { toCalendarDate } from "./finance.types";
 import type { Expense } from "./finance.types";
@@ -45,6 +49,38 @@ function labelFor(start: Dayjs, granularity: Granularity): string {
   return start.format("MMM YYYY");
 }
 
+function computeDelta(current: number, previous: number): Delta {
+  if (previous === 0) {
+    return { pct: null, direction: current === 0 ? "flat" : "up" };
+  }
+  const pct = ((current - previous) / previous) * 100;
+  return { pct, direction: pct > 0.05 ? "up" : pct < -0.05 ? "down" : "flat" };
+}
+
+// Lower spend, a lower per-period average, and fewer transactions all read as
+// tighter budget control here, so "down" is favorable across every KPI card.
+
+async function fetchExpensesInRange(from: Dayjs, to: Dayjs): Promise<{ expenses: Expense[]; error?: string }> {
+  const collected: Expense[] = [];
+  let page = 1;
+  // Safety cap: this account has well under a thousand records; this bound
+  // just guards against ever looping on unexpected data.
+  for (let i = 0; i < 10; i += 1) {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: "100",
+      from: from.format("YYYY-MM-DD"),
+      to: to.format("YYYY-MM-DD"),
+    });
+    const result = await getExpensesAction(params.toString());
+    if (result.error) return { expenses: collected, error: result.error };
+    collected.push(...(result.data?.expenses ?? []));
+    if (!result.data?.pagination.hasNext) break;
+    page += 1;
+  }
+  return { expenses: collected };
+}
+
 function buildEmptyBuckets(from: Dayjs, to: Dayjs, granularity: Granularity): Bucket[] {
   const buckets: Bucket[] = [];
   let cursor = bucketKeyFor(from, granularity).start;
@@ -65,8 +101,17 @@ export function ReportsView() {
   const [range, setRange] = useState<[Dayjs, Dayjs]>([dayjs().subtract(29, "day").startOf("day"), dayjs().endOf("day")]);
   const [granularity, setGranularity] = useState<Granularity>("daily");
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [previousExpenses, setPreviousExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+
+  const previousRange = useMemo((): [Dayjs, Dayjs] => {
+    const periodLengthDays = range[1].startOf("day").diff(range[0].startOf("day"), "day") + 1;
+    return [
+      range[0].subtract(periodLengthDays, "day").startOf("day"),
+      range[0].subtract(1, "day").endOf("day"),
+    ];
+  }, [range]);
 
   const load = useCallback(
     async (from: Dayjs, to: Dayjs) => {
@@ -79,26 +124,11 @@ export function ReportsView() {
         return;
       }
 
-      const collected: Expense[] = [];
-      let page = 1;
-      // Safety cap: this account has well under a thousand records; this bound
-      // just guards against ever looping on unexpected data.
-      for (let i = 0; i < 10; i += 1) {
-        const params = new URLSearchParams({
-          page: String(page),
-          limit: "100",
-          from: from.format("YYYY-MM-DD"),
-          to: to.format("YYYY-MM-DD"),
-        });
-        const result = await getExpensesAction(params.toString());
-        if (result.error) {
-          setError(result.error);
-          setLoading(false);
-          return;
-        }
-        collected.push(...(result.data?.expenses ?? []));
-        if (!result.data?.pagination.hasNext) break;
-        page += 1;
+      const { expenses: collected, error: fetchError } = await fetchExpensesInRange(from, to);
+      if (fetchError) {
+        setError(fetchError);
+        setLoading(false);
+        return;
       }
 
       setExpenses(collected);
@@ -111,6 +141,18 @@ export function ReportsView() {
     void load(range[0], range[1]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range]);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Previous-period comparison is a supplementary trend signal — if it
+    // fails to load, the KPI cards just fall back to no delta.
+    void fetchExpensesInRange(previousRange[0], previousRange[1]).then(({ expenses: collected, error: fetchError }) => {
+      if (!cancelled && !fetchError) setPreviousExpenses(collected);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [previousRange]);
 
   const buckets = useMemo(() => {
     const empty = buildEmptyBuckets(range[0], range[1], granularity);
@@ -147,6 +189,33 @@ export function ReportsView() {
   const bucketCount = buckets.length || 1;
   const averagePerBucket = grandTotal / bucketCount;
   const transactionCount = expenses.length;
+
+  const bucketTotalsSeries = useMemo(
+    () => buckets.map((bucket) => (primaryCurrency ? bucket.totalsByCurrency[primaryCurrency] ?? 0 : 0)),
+    [buckets, primaryCurrency],
+  );
+  const bucketCountsSeries = useMemo(() => buckets.map((bucket) => bucket.count), [buckets]);
+
+  const previousBucketCount = useMemo(
+    () => buildEmptyBuckets(previousRange[0], previousRange[1], granularity).length || 1,
+    [previousRange, granularity],
+  );
+
+  const previousGrandTotal = useMemo(() => {
+    if (!primaryCurrency) return 0;
+    return previousExpenses.reduce((sum, expense) => {
+      if (expense.currency !== primaryCurrency) return sum;
+      const cost = typeof expense.cost === "string" ? parseFloat(expense.cost) : expense.cost;
+      return Number.isNaN(cost) ? sum : sum + cost;
+    }, 0);
+  }, [previousExpenses, primaryCurrency]);
+
+  const previousAveragePerBucket = previousGrandTotal / previousBucketCount;
+  const previousTransactionCount = previousExpenses.length;
+
+  const totalSpentDelta = computeDelta(grandTotal, previousGrandTotal);
+  const averageDelta = computeDelta(averagePerBucket, previousAveragePerBucket);
+  const transactionsDelta = computeDelta(transactionCount, previousTransactionCount);
 
   const maxBucketTotal = Math.max(
     1,
@@ -215,36 +284,32 @@ export function ReportsView() {
         <MetricCardsSkeleton count={3} className="mb-4 md:grid-cols-3" />
       ) : (
         <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-          <Card className="!p-4">
-            <p className="mb-1 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">
-              Total spent
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-[22px] font-medium tabular-nums text-[var(--text-1)]">
-                {primaryCurrency ? grandTotal.toFixed(2) : "—"}
-              </span>
-              {primaryCurrency && <span className="text-xs text-[var(--text-3)]">{primaryCurrency}</span>}
-            </div>
-          </Card>
-          <Card className="!p-4">
-            <p className="mb-1 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">
-              Average per {granularity === "daily" ? "day" : granularity === "weekly" ? "week" : "month"}
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-[22px] font-medium tabular-nums text-[var(--text-1)]">
-                {primaryCurrency ? averagePerBucket.toFixed(2) : "—"}
-              </span>
-              {primaryCurrency && <span className="text-xs text-[var(--text-3)]">{primaryCurrency}</span>}
-            </div>
-          </Card>
-          <Card className="!p-4">
-            <p className="mb-1 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">
-              Transactions
-            </p>
-            <span className="font-mono text-[22px] font-medium tabular-nums text-[var(--text-1)]">
-              {transactionCount}
-            </span>
-          </Card>
+          <StatCard
+            tone="info"
+            icon={<WalletOutlined />}
+            label="Total spent"
+            unit={primaryCurrency || undefined}
+            value={primaryCurrency ? grandTotal.toFixed(2) : "—"}
+            trend={primaryCurrency && <TrendBadge delta={totalSpentDelta} />}
+            sparkline={primaryCurrency && <Sparkline values={bucketTotalsSeries} favorable={totalSpentDelta.direction} />}
+          />
+          <StatCard
+            tone="gold"
+            icon={<BarChartOutlined />}
+            label={`Average per ${granularity === "daily" ? "day" : granularity === "weekly" ? "week" : "month"}`}
+            unit={primaryCurrency || undefined}
+            value={primaryCurrency ? averagePerBucket.toFixed(2) : "—"}
+            trend={primaryCurrency && <TrendBadge delta={averageDelta} />}
+            sparkline={primaryCurrency && <Sparkline values={bucketTotalsSeries} favorable={averageDelta.direction} />}
+          />
+          <StatCard
+            tone="emerald"
+            icon={<SwapOutlined />}
+            label="Transactions"
+            value={String(transactionCount)}
+            trend={<TrendBadge delta={transactionsDelta} />}
+            sparkline={<Sparkline values={bucketCountsSeries} favorable={transactionsDelta.direction} />}
+          />
         </div>
       )}
 

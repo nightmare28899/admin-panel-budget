@@ -1,6 +1,7 @@
 "use client";
 
 import { DatePicker, Input, Select, Spin } from "antd";
+import { SafetyOutlined, WalletOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -24,7 +25,9 @@ import {
   updateExpenseAction,
 } from "@/lib/userActions";
 import { Button } from "@/components/ui/Button";
+import { BudgetRing } from "@/components/ui/BudgetRing";
 import { Card } from "@/components/ui/Card";
+import { StatCard } from "@/components/ui/StatCard";
 import { MetricCardsSkeleton, TableSkeleton } from "@/components/ui/ContentSkeleton";
 import { Modal } from "@/components/ui/Modal";
 import { SubscriptionDueBanner } from "./SubscriptionDueBanner";
@@ -212,32 +215,21 @@ export function ExpensesView() {
           <MetricCardsSkeleton count={2} className="mb-4 md:grid-cols-3" />
         ) : (
           <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <Card className="!p-4">
-              <p className="mb-1 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">
-                {spentLabel}
-              </p>
-              <div className="flex items-baseline gap-1.5">
-                {hasBudgetPeriod && (
-                  <span className="font-mono text-xs text-[var(--text-3)]">{currencyLabel}</span>
-                )}
-                <span className="font-mono text-[22px] font-medium tabular-nums text-[var(--text-1)]">
-                  {hasBudgetPeriod ? (summary?.spentInBudgetPeriod ?? 0).toFixed(2) : "—"}
-                </span>
-              </div>
-            </Card>
-            <Card className="!p-4">
-              <p className="mb-1 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">
-                Budget period remaining
-              </p>
-              <div className="flex items-baseline gap-1.5">
-                {hasBudgetPeriod && (
-                  <span className="font-mono text-xs text-[var(--text-3)]">{currencyLabel}</span>
-                )}
-                <span className="font-mono text-[22px] font-medium tabular-nums text-[var(--text-1)]">
-                  {hasBudgetPeriod ? (summary?.remaining ?? 0).toFixed(2) : "—"}
-                </span>
-              </div>
-            </Card>
+            <StatCard
+              tone="rose"
+              icon={<WalletOutlined />}
+              label={spentLabel}
+              unit={hasBudgetPeriod ? currencyLabel : undefined}
+              value={hasBudgetPeriod ? (summary?.spentInBudgetPeriod ?? 0).toFixed(2) : "—"}
+            />
+            <StatCard
+              tone="emerald"
+              icon={<SafetyOutlined />}
+              label="Budget period remaining"
+              unit={hasBudgetPeriod ? currencyLabel : undefined}
+              value={hasBudgetPeriod ? (summary?.remaining ?? 0).toFixed(2) : "—"}
+              extra={hasBudgetPeriod ? <BudgetRing percentage={summary?.percentage ?? 0} /> : undefined}
+            />
           </div>
         )}
 

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useContext, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
+import { CommandPalette } from "@/components/ui/CommandPalette";
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
@@ -254,6 +255,7 @@ export function AppShell({
 }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [headerSlot, setHeaderSlot] = useState<ReactNode | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const collapsed = useSyncExternalStore(
     subscribeSidebarCollapsed,
     getSidebarCollapsedSnapshot,
@@ -264,11 +266,29 @@ export function AppShell({
 
   const toggleCollapsed = () => setSidebarCollapsed(!collapsed);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <HeaderSlotContext.Provider value={{ setHeaderSlot }}>
       <div className="relative flex h-screen w-full overflow-hidden bg-[var(--bg-0)] font-sans text-[var(--text-2)]">
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-96 bg-[radial-gradient(circle_at_top,var(--emerald-dim),transparent_68%)]"
+          className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,var(--emerald-dim),transparent_68%)]"
+          aria-hidden="true"
+        />
+        {/* Second, softer/larger glow layer so the fixed backdrop stays
+            present across the full viewport height instead of going flat
+            --bg-0 once content scrolls past the first glow's falloff. */}
+        <div
+          className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_120%,var(--info-dim),transparent_60%)] opacity-60"
           aria-hidden="true"
         />
         <aside
@@ -311,6 +331,18 @@ export function AppShell({
             </div>
 
             <div className="flex items-center gap-x-3.5">
+              <button
+                type="button"
+                onClick={() => setPaletteOpen(true)}
+                aria-label="Search (Cmd+K)"
+                title="Search (Cmd+K)"
+                className="flex h-[34px] w-[34px] items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+                  <circle cx="11" cy="11" r="7" />
+                  <path strokeLinecap="round" d="m21 21-4.3-4.3" />
+                </svg>
+              </button>
               {headerSlot ? (
                 <>
                   {headerSlot}
@@ -355,6 +387,8 @@ export function AppShell({
             </aside>
           </div>
         )}
+
+        <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       </div>
     </HeaderSlotContext.Provider>
   );

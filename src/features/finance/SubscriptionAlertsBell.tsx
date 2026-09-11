@@ -20,6 +20,7 @@ function formatDue(alert: SubscriptionAlert) {
 
 export function SubscriptionAlertsBell() {
   const [alerts, setAlerts] = useState<SubscriptionAlert[]>([]);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -59,6 +60,8 @@ export function SubscriptionAlertsBell() {
       trigger="click"
       placement="bottomRight"
       styles={{ content: { padding: 0 } }}
+      open={open}
+      onOpenChange={setOpen}
       content={
         <div className="w-[300px] max-w-[85vw] overflow-hidden rounded-[var(--radius-md)]">
           <div className="border-b border-[var(--border-soft)] px-4 pt-3.5 pb-3">
@@ -124,6 +127,7 @@ export function SubscriptionAlertsBell() {
           </ul>
           <Link
             href="/finance/subscriptions"
+            onClick={() => setOpen(false)}
             className="block border-t border-[var(--border-soft)] px-4 py-2.5 text-xs font-medium text-[var(--emerald-text)] transition-colors hover:bg-[var(--bg-3)] hover:underline"
           >
             View all subscriptions →

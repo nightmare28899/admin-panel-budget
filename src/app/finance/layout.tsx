@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getUserToken } from "@/lib/userSession";
-import { getUserMeAction } from "@/lib/userActions";
+import { getUserMeForLayoutAction } from "@/lib/userActions";
 import { FinanceShell } from "@/features/finance/FinanceShell";
 
 export default async function FinanceLayout({
@@ -11,7 +11,7 @@ export default async function FinanceLayout({
   const token = await getUserToken();
   if (!token) redirect("/user-login");
 
-  const profile = await getUserMeAction();
+  const profile = await getUserMeForLayoutAction();
   const user = profile.data?.user;
   if (profile.error || !user || !user.isActive) {
     redirect("/user-login");

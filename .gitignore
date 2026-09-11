@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local-only AI agent instructions (not shared in repo)
+.AGENTS/
+.SKILLS/
+# Local AI runtime state
+.atl/

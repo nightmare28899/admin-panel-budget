@@ -4,6 +4,10 @@ import type {
   CategoryWritePayload,
   ExpenseWritePayload,
 } from "@/features/finance/finance.types";
+import type {
+  ConfirmStatementImportPayload,
+  UpdateStatementRowsPayload,
+} from "@/features/finance/statement-import.types";
 import { userApi } from "./userApi";
 import {
   clearUserSession,
@@ -116,6 +120,14 @@ export async function getUserMeAction() {
   return withUser((token) => userApi.me(token), true);
 }
 
+// Server Components render can't write cookies, so this variant skips the
+// refresh-on-401 retry (which would call setUserSession -> cookies().set()).
+// Use this only from Server Components (e.g. layout guards); client
+// components should keep using getUserMeAction for the refresh behavior.
+export async function getUserMeForLayoutAction() {
+  return withUser((token) => userApi.me(token), false);
+}
+
 export async function getFinanceSummaryAction() {
   return withUser((token) => userApi.summary(token), true);
 }
@@ -130,6 +142,18 @@ export async function getExpenseAction(id: string) {
 
 export async function getCategoriesAction() {
   return withUser((token) => userApi.categories(token), true);
+}
+
+export async function getCreditCardsAction() {
+  return withUser((token) => userApi.creditCards(token), true);
+}
+
+export async function getStatementImportsAction(query: string) {
+  return withUser((token) => userApi.statementImports(token, query), true);
+}
+
+export async function getStatementImportAction(id: string) {
+  return withUser((token) => userApi.statementImport(token, id), true);
 }
 
 async function withFreshUser<T>(
@@ -163,6 +187,43 @@ export async function updateCategoryAction(
 
 export async function createCategoryAction(body: CategoryWritePayload) {
   return withFreshUser((token) => userApi.createCategory(token, body));
+}
+
+export async function createStatementImportAction(
+  file: File,
+  creditCardId?: string,
+) {
+  return withFreshUser((token) => {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    if (creditCardId) form.append("creditCardId", creditCardId);
+    return userApi.createStatementImport(token, form);
+  });
+}
+
+export async function processStatementImportAction(id: string) {
+  return withFreshUser((token) => userApi.processStatementImport(token, id));
+}
+
+export async function updateStatementRowsAction(
+  id: string,
+  body: UpdateStatementRowsPayload,
+) {
+  return withFreshUser((token) => userApi.updateStatementRows(token, id, body));
+}
+
+export async function confirmStatementImportAction(
+  id: string,
+  body: ConfirmStatementImportPayload,
+) {
+  return withFreshUser((token) => userApi.confirmStatementImport(token, id, body));
+}
+
+export async function revertStatementImportAction(
+  id: string,
+  body: ConfirmStatementImportPayload,
+) {
+  return withFreshUser((token) => userApi.revertStatementImport(token, id, body));
 }
 
 export async function updateExpenseAction(
