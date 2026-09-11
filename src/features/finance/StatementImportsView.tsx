@@ -57,6 +57,7 @@ export function StatementImportsView() {
   const [history, setHistory] = useState<StatementImportListResponse>();
   const [cards, setCards] = useState<CreditCardSummary[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string>();
+  const [filterCardId, setFilterCardId] = useState<string>();
   const [file, setFile] = useState<File>();
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -73,6 +74,7 @@ export function StatementImportsView() {
       page: String(page),
       limit: String(PAGE_SIZE),
     });
+    if (filterCardId) query.set("creditCardId", filterCardId);
     const [importsResult, cardsResult] = await Promise.all([
       getStatementImportsAction(query.toString()),
       getCreditCardsAction(),
@@ -95,7 +97,7 @@ export function StatementImportsView() {
     }
 
     setLoading(false);
-  }, [page, router]);
+  }, [page, filterCardId, router]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0);
@@ -196,6 +198,11 @@ export function StatementImportsView() {
     }
   };
 
+  const filterByCard = (cardId: string | undefined) => {
+    setFilterCardId(cardId);
+    setPage(1);
+  };
+
   const totalPages = Math.max(1, history?.totalPages ?? 1);
 
   return (
@@ -233,6 +240,20 @@ export function StatementImportsView() {
         >
           {notice}
         </div>
+      )}
+
+      {cards.length > 0 && (
+        <Card title="My Cards" className="mb-4 !p-5">
+          <p className="mb-3 text-xs text-[var(--text-3)]">
+            Select a card to show only its statements below.
+          </p>
+          <CreditCardPicker
+            cards={cards}
+            selectedCardId={filterCardId}
+            onSelect={filterByCard}
+            emptyMessage={cardsError ? "Cards unavailable" : "No active cards"}
+          />
+        </Card>
       )}
 
       <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
@@ -301,6 +322,26 @@ export function StatementImportsView() {
       </div>
 
       <Card title="Import history" className="!p-5">
+        {filterCardId && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/40 px-3 py-2 text-xs text-[var(--text-3)]">
+            <span>
+              Filtered to{" "}
+              <span className="font-medium text-[var(--text-2)]">
+                {(() => {
+                  const filtered = cards.find((card) => card.id === filterCardId);
+                  return filtered ? `${filtered.bank} · ${filtered.name}` : "selected card";
+                })()}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => filterByCard(undefined)}
+              className="shrink-0 cursor-pointer font-medium text-[var(--emerald-text)] hover:underline"
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
         {loading && !history ? (
           <ListSkeleton rows={5} />
         ) : history?.items.length ? (
