@@ -37,7 +37,7 @@ export function CreditCardPicker({
         role="radio"
         aria-checked={selectedCardId === undefined}
         onClick={() => onSelect(undefined)}
-        className={`flex h-40 w-40 shrink-0 flex-col items-center justify-center gap-2 rounded-[28px] border-2 border-dashed text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] ${
+        className={`flex h-40 w-40 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden! rounded-[28px] border-2 border-dashed text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] ${
           selectedCardId === undefined
             ? "border-[var(--emerald)] bg-[var(--emerald-dim)] text-[var(--emerald-text)]"
             : "border-[var(--border-soft)] text-[var(--text-3)] hover:border-[var(--border)] hover:text-[var(--text-2)]"
@@ -64,7 +64,7 @@ export function CreditCardPicker({
                 ? `0 18px 34px -12px ${background}, 0 0 0 2px var(--emerald)`
                 : `0 12px 24px -14px ${background}`,
             }}
-            className={`group relative flex h-40 w-56 shrink-0 flex-col justify-between overflow-hidden rounded-[28px] p-4 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-1)] ${
+            className={`group relative flex h-40 w-56 shrink-0 cursor-pointer flex-col justify-between overflow-hidden! rounded-[28px] p-4 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-1)] ${
               selected ? "-translate-y-1 scale-[1.03]" : "hover:-translate-y-1 hover:scale-[1.015]"
             }`}
           >
