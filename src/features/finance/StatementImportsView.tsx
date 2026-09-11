@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "antd";
+import Link from "next/link";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -207,13 +209,21 @@ export function StatementImportsView() {
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
-      <div className="mb-4">
-        <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">
-          Card statements
-        </h1>
-        <p className="mt-0.5 text-sm text-[var(--text-3)]">
-          Upload Banamex PDF statements and review their processing status.
-        </p>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">
+            Card statements
+          </h1>
+          <p className="mt-0.5 text-sm text-[var(--text-3)]">
+            Upload Banamex PDF statements and review their processing status.
+          </p>
+        </div>
+        <Link
+          href="/finance/cards"
+          className="text-sm font-medium text-[var(--emerald-text)] hover:underline"
+        >
+          Manage cards →
+        </Link>
       </div>
 
       {error && (
@@ -240,20 +250,6 @@ export function StatementImportsView() {
         >
           {notice}
         </div>
-      )}
-
-      {cards.length > 0 && (
-        <Card title="My Cards" className="mb-4 !p-5">
-          <p className="mb-3 text-xs text-[var(--text-3)]">
-            Select a card to show only its statements below.
-          </p>
-          <CreditCardPicker
-            cards={cards}
-            selectedCardId={filterCardId}
-            onSelect={filterByCard}
-            emptyMessage={cardsError ? "Cards unavailable" : "No active cards"}
-          />
-        </Card>
       )}
 
       <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
@@ -322,24 +318,23 @@ export function StatementImportsView() {
       </div>
 
       <Card title="Import history" className="!p-5">
-        {filterCardId && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/40 px-3 py-2 text-xs text-[var(--text-3)]">
-            <span>
-              Filtered to{" "}
-              <span className="font-medium text-[var(--text-2)]">
-                {(() => {
-                  const filtered = cards.find((card) => card.id === filterCardId);
-                  return filtered ? `${filtered.bank} · ${filtered.name}` : "selected card";
-                })()}
-              </span>
-            </span>
-            <button
-              type="button"
-              onClick={() => filterByCard(undefined)}
-              className="shrink-0 cursor-pointer font-medium text-[var(--emerald-text)] hover:underline"
-            >
-              Clear filter
-            </button>
+        {cards.length > 0 && (
+          <div className="mb-4 flex items-center gap-2">
+            <label htmlFor="statement-history-card-filter" className="text-xs text-[var(--text-3)]">
+              Filter by card
+            </label>
+            <Select
+              id="statement-history-card-filter"
+              allowClear
+              value={filterCardId}
+              onChange={filterByCard}
+              placeholder="All cards"
+              className="w-64"
+              options={cards.map((card) => ({
+                value: card.id,
+                label: `${card.bank} · ${card.name} •••• ${card.last4}`,
+              }))}
+            />
           </div>
         )}
         {loading && !history ? (
