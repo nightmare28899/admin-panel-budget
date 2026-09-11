@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState, useSyncExternalStore, t
 import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { CommandPalette } from "@/components/ui/CommandPalette";
+import { AmbientBackground } from "@/components/ui/AmbientBackground";
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
@@ -280,17 +281,7 @@ export function AppShell({
   return (
     <HeaderSlotContext.Provider value={{ setHeaderSlot }}>
       <div className="relative flex h-screen w-full overflow-hidden bg-[var(--bg-0)] font-sans text-[var(--text-2)]">
-        <div
-          className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,var(--emerald-dim),transparent_68%)]"
-          aria-hidden="true"
-        />
-        {/* Second, softer/larger glow layer so the fixed backdrop stays
-            present across the full viewport height instead of going flat
-            --bg-0 once content scrolls past the first glow's falloff. */}
-        <div
-          className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_120%,var(--info-dim),transparent_60%)] opacity-60"
-          aria-hidden="true"
-        />
+        <AmbientBackground />
         <aside
           className={`relative z-40 hidden shrink-0 overflow-hidden border-r border-[var(--border-soft)] bg-[var(--bg-1)] transition-[margin-left] duration-300 ease-in-out will-change-[margin-left] motion-reduce:transition-none md:flex md:w-[260px] ${
             collapsed ? "md:ml-[-260px]" : "md:ml-0"

@@ -1,12 +1,10 @@
 import Link from "next/link";
+import { AmbientBackground } from "@/components/ui/AmbientBackground";
 
 export default function Home() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] px-6 py-16">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,var(--emerald-dim),transparent_68%)]"
-        aria-hidden="true"
-      />
+      <AmbientBackground variant="auth" />
 
       <section className="relative w-full max-w-4xl" aria-labelledby="platform-heading">
         <div className="mx-auto mb-10 max-w-2xl text-center">

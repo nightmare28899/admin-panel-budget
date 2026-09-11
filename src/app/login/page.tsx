@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/lib/actions";
 import { Button } from "@/components/ui/Button";
+import { AmbientBackground } from "@/components/ui/AmbientBackground";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -64,10 +65,7 @@ export default function LoginPage() {
 
     return (
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] p-6">
-            <div
-                className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(circle_at_top,var(--emerald-dim),transparent_68%)]"
-                aria-hidden="true"
-            />
+            <AmbientBackground variant="auth" />
             {toast && (
                 <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
                     <div

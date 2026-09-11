@@ -73,3 +73,22 @@ button:focus-visible {
 .animate-toast-in {
   animation: toast-in 0.2s ease-out forwards;
 }
+
+@keyframes badge-pop {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-badge-pop {
+  animation: badge-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ambient-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, -4%, 0) scale(1.08); }
+}
+
+.animate-ambient-drift {
+  animation: ambient-drift 26s ease-in-out infinite;
+}

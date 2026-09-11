@@ -7,6 +7,7 @@ import { userGoogleLoginAction, userLoginAction } from "@/lib/userActions";
 import { signInWithGoogle } from "@/lib/googleAuth";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { AmbientBackground } from "@/components/ui/AmbientBackground";
 
 function SessionExpiredNotice() {
   const searchParams = useSearchParams();
@@ -61,10 +62,7 @@ export default function UserLoginPage() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] p-6">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(circle_at_top,var(--emerald-dim),transparent_68%)]"
-        aria-hidden="true"
-      />
+      <AmbientBackground variant="auth" />
       <Card className="relative z-10 w-full max-w-md">
         <Link
           href="/"
