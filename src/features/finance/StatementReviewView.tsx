@@ -51,6 +51,33 @@ function canIncludeAsExpense(row: StatementRow) {
   return row.section !== "CFDI" && EXPENSE_KINDS.has(row.kind);
 }
 
+function isIncludedRowValid(row: StatementRow, hasDefaultCard: boolean) {
+  return (
+    canIncludeAsExpense(row) &&
+    Boolean(row.transactionDate) &&
+    Boolean(row.categoryId) &&
+    (Boolean(row.linkedCreditCardId) || hasDefaultCard) &&
+    Number.isFinite(Number(row.amount)) &&
+    Number(row.amount) > 0 &&
+    /^[A-Z]{3}$/.test(row.currency)
+  );
+}
+
+// Inline style beats antd's own row/cell CSS without fighting specificity,
+// so a row's review state (needs a decision, ready to confirm, missing
+// required data) reads at a glance across a table of dozens of rows.
+function rowTint(row: StatementRow, hasDefaultCard: boolean): string | undefined {
+  if (row.decision === "INCLUDE_EXPENSE") {
+    return isIncludedRowValid(row, hasDefaultCard)
+      ? "color-mix(in oklch, var(--emerald) 7%, transparent)"
+      : "color-mix(in oklch, var(--rose) 9%, transparent)";
+  }
+  if (row.decision === "PENDING") {
+    return "color-mix(in oklch, var(--gold) 7%, transparent)";
+  }
+  return undefined;
+}
+
 function formatMoney(value: number | string, currency: string) {
   const amount = Number(value);
   return Number.isFinite(amount)
@@ -146,16 +173,8 @@ export function StatementReviewView({
   const changedRows = Object.values(drafts);
   const includedRows = rows.filter((row) => row.decision === "INCLUDE_EXPENSE");
   const pendingCount = rows.filter((row) => row.decision === "PENDING").length;
-  const invalidIncludedRows = includedRows.filter(
-    (row) =>
-      !canIncludeAsExpense(row) ||
-      !row.transactionDate ||
-      !row.categoryId ||
-      (!row.linkedCreditCardId && !statementImport?.creditCardId) ||
-      !Number.isFinite(Number(row.amount)) ||
-      Number(row.amount) <= 0 ||
-      !/^[A-Z]{3}$/.test(row.currency),
-  );
+  const hasDefaultCard = Boolean(statementImport?.creditCardId);
+  const invalidIncludedRows = includedRows.filter((row) => !isIncludedRowValid(row, hasDefaultCard));
   const reconciliationPassed = statementImport?.reconciliation?.status === "PASSED";
   const canConfirm = Boolean(
     editable &&
@@ -522,6 +541,20 @@ export function StatementReviewView({
       )}
 
       <Card title="Statement rows" className="!p-4">
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--text-3)]">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--emerald)]" aria-hidden="true" />
+            Ready to confirm
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--gold)]" aria-hidden="true" />
+            Pending decision
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--rose)]" aria-hidden="true" />
+            Missing required data
+          </span>
+        </div>
         <Table<StatementRow>
           rowKey="id"
           dataSource={rows}
@@ -529,6 +562,9 @@ export function StatementReviewView({
           pagination={false}
           scroll={{ x: 1240 }}
           size="middle"
+          onRow={(row) => ({
+            style: { backgroundColor: rowTint(row, hasDefaultCard) },
+          })}
         />
       </Card>
 
