@@ -94,6 +94,7 @@ export type StatementImportCreateResponse = {
   version: number;
   warningCount: number;
   failureCode?: string | null;
+  failureMessage?: string | null;
   duplicate: boolean;
 };
 

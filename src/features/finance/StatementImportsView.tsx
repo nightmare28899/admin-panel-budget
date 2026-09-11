@@ -148,9 +148,9 @@ export function StatementImportsView() {
     const imported = result.data;
     const processingError =
       imported.status === "FAILED"
-        ? imported.failureCode
-          ? `The PDF was stored, but processing failed (${imported.failureCode}).`
-          : "The PDF was stored, but processing failed."
+        ? (imported.failureMessage || imported.failureCode
+            ? `The PDF was stored, but processing failed: ${imported.failureMessage || imported.failureCode}`
+            : "The PDF was stored, but processing failed.")
         : undefined;
 
     if (!processingError && imported.duplicate) {
