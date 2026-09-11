@@ -1,6 +1,5 @@
 "use client";
 
-import { Select } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,6 +7,7 @@ import { Badge, type BadgeVariant } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ListSkeleton } from "@/components/ui/ContentSkeleton";
+import { CreditCardPicker } from "./CreditCardPicker";
 import {
   createStatementImportAction,
   getCreditCardsAction,
@@ -239,21 +239,14 @@ export function StatementImportsView() {
         <Card title="Upload statement" className="!p-5">
           <div className="space-y-4">
             <div>
-              <label htmlFor="statement-credit-card" className="mb-1.5 block text-sm text-[var(--text-2)]">
+              <label className="mb-1.5 block text-sm text-[var(--text-2)]">
                 Credit card <span className="text-[var(--text-3)]">(optional)</span>
               </label>
-              <Select
-                id="statement-credit-card"
-                allowClear
-                value={selectedCardId}
-                onChange={setSelectedCardId}
-                placeholder="Select a credit card"
-                className="w-full"
-                options={cards.map((card) => ({
-                  value: card.id,
-                  label: `${card.bank} · ${card.name} •••• ${card.last4}`,
-                }))}
-                notFoundContent={cardsError ? "Cards unavailable" : "No active cards"}
+              <CreditCardPicker
+                cards={cards}
+                selectedCardId={selectedCardId}
+                onSelect={setSelectedCardId}
+                emptyMessage={cardsError ? "Cards unavailable" : "No active cards"}
               />
               {cardsError && (
                 <p className="mt-1.5 text-xs text-[var(--gold-text)]">
