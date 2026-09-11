@@ -129,7 +129,7 @@ export function SessionRenewalProvider({ children }: PropsWithChildren) {
         open={open}
         centered
         closable={false}
-        maskClosable={false}
+        mask={{ closable: false }}
         keyboard={!loading}
         onCancel={closeSession}
         title="Session expired"
