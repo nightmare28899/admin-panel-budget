@@ -56,6 +56,7 @@ function validateStatementFile(file: File): string | undefined {
 export function StatementImportsView() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<StatementImportListResponse>();
   const [cards, setCards] = useState<CreditCardSummary[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string>();
@@ -105,6 +106,16 @@ export function StatementImportsView() {
     const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
   }, [load]);
+
+  // The action that sets error/notice (Retry processing, Upload) usually
+  // happens further down a long page than this banner renders — without
+  // this, the result of a click is invisible unless you already happen to
+  // be scrolled to the top.
+  useEffect(() => {
+    if (error || notice) {
+      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error, notice]);
 
   const selectFile = (nextFile?: File) => {
     setNotice(undefined);
@@ -226,6 +237,7 @@ export function StatementImportsView() {
         </Link>
       </div>
 
+      <div ref={feedbackRef}>
       {error && (
         <div
           role="alert"
@@ -251,6 +263,7 @@ export function StatementImportsView() {
           {notice}
         </div>
       )}
+      </div>
 
       <Card title="Credit card" className="mb-4 !p-5">
         <p className="mb-3 text-xs text-[var(--text-3)]">
