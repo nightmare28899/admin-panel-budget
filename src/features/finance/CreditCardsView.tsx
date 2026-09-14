@@ -12,9 +12,12 @@ import {
   getCreditCardsOverviewAction,
   updateCreditCardAction,
 } from "@/lib/userActions";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 export function CreditCardsView() {
   const router = useRouter();
+  const { t } = useLocale();
   const [overview, setOverview] = useState<CreditCardOverviewResponse>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -28,10 +31,10 @@ export function CreditCardsView() {
       return;
     }
 
-    if (result.error) setError(result.error);
+    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
     else setOverview(result.data);
     setLoading(false);
-  }, [router]);
+  }, [router, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0);
@@ -43,16 +46,16 @@ export function CreditCardsView() {
       router.push("/user-login");
       return;
     }
-    if (result.error) setError(result.error);
+    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
     else await load();
   };
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
       <div className="mb-4">
-        <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">My Cards</h1>
+        <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("myCards")}</h1>
         <p className="mt-0.5 text-sm text-[var(--text-3)]">
-          Track your credit cards, their cycle spending, and available credit.
+          {t("trackCardsDescription")}
         </p>
       </div>
 
@@ -65,7 +68,7 @@ export function CreditCardsView() {
           <button
             type="button"
             onClick={() => setError(undefined)}
-            aria-label="Dismiss error"
+            aria-label={t("dismissError")}
             className="shrink-0 cursor-pointer text-[var(--rose)]/70 transition-colors hover:text-[var(--rose)]"
           >
             ✕

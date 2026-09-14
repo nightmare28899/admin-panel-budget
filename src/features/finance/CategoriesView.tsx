@@ -13,9 +13,12 @@ import {
 } from "@/lib/userActions";
 import { Card } from "@/components/ui/Card";
 import { ListSkeleton } from "@/components/ui/ContentSkeleton";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 export function CategoriesView() {
   const router = useRouter();
+  const { t } = useLocale();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -30,10 +33,10 @@ export function CategoriesView() {
     }
 
     const cats = await getCategoriesAction();
-    if (cats.error) setError(cats.error);
+    if (cats.error) setError(frontendError(cats.error, t, "requestFailedGeneric"));
     else setCategories(cats.data ?? []);
     setLoading(false);
-  }, [router]);
+  }, [router, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void reload(), 0);
@@ -41,7 +44,7 @@ export function CategoriesView() {
   }, [reload]);
 
   const refreshAfter = async (result: { error?: string }) => {
-    if (result.error) setError(result.error);
+    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
     else void reload();
   };
 
@@ -49,10 +52,10 @@ export function CategoriesView() {
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
       <div className="mb-4">
         <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">
-          Your categories
+          {t("yourCategories")}
         </h1>
         <p className="mt-0.5 text-sm text-[var(--text-3)]">
-          Organize expenses and configure category budgets.
+          {t("categoriesDescription")}
         </p>
       </div>
 
@@ -65,7 +68,7 @@ export function CategoriesView() {
           <button
             type="button"
             onClick={() => setError(undefined)}
-            aria-label="Dismiss error"
+            aria-label={t("dismissError")}
             className="shrink-0 cursor-pointer text-[var(--rose)]/70 transition-colors hover:text-[var(--rose)]"
           >
             ✕

@@ -1,5 +1,7 @@
-export const SESSION_EXPIRED_MESSAGE =
-  "Session expired. Renew or close the session to continue.";
+// This is a stable i18n message key (see src/i18n/messages.ts), not literal
+// English text — this file runs outside React and can't call t() itself, so
+// UI call sites resolve it via frontendError()/t() before displaying it.
+export const SESSION_EXPIRED_MESSAGE = "sessionExpiredMessage";
 
 export type ActionResult<T> = {
   data?: T;

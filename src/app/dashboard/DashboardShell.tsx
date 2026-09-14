@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AppShell, useHeaderSlot, type AppShellNavItem } from "@/components/layout/AppShell";
 import { LogoutButton } from "./LogoutButton";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export { useHeaderSlot };
 
@@ -14,15 +15,10 @@ type SessionUser = {
   isPremium?: boolean;
 };
 
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard/users": "Users",
-  "/dashboard/profile": "My Profile",
-  "/dashboard/notifications": "Notifications",
-};
-
-const NAV_ITEMS: AppShellNavItem[] = [
+function createNavItems(t: ReturnType<typeof useLocale>["t"]): AppShellNavItem[] {
+  return [
   {
-    label: "Overview",
+    label: t("overview"),
     href: null,
     soon: true,
     icon: (
@@ -33,7 +29,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "Users",
+    label: t("users"),
     href: "/dashboard/users",
     icon: (
       <>
@@ -45,7 +41,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "Notifications",
+    label: t("notifications"),
     href: "/dashboard/notifications",
     icon: (
       <>
@@ -55,7 +51,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "Settings",
+    label: t("settings"),
     href: null,
     soon: true,
     icon: (
@@ -66,7 +62,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "My Profile",
+    label: t("myProfile"),
     href: "/dashboard/profile",
     icon: (
       <>
@@ -75,15 +71,17 @@ const NAV_ITEMS: AppShellNavItem[] = [
       </>
     ),
   },
-];
+  ];
+}
 
 function HeaderActions() {
+  const { t } = useLocale();
   return (
     <>
       <Link
         href="/dashboard/notifications"
-        aria-label="Notifications"
-        title="Notifications"
+        aria-label={t("notifications")}
+        title={t("notifications")}
         className="flex h-[34px] w-[34px] items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
@@ -103,11 +101,17 @@ export function DashboardShell({
   user: SessionUser;
   children: React.ReactNode;
 }) {
+  const { t } = useLocale();
+  const pageTitles: Record<string, string> = {
+    "/dashboard/users": t("users"),
+    "/dashboard/profile": t("myProfile"),
+    "/dashboard/notifications": t("notifications"),
+  };
   return (
     <AppShell
-      navItems={NAV_ITEMS}
-      pageTitles={PAGE_TITLES}
-      defaultTitle="Dashboard"
+      navItems={createNavItems(t)}
+      pageTitles={pageTitles}
+      defaultTitle={t("dashboard")}
       user={user}
       profileHref="/dashboard/profile"
       headerActions={<HeaderActions />}

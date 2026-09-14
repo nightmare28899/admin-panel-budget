@@ -1,4 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
+import { useLocale } from "@/i18n/LocaleProvider";
 import {
   creditCardBackground,
   CreditCardChipIcon,
@@ -8,10 +11,6 @@ import type { CreditCardOverviewItem } from "./credit-cards.types";
 
 // Credit cards don't carry their own currency (unlike expenses/subscriptions);
 // match the same "MXN" convention already used for statement reconciliation.
-function formatMoney(value: number) {
-  return `MXN ${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
 function usageTone(card: CreditCardOverviewItem): "emerald" | "gold" | "rose" {
   if (card.flags.overLimit) return "rose";
   if (card.flags.highUtilization) return "gold";
@@ -35,6 +34,8 @@ export function CreditCardTile({
   onDeactivate: () => void;
   onReactivate: () => void;
 }) {
+  const { t, formatNumber } = useLocale();
+  const formatMoney = (value: number) => `MXN ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const background = creditCardBackground(card);
   const tone = usageTone(card);
 
@@ -54,7 +55,7 @@ export function CreditCardTile({
             <CreditCardContactlessIcon />
             {!card.isActive && (
               <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/85">
-                Inactive
+                {t("inactive")}
               </span>
             )}
           </div>
@@ -81,11 +82,11 @@ export function CreditCardTile({
         {card.creditStatus.limit != null ? (
           <div>
             <div className="flex items-center justify-between text-xs text-[var(--text-3)]">
-              <span>Spending this cycle</span>
+               <span>{t("spendingThisCycle")}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${USAGE_BADGE_CLASS[tone]}`}
               >
-                {card.creditStatus.utilizationPercent ?? 0}% USED
+                 {t("percentUsed", { percent: formatNumber(card.creditStatus.utilizationPercent ?? 0) })}
               </span>
             </div>
             <p className="mt-1 font-mono text-sm text-[var(--text-1)]">
@@ -93,20 +94,20 @@ export function CreditCardTile({
             </p>
           </div>
         ) : (
-          <p className="text-xs text-[var(--text-3)]">No credit limit set.</p>
+           <p className="text-xs text-[var(--text-3)]">{t("noCreditLimit")}</p>
         )}
 
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" onClick={onEdit}>
-            Edit
+             {t("edit")}
           </Button>
           {card.isActive ? (
             <Button type="button" variant="danger" size="sm" onClick={onDeactivate}>
-              Deactivate
+               {t("deactivate")}
             </Button>
           ) : (
             <Button type="button" variant="outline" size="sm" onClick={onReactivate}>
-              Reactivate
+               {t("reactivate")}
             </Button>
           )}
         </div>

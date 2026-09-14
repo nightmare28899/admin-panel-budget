@@ -1,4 +1,7 @@
+"use client";
+
 import type { CreditCardSummary } from "./statement-import.types";
+import { useLocale } from "@/i18n/LocaleProvider";
 import {
   creditCardBackground,
   CreditCardChipIcon,
@@ -10,6 +13,8 @@ type CreditCardPickerProps = {
   selectedCardId: string | undefined;
   onSelect: (cardId: string | undefined) => void;
   emptyMessage?: string;
+  /** Hide the dashed "no card" tile for flows where a card is mandatory. */
+  hideEmptyOption?: boolean;
 };
 
 export function CreditCardPicker({
@@ -17,11 +22,13 @@ export function CreditCardPicker({
   selectedCardId,
   onSelect,
   emptyMessage,
+  hideEmptyOption = false,
 }: CreditCardPickerProps) {
+  const { t } = useLocale();
   if (cards.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-[var(--border-soft)] px-3 py-3 text-sm text-[var(--text-3)]">
-        {emptyMessage ?? "No active cards."}
+        {emptyMessage ?? t("noActiveCards")}
       </p>
     );
   }
@@ -30,22 +37,24 @@ export function CreditCardPicker({
     <div
       className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-4 pt-4"
       role="radiogroup"
-      aria-label="Credit card"
+      aria-label={t("creditCard")}
     >
-      <button
-        type="button"
-        role="radio"
-        aria-checked={selectedCardId === undefined}
-        onClick={() => onSelect(undefined)}
-        className={`flex h-40 w-40 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden! rounded-[28px] border-2 border-dashed text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] ${
-          selectedCardId === undefined
-            ? "border-[var(--emerald)] bg-[var(--emerald-dim)] text-[var(--emerald-text)]"
-            : "border-[var(--border-soft)] text-[var(--text-3)] hover:border-[var(--border)] hover:text-[var(--text-2)]"
-        }`}
-      >
-        <span className="text-2xl" aria-hidden="true">—</span>
-        <span className="text-xs font-semibold">No card</span>
-      </button>
+      {!hideEmptyOption && (
+        <button
+          type="button"
+          role="radio"
+          aria-checked={selectedCardId === undefined}
+          onClick={() => onSelect(undefined)}
+          className={`flex h-40 w-40 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden! rounded-[28px] border-2 border-dashed text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] ${
+            selectedCardId === undefined
+              ? "border-[var(--emerald)] bg-[var(--emerald-dim)] text-[var(--emerald-text)]"
+              : "border-[var(--border-soft)] text-[var(--text-3)] hover:border-[var(--border)] hover:text-[var(--text-2)]"
+          }`}
+        >
+          <span className="text-2xl" aria-hidden="true">—</span>
+          <span className="text-xs font-semibold">{t("noCard")}</span>
+        </button>
+      )}
 
       {cards.map((card) => {
         const selected = card.id === selectedCardId;
@@ -56,7 +65,7 @@ export function CreditCardPicker({
             type="button"
             role="radio"
             aria-checked={selected}
-            aria-label={`${card.bank} ${card.name} ending in ${card.last4}`}
+            aria-label={t("cardEnding", { bank: card.bank, name: card.name, last4: card.last4 })}
             onClick={() => onSelect(card.id)}
             style={{
               background,

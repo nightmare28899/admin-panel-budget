@@ -2,13 +2,23 @@
 
 import type {
   CategoryWritePayload,
+  Expense,
   ExpenseWritePayload,
 } from "@/features/finance/finance.types";
 import type { CreditCardWritePayload } from "@/features/finance/credit-cards.types";
+import {
+  buildTestDataFixtures,
+  TEST_DATA_MARKER,
+} from "@/features/finance/testDataFixtures";
 import type {
   ConfirmStatementImportPayload,
+  MarkStatementImportPaidPayload,
   UpdateStatementRowsPayload,
 } from "@/features/finance/statement-import.types";
+import type {
+  CreateSubscriptionPayload,
+  UpdateSubscriptionPayload,
+} from "@/features/finance/subscriptions.types";
 import { userApi } from "./userApi";
 import {
   clearUserSession,
@@ -25,8 +35,148 @@ type Result<T = undefined> = {
   sessionExpired?: boolean;
 };
 
+export type SeedTestDataSummary = {
+  created: number;
+  skipped: number;
+  failed: number;
+};
+
+// "requestFailedGeneric" is a stable i18n message key (see
+// src/i18n/messages.ts) — this file can't call t() itself, so UI call sites
+// resolve it via frontendError()/t() before displaying it.
 const errorText = (error: unknown) =>
-  error instanceof Error ? error.message : "Request failed";
+  error instanceof Error ? error.message : "requestFailedGeneric";
+
+const isUnauthorizedError = (error: unknown) => {
+  const message = errorText(error);
+  return message.includes("401") || message.toLowerCase().includes("unauthorized");
+};
+
+function testDataGenerationEnabled() {
+  if (process.env.TEST_DATA_ENABLED !== "true") return false;
+
+  try {
+    const apiUrl = new URL(process.env.NEXT_PUBLIC_API_URL ?? "");
+    return (
+      apiUrl.protocol === "http:" &&
+      ["host.docker.internal", "localhost", "127.0.0.1"].includes(
+        apiUrl.hostname,
+      ) &&
+      apiUrl.pathname.replace(/\/$/, "") === "/api"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function addExpenseFields(form: FormData, body: ExpenseWritePayload) {
+  Object.entries(body).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") form.append(key, value);
+  });
+}
+
+async function getAllExpensesForTestData(token: string): Promise<Expense[]> {
+  const expenses: Expense[] = [];
+  let page = 1;
+
+  for (let requestCount = 0; requestCount < 20; requestCount += 1) {
+    const query = new URLSearchParams({ page: String(page), limit: "100" });
+    const response = await userApi.expenses(token, query.toString());
+    expenses.push(...response.expenses);
+    if (!response.pagination.hasNext) return expenses;
+    page += 1;
+  }
+
+  throw new Error("testDataExpenseReadLimit");
+}
+
+async function seedTestData(token: string): Promise<SeedTestDataSummary> {
+  const fixtures = buildTestDataFixtures();
+  const summary: SeedTestDataSummary = { created: 0, skipped: 0, failed: 0 };
+  const [existingCategories, cardOverview, existingExpenses] = await Promise.all([
+    userApi.categories(token),
+    userApi.creditCardsOverview(token, "includeInactive=true"),
+    getAllExpensesForTestData(token),
+  ]);
+  const categoriesByName = new Map(
+    existingCategories.map((category) => [category.name, category]),
+  );
+
+  for (const fixture of fixtures.categories) {
+    if (categoriesByName.has(fixture.payload.name)) {
+      summary.skipped += 1;
+      continue;
+    }
+
+    try {
+      const category = await userApi.createCategory(token, fixture.payload);
+      categoriesByName.set(category.name, category);
+      summary.created += 1;
+    } catch (error) {
+      if (isUnauthorizedError(error)) throw error;
+      summary.failed += 1;
+    }
+  }
+
+  for (const fixture of fixtures.cards) {
+    const exists = cardOverview.cards.some(
+      (card) =>
+        card.name === fixture.payload.name &&
+        card.last4 === fixture.payload.last4,
+    );
+    if (exists) {
+      summary.skipped += 1;
+      continue;
+    }
+
+    try {
+      await userApi.createCreditCard(token, fixture.payload);
+      summary.created += 1;
+    } catch (error) {
+      if (isUnauthorizedError(error)) throw error;
+      summary.failed += 1;
+    }
+  }
+
+  const existingExpenseMarkers = new Set(
+    existingExpenses
+      .map((expense) => expense.note)
+      .filter(
+        (note): note is string =>
+          typeof note === "string" && note.startsWith(`${TEST_DATA_MARKER}:`),
+      ),
+  );
+
+  for (const fixture of fixtures.expenses) {
+    if (existingExpenseMarkers.has(fixture.marker)) {
+      summary.skipped += 1;
+      continue;
+    }
+
+    const category = fixtures.categories.find(
+      (candidate) => candidate.key === fixture.categoryKey,
+    );
+    const categoryId = category
+      ? categoriesByName.get(category.payload.name)?.id
+      : undefined;
+    if (!categoryId) {
+      summary.failed += 1;
+      continue;
+    }
+
+    try {
+      const form = new FormData();
+      addExpenseFields(form, { ...fixture.payload, categoryId });
+      await userApi.createExpense(token, form);
+      summary.created += 1;
+    } catch (error) {
+      if (isUnauthorizedError(error)) throw error;
+      summary.failed += 1;
+    }
+  }
+
+  return summary;
+}
 
 export async function userLoginAction(
   email: string,
@@ -45,8 +195,7 @@ export async function userGoogleLoginAction(
 ): Promise<Result> {
   if (!userGoogleAuthEnabled()) {
     return {
-      error:
-        "Google sign-in is unavailable until server-side Firebase authentication is enabled.",
+      error: "userGoogleSignInUnavailable",
     };
   }
 
@@ -131,6 +280,13 @@ export async function getUserMeForLayoutAction() {
 
 export async function getFinanceSummaryAction() {
   return withUser((token) => userApi.summary(token), true);
+}
+
+export async function seedTestDataAction(): Promise<
+  Result<SeedTestDataSummary>
+> {
+  if (!testDataGenerationEnabled()) return { error: "testDataDisabled" };
+  return withFreshUser((token) => seedTestData(token));
 }
 
 export async function getExpensesAction(query: string) {
@@ -246,11 +402,43 @@ export async function revertStatementImportAction(
   return withFreshUser((token) => userApi.revertStatementImport(token, id, body));
 }
 
+export async function markStatementImportPaidAction(
+  id: string,
+  isPaid: boolean,
+) {
+  return withFreshUser((token) =>
+    userApi.markStatementImportPaid(token, id, { isPaid } satisfies MarkStatementImportPaidPayload),
+  );
+}
+
+export async function deleteStatementImportAction(id: string) {
+  return withFreshUser((token) => userApi.deleteStatementImport(token, id));
+}
+
 export async function updateExpenseAction(
   id: string,
   body: ExpenseWritePayload,
 ) {
   return withFreshUser((token) => userApi.updateExpense(token, id, body));
+}
+
+export async function getSubscriptionsAction() {
+  return withUser((token) => userApi.listSubscriptions(token), true);
+}
+
+export async function createSubscriptionAction(body: CreateSubscriptionPayload) {
+  return withFreshUser((token) => userApi.createSubscription(token, body));
+}
+
+export async function updateSubscriptionAction(
+  id: string,
+  body: UpdateSubscriptionPayload,
+) {
+  return withFreshUser((token) => userApi.updateSubscription(token, id, body));
+}
+
+export async function deactivateSubscriptionAction(id: string) {
+  return withFreshUser((token) => userApi.deactivateSubscription(token, id));
 }
 
 export async function createExpenseAction(
@@ -259,9 +447,7 @@ export async function createExpenseAction(
 ): Promise<Result<unknown>> {
   return withFreshUser(async (token) => {
     const form = new FormData();
-    Object.entries(body).forEach(([key, value]) => {
-      if (value !== undefined && value !== "") form.append(key, value);
-    });
+    addExpenseFields(form, body);
     if (receipt) form.append("image", receipt, receipt.name);
     return userApi.createExpense(token, form);
   });

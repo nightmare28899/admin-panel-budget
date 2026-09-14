@@ -1,4 +1,7 @@
+import { useLocale } from "@/i18n/LocaleProvider";
+
 export function BudgetRing({ percentage, size = 48 }: { percentage: number; size?: number }) {
+  const { t, formatNumber } = useLocale();
   const clamped = Math.min(100, Math.max(0, percentage));
   // Unlike the app's usual "down is favorable" trend polarity, here higher
   // usage is worse: emerald while comfortably under budget, gold as it
@@ -11,7 +14,7 @@ export function BudgetRing({ percentage, size = 48 }: { percentage: number; size
   const offset = circumference * (1 - clamped / 100);
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`${Math.round(clamped)}% of budget used`}>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={t("budgetUsedPercent", { percent: formatNumber(Math.round(clamped)) })}>
       <circle
         cx={size / 2}
         cy={size / 2}

@@ -12,7 +12,10 @@ const config = {
 
 export function firebaseConfigured() { return Object.values(config).every((value) => typeof value === "string" && value.length > 0); }
 export async function getFirebaseAuth() {
-  if (!firebaseConfigured()) throw new Error("Google sign-in is unavailable: Firebase web configuration is missing.");
+  // "googleSignInUnavailable" is a stable i18n message key (see
+  // src/i18n/messages.ts) — this file can't call t() itself, so UI call
+  // sites resolve it via frontendError()/t() before displaying it.
+  if (!firebaseConfigured()) throw new Error("googleSignInUnavailable");
   const app = getApps()[0] ?? initializeApp(config);
   const auth = getAuth(app);
   await setPersistence(auth, inMemoryPersistence);

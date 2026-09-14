@@ -1,16 +1,18 @@
 import { useCallback, useState, type RefObject } from "react";
 import { createStatementImportAction } from "@/lib/userActions";
 import { useSessionRedirect } from "./useSessionRedirect";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 const MAX_STATEMENT_FILE_SIZE = 10 * 1024 * 1024;
 
-function validateStatementFile(file: File): string | undefined {
+function validateStatementFile(file: File, invalidType: string, tooLarge: string): string | undefined {
   const hasPdfExtension = file.name.toLowerCase().endsWith(".pdf");
   if (file.type !== "application/pdf" && !hasPdfExtension) {
-    return "Choose a PDF statement.";
+    return invalidType;
   }
   if (file.size > MAX_STATEMENT_FILE_SIZE) {
-    return "The PDF must be 10 MB or smaller.";
+    return tooLarge;
   }
   return undefined;
 }
@@ -28,6 +30,7 @@ export function useStatementUpload({
   setError: (message?: string) => void;
   setNotice: (message?: string) => void;
 }) {
+  const { t } = useLocale();
   const redirectIfExpired = useSessionRedirect();
   const [file, setFile] = useState<File>();
   const [uploading, setUploading] = useState(false);
@@ -41,7 +44,7 @@ export function useStatementUpload({
         return;
       }
 
-      const validationError = validateStatementFile(nextFile);
+      const validationError = validateStatementFile(nextFile, t("choosePdf"), t("pdfTooLarge"));
       if (validationError) {
         setFile(undefined);
         setError(validationError);
@@ -50,12 +53,16 @@ export function useStatementUpload({
       }
       setFile(nextFile);
     },
-    [fileInputRef, setError, setNotice],
+    [fileInputRef, setError, setNotice, t],
   );
 
   const upload = useCallback(async () => {
     if (!file) {
-      setError("Choose a PDF statement before uploading.");
+      setError(t("choosePdfBeforeUpload"));
+      return;
+    }
+    if (!selectedCardId) {
+      setError(t("cardRequiredBeforeUpload"));
       return;
     }
 
@@ -67,7 +74,7 @@ export function useStatementUpload({
 
     if (redirectIfExpired(result.sessionExpired)) return;
     if (result.error || !result.data) {
-      setError(result.error ?? "The statement could not be uploaded.");
+      setError(frontendError(result.error, t, "statementUploadFailed"));
       return;
     }
 
@@ -75,23 +82,23 @@ export function useStatementUpload({
     const processingError =
       imported.status === "FAILED"
         ? imported.failureMessage || imported.failureCode
-          ? `The PDF was stored, but processing failed: ${imported.failureMessage || imported.failureCode}`
-          : "The PDF was stored, but processing failed."
+          ? t("pdfStoredProcessingFailedDetail", { detail: imported.failureMessage || imported.failureCode || "" })
+          : t("pdfStoredProcessingFailed")
         : undefined;
 
     if (!processingError && imported.duplicate) {
-      setNotice("This PDF was already uploaded. Its existing import is shown below.");
+      setNotice(t("duplicatePdf"));
     } else if (imported.status === "NEEDS_REVIEW") {
-      setNotice("Statement processed successfully and is ready for review.");
+      setNotice(t("statementReady"));
     } else if (!processingError) {
-      setNotice("Statement uploaded successfully.");
+      setNotice(t("statementUploaded"));
     }
 
     setFile(undefined);
     if (fileInputRef.current) fileInputRef.current.value = "";
     await onUploaded();
     if (processingError) setError(processingError);
-  }, [file, fileInputRef, selectedCardId, onUploaded, redirectIfExpired, setError, setNotice]);
+  }, [file, fileInputRef, selectedCardId, onUploaded, redirectIfExpired, setError, setNotice, t]);
 
   return { file, uploading, selectFile, upload };
 }

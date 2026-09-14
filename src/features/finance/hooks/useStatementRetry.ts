@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 import { processStatementImportAction } from "@/lib/userActions";
 import { useSessionRedirect } from "./useSessionRedirect";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 export function useStatementRetry({
   onRetried,
@@ -11,6 +13,7 @@ export function useStatementRetry({
   setError: (message?: string) => void;
   setNotice: (message?: string) => void;
 }) {
+  const { t } = useLocale();
   const redirectIfExpired = useSessionRedirect();
   const [processingId, setProcessingId] = useState<string>();
 
@@ -24,7 +27,7 @@ export function useStatementRetry({
 
       if (redirectIfExpired(result.sessionExpired)) return;
       if (result.error || !result.data) {
-        setError(result.error ?? "The statement could not be processed.");
+        setError(frontendError(result.error, t, "statementProcessFailed"));
         return;
       }
 
@@ -33,17 +36,17 @@ export function useStatementRetry({
         setError(
           result.data.failureMessage ||
             result.data.failureCode ||
-            "The statement could not be processed.",
+            t("statementProcessFailed"),
         );
       } else {
         setNotice(
           result.data.status === "NEEDS_REVIEW"
-            ? "Statement processed successfully and is ready for review."
-            : "Statement processing completed.",
+            ? t("statementReady")
+            : t("statementProcessingComplete"),
         );
       }
     },
-    [onRetried, redirectIfExpired, setError, setNotice],
+    [onRetried, redirectIfExpired, setError, setNotice, t],
   );
 
   return { processingId, retry };

@@ -10,8 +10,11 @@ import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { Toast, ToastType } from "@/components/ui/Toast";
 import { Avatar } from "@/components/ui/Avatar";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 import {
   clampDailyBudgetInput,
+  currencyMessageKey,
   DAILY_BUDGET_MAX,
   normalizeSupportedCurrency,
   SUPPORTED_CURRENCIES,
@@ -19,11 +22,11 @@ import {
 
 type Account = CurrentUserResponse["account"];
 
-function formatMemberSince(createdAt?: string) {
-  if (!createdAt) return "Unknown";
+function formatMemberSince(createdAt: string | undefined, formatDate: (value: Date | string | number, options?: Intl.DateTimeFormatOptions) => string, unknown: string) {
+  if (!createdAt) return unknown;
   const date = new Date(createdAt);
-  if (Number.isNaN(date.getTime())) return "Unknown";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+  if (Number.isNaN(date.getTime())) return unknown;
+  return formatDate(date, { year: "numeric", month: "long", day: "numeric" });
 }
 
 export function ProfileView({
@@ -34,7 +37,9 @@ export function ProfileView({
   initialAccount: Account;
 }) {
   const { runServerAction } = useSessionRenewal();
+  const { t, formatDate, formatNumber } = useLocale();
   const [user, setUser] = useState(initialUser);
+  const memberSince = formatMemberSince(user.createdAt, formatDate, t("unknown"));
   const [isActive] = useState(initialAccount?.isActive ?? initialUser.isActive ?? true);
 
   const [editOpen, setEditOpen] = useState(false);
@@ -82,10 +87,10 @@ export function ProfileView({
         dailyBudget: editForm.dailyBudget,
         currency: editForm.currency,
       }));
-      showToast("Profile updated successfully", "success");
+      showToast(t("profileUpdated"), "success");
       setEditOpen(false);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to update profile", "error");
+      showToast(frontendError(err instanceof Error ? err.message : undefined, t, "failedUpdateProfile"), "error");
     } finally {
       setActionLoading(false);
     }
@@ -118,23 +123,23 @@ export function ProfileView({
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2 9.5 8.5 3 9.3l5 4.4L6.4 20 12 16.3 17.6 20 16 13.7l5-4.4-6.5-.8Z" />
                   </svg>
-                  Premium
+                  {t("premium")}
                 </span>
               )}
               <span className="inline-flex items-center gap-[5px] rounded-full bg-[var(--emerald-dim)] px-2.5 py-1 text-[11.5px] text-[var(--text-2)]">
                 <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-[var(--emerald)]" : "bg-[var(--text-3)]"}`} />
-                {isActive ? "Active" : "Disabled"}
+                {isActive ? t("active") : t("disabled")}
               </span>
             </div>
 
             <p className="mt-3 text-[11.5px] text-[var(--text-3)]">
-              Member since {formatMemberSince(user.createdAt)}
+              {t("memberSince", { date: memberSince })}
             </p>
           </div>
 
           <div className="shrink-0">
             <Button variant="primary" onClick={openEdit}>
-              Edit Profile
+              {t("editProfile")}
             </Button>
           </div>
         </div>
@@ -142,7 +147,7 @@ export function ProfileView({
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card
-          title="Account details"
+          title={t("accountDetails")}
           icon={
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} className="text-[var(--text-3)]">
               <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -152,29 +157,29 @@ export function ProfileView({
         >
           <dl className="space-y-3.5 text-sm">
             <div className="flex items-center justify-between border-b border-[var(--border-soft)] pb-3.5">
-              <dt className="text-[12.5px] text-[var(--text-3)]">Email</dt>
+              <dt className="text-[12.5px] text-[var(--text-3)]">{t("email")}</dt>
               <dd className="font-mono text-[12.5px] text-[var(--text-1)]">{user.email}</dd>
             </div>
             <div className="flex items-center justify-between border-b border-[var(--border-soft)] pb-3.5">
-              <dt className="text-[12.5px] text-[var(--text-3)]">Role</dt>
+              <dt className="text-[12.5px] text-[var(--text-3)]">{t("role")}</dt>
               <dd className="text-[12.5px] font-medium text-[var(--text-1)]">{user.role}</dd>
             </div>
             <div className="flex items-center justify-between border-b border-[var(--border-soft)] pb-3.5">
-              <dt className="text-[12.5px] text-[var(--text-3)]">Member since</dt>
-              <dd className="text-[12.5px] text-[var(--text-1)]">{formatMemberSince(user.createdAt)}</dd>
+              <dt className="text-[12.5px] text-[var(--text-3)]">{t("memberSince", { date: "" }).trim()}</dt>
+              <dd className="text-[12.5px] text-[var(--text-1)]">{memberSince}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-[12.5px] text-[var(--text-3)]">Account status</dt>
+              <dt className="text-[12.5px] text-[var(--text-3)]">{t("accountStatus")}</dt>
               <dd className="inline-flex items-center gap-[5px] text-xs text-[var(--text-2)]">
                 <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-[var(--emerald)]" : "bg-[var(--text-3)]"}`} />
-                {isActive ? "Active" : "Disabled"}
+                {isActive ? t("active") : t("disabled")}
               </dd>
             </div>
           </dl>
         </Card>
 
         <Card
-          title="Preferences"
+          title={t("preferences")}
           icon={
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} className="text-[var(--text-3)]">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
@@ -182,16 +187,16 @@ export function ProfileView({
           }
         >
           <div className="mb-5">
-            <p className="mb-1.5 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">Daily budget</p>
+            <p className="mb-1.5 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">{t("dailyBudget")}</p>
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-[30px] font-medium tabular-nums text-[var(--text-1)]">
-                {typeof user.dailyBudget === "number" ? user.dailyBudget.toFixed(2) : "—"}
+                {typeof user.dailyBudget === "number" ? formatNumber(user.dailyBudget, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
               </span>
-              <span className="text-xs text-[var(--text-3)]">per day</span>
+              <span className="text-xs text-[var(--text-3)]">{t("perDay")}</span>
             </div>
           </div>
           <div className="flex items-center justify-between border-t border-[var(--border-soft)] pt-3.5">
-            <span className="text-[12.5px] text-[var(--text-3)]">Currency</span>
+            <span className="text-[12.5px] text-[var(--text-3)]">{t("currency")}</span>
             <span className="rounded-md border border-[var(--border)] px-2.5 py-[3px] font-mono text-[11.5px] text-[var(--text-2)]">
               {user.currency || "—"}
             </span>
@@ -199,10 +204,10 @@ export function ProfileView({
         </Card>
       </div>
 
-      <Modal open={editOpen} onClose={() => (actionLoading ? null : setEditOpen(false))} title="Edit Profile">
+      <Modal open={editOpen} onClose={() => (actionLoading ? null : setEditOpen(false))} title={t("editProfile")}>
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
-            <label htmlFor="profile-edit-name" className="mb-1 block text-sm text-[var(--text-2)]">Name</label>
+            <label htmlFor="profile-edit-name" className="mb-1 block text-sm text-[var(--text-2)]">{t("name")}</label>
             <input
               id="profile-edit-name"
               name="name"
@@ -217,7 +222,7 @@ export function ProfileView({
             />
           </div>
           <div>
-            <label htmlFor="profile-edit-daily-budget" className="mb-1 block text-sm text-[var(--text-2)]">Daily Budget</label>
+            <label htmlFor="profile-edit-daily-budget" className="mb-1 block text-sm text-[var(--text-2)]">{t("dailyBudget")}</label>
             <input
               id="profile-edit-daily-budget"
               name="dailyBudget"
@@ -236,11 +241,11 @@ export function ProfileView({
               disabled={actionLoading}
             />
             <p className="mt-1 text-xs text-[var(--text-3)]">
-              Maximum {DAILY_BUDGET_MAX.toLocaleString()} per day.
+              {t("maximumPerDay", { amount: formatNumber(DAILY_BUDGET_MAX) })}
             </p>
           </div>
           <div>
-            <label htmlFor="profile-edit-currency" className="mb-1 block text-sm text-[var(--text-2)]">Currency</label>
+            <label htmlFor="profile-edit-currency" className="mb-1 block text-sm text-[var(--text-2)]">{t("currency")}</label>
             <select
               id="profile-edit-currency"
               name="currency"
@@ -254,13 +259,13 @@ export function ProfileView({
             >
               {SUPPORTED_CURRENCIES.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.label}
+                  {t(currencyMessageKey(option.value))}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="profile-edit-password" className="mb-1 block text-sm text-[var(--text-2)]">New Password (optional)</label>
+            <label htmlFor="profile-edit-password" className="mb-1 block text-sm text-[var(--text-2)]">{t("newPassword")}</label>
             <input
               id="profile-edit-password"
               name="password"
@@ -269,11 +274,11 @@ export function ProfileView({
               minLength={6}
               value={editForm.password}
               onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-              placeholder="Set a new password"
+              placeholder={t("setNewPassword")}
               className="input"
               disabled={actionLoading}
             />
-            <p className="mt-1 text-xs text-[var(--text-3)]">Leave empty to keep current password. Minimum 6 characters.</p>
+            <p className="mt-1 text-xs text-[var(--text-3)]">{t("passwordHelp")}</p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
@@ -283,10 +288,10 @@ export function ProfileView({
               onClick={() => setEditOpen(false)}
               disabled={actionLoading}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" variant="primary" disabled={actionLoading}>
-              {actionLoading ? "Saving..." : "Save Changes"}
+              {actionLoading ? t("saving") : t("saveChanges")}
             </Button>
           </div>
         </form>

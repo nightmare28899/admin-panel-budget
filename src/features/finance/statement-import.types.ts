@@ -76,6 +76,8 @@ export type StatementImportListItem = {
   parsedAt?: string | null;
   confirmedAt?: string | null;
   revertedAt?: string | null;
+  isPaid: boolean;
+  paidAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -217,4 +219,15 @@ export type RevertStatementImportResponse = {
   import: StatementImportDetail;
   deletedExpenseCount: number;
   alreadyReverted: boolean;
+};
+
+export type MarkStatementImportPaidPayload = {
+  isPaid: boolean;
+};
+
+// Exact backend response shape is unconfirmed at the time of writing (the
+// endpoint is being implemented in a sibling repo); this mirrors the small
+// confirmation-object shape used elsewhere in this API (e.g. userApi.logout).
+export type DeleteStatementImportResponse = {
+  message: string;
 };

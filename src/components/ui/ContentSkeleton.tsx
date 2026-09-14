@@ -1,4 +1,8 @@
+"use client";
+
 import type { HTMLAttributes } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { MessageKey } from "@/i18n/messages";
 
 export function SkeletonBlock({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
@@ -9,10 +13,11 @@ export function SkeletonBlock({ className = "", ...props }: HTMLAttributes<HTMLD
   );
 }
 
-function LoadingStatus({ label }: { label: string }) {
+function LoadingStatus({ message }: { message: MessageKey }) {
+  const { t } = useLocale();
   return (
     <span className="sr-only" role="status" aria-live="polite">
-      {label}
+      {t(message)}
     </span>
   );
 }
@@ -26,7 +31,7 @@ export function MetricCardsSkeleton({
 }) {
   return (
     <div className={`grid grid-cols-1 gap-3 ${className}`}>
-      <LoadingStatus label="Loading summary" />
+      <LoadingStatus message="loadingSummary" />
       {Array.from({ length: count }, (_, index) => (
         <div
           key={index}
@@ -45,7 +50,7 @@ export function MetricCardsSkeleton({
 export function CreditCardsSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div aria-busy="true">
-      <LoadingStatus label="Loading credit cards" />
+      <LoadingStatus message="loadingCreditCards" />
       <div className="flex gap-4 overflow-hidden" aria-hidden="true">
         {Array.from({ length: count }, (_, index) => (
           <SkeletonBlock key={index} className="h-40 w-56 shrink-0 rounded-[28px]" />
@@ -58,7 +63,7 @@ export function CreditCardsSkeleton({ count = 3 }: { count?: number }) {
 export function TableSkeleton({ rows = 6, columns = 5 }: { rows?: number; columns?: number }) {
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--border-soft)]" aria-busy="true">
-      <LoadingStatus label="Loading table" />
+      <LoadingStatus message="loadingTable" />
       <div
         className="grid gap-4 border-b border-[var(--border-soft)] px-5 py-3"
         style={{ gridTemplateColumns: `repeat(${columns}, minmax(5rem, 1fr))` }}
@@ -91,7 +96,7 @@ export function TableSkeleton({ rows = 6, columns = 5 }: { rows?: number; column
 export function ListSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div aria-busy="true">
-      <LoadingStatus label="Loading list" />
+      <LoadingStatus message="loadingList" />
       <div aria-hidden="true">
         {Array.from({ length: rows }, (_, index) => (
           <div
@@ -113,7 +118,7 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
 export function ChartSkeleton() {
   return (
     <div className="py-4" aria-busy="true">
-      <LoadingStatus label="Loading chart" />
+      <LoadingStatus message="loadingChart" />
       <div className="flex h-48 items-end gap-3" aria-hidden="true">
         {[45, 72, 38, 84, 56, 68, 42, 76, 52, 64].map((height, index) => (
           <SkeletonBlock key={index} className="min-w-4 flex-1" style={{ height: `${height}%` }} />
@@ -126,7 +131,7 @@ export function ChartSkeleton() {
 export function FormSkeleton() {
   return (
     <div className="space-y-5" aria-busy="true">
-      <LoadingStatus label="Loading form" />
+      <LoadingStatus message="loadingForm" />
       <div aria-hidden="true" className="space-y-5">
         <SkeletonBlock className="h-16 w-full" />
         <div>

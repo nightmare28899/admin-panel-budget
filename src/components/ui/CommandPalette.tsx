@@ -3,26 +3,30 @@
 import { useMemo, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "./Modal";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 type CommandEntry = {
   label: string;
   href: string;
 };
 
-const ENTRIES: CommandEntry[] = [
-  { label: "Dashboard / Home", href: "/" },
-  { label: "Users", href: "/dashboard/users" },
-  { label: "Profile", href: "/dashboard/profile" },
-  { label: "Notifications", href: "/dashboard/notifications" },
-  { label: "Finance Overview", href: "/finance" },
-  { label: "Expenses", href: "/finance/expenses" },
-  { label: "Categories", href: "/finance/categories" },
-  { label: "Reports", href: "/finance/reports" },
-  { label: "Subscriptions", href: "/finance/subscriptions" },
-];
-
 export function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
+  const { t } = useLocale();
+  const entries = useMemo<CommandEntry[]>(
+    () => [
+      { label: t("dashboardHome"), href: "/" },
+      { label: t("users"), href: "/dashboard/users" },
+      { label: t("profile"), href: "/dashboard/profile" },
+      { label: t("notifications"), href: "/dashboard/notifications" },
+      { label: t("financeOverview"), href: "/finance" },
+      { label: t("expenses"), href: "/finance/expenses" },
+      { label: t("categories"), href: "/finance/categories" },
+      { label: t("reports"), href: "/finance/reports" },
+      { label: t("subscriptions"), href: "/finance/subscriptions" },
+    ],
+    [t],
+  );
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -40,9 +44,9 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return ENTRIES;
-    return ENTRIES.filter((entry) => entry.label.toLowerCase().includes(needle));
-  }, [query]);
+    if (!needle) return entries;
+    return entries.filter((entry) => entry.label.toLowerCase().includes(needle));
+  }, [entries, query]);
 
   const clampedActiveIndex = results.length ? Math.min(activeIndex, results.length - 1) : 0;
 
@@ -66,7 +70,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Jump to" maxWidth="max-w-lg">
+    <Modal open={open} onClose={onClose} title={t("jumpTo")} maxWidth="max-w-lg">
       <input
         type="text"
         value={query}
@@ -75,7 +79,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
           setActiveIndex(0);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="Search pages…"
+        placeholder={t("searchPages")}
         role="combobox"
         aria-expanded="true"
         aria-controls="command-palette-results"
@@ -84,7 +88,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       />
       <ul id="command-palette-results" role="listbox" className="-mx-2 mt-1 max-h-72 space-y-0.5 overflow-y-auto">
         {results.length === 0 ? (
-          <li className="px-2 py-6 text-center text-sm text-[var(--text-3)]">No matches.</li>
+          <li className="px-2 py-6 text-center text-sm text-[var(--text-3)]">{t("noMatches")}</li>
         ) : (
           results.map((entry, index) => (
             <li key={entry.href} id={`command-palette-option-${index}`} role="option" aria-selected={index === clampedActiveIndex}>

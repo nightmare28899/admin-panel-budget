@@ -4,15 +4,17 @@ import { useState } from "react";
 import type { Category, CategoryWritePayload } from "./finance.types";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export function CategoryManager({ categories, onCreate, onUpdate, onDelete }: { categories: Category[]; onCreate: (body: CategoryWritePayload) => void; onUpdate: (id: string, body: CategoryWritePayload) => void; onDelete: (id: string) => void }) {
+  const { t, formatNumber } = useLocale();
   const [open, setOpen] = useState(false); const [editing, setEditing] = useState<Category>(); const [form] = Form.useForm<CategoryWritePayload>();
   const submit = (values: CategoryWritePayload) => { if (editing) onUpdate(editing.id, values); else onCreate(values); setOpen(false); form.resetFields(); setEditing(undefined); };
   const closeModal = () => { setOpen(false); form.resetFields(); setEditing(undefined); };
   return <section>
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h2 className="text-lg font-semibold text-[var(--text-1)]">Category list</h2>
-      <Button type="button" variant="tinted" onClick={() => setOpen(true)}>Add category</Button>
+      <h2 className="text-lg font-semibold text-[var(--text-1)]">{t("categoryList")}</h2>
+      <Button type="button" variant="tinted" onClick={() => setOpen(true)}>{t("addCategory")}</Button>
     </div>
     <List
       bordered
@@ -31,10 +33,10 @@ export function CategoryManager({ categories, onCreate, onUpdate, onDelete }: { 
                 setOpen(true);
               }}
             >
-              Edit
+               {t("edit")}
             </Button>,
-            <Popconfirm key="delete" title="Delete category? Expenses must not reference it." okButtonProps={{ danger: true, shape: "round" }} cancelButtonProps={{ shape: "round" }} onConfirm={() => onDelete(category.id)}>
-              <Button type="button" variant="danger" size="sm">Delete</Button>
+            <Popconfirm key="delete" title={t("deleteCategoryQuestion")} okButtonProps={{ danger: true, shape: "round" }} cancelButtonProps={{ shape: "round" }} onConfirm={() => onDelete(category.id)}>
+              <Button type="button" variant="danger" size="sm">{t("delete")}</Button>
             </Popconfirm>,
           ]}
         >
@@ -44,7 +46,7 @@ export function CategoryManager({ categories, onCreate, onUpdate, onDelete }: { 
                 {category.icon} {category.name}
                 {category.color && (
                   <span
-                    aria-label={`Category color ${category.color}`}
+                    aria-label={t("categoryColor", { color: category.color })}
                     title={category.color}
                     className="inline-block h-3 w-3 shrink-0 rounded-full border border-[var(--border-soft)]"
                     style={{ backgroundColor: category.color }}
@@ -52,19 +54,19 @@ export function CategoryManager({ categories, onCreate, onUpdate, onDelete }: { 
                 )}
               </span>
             }
-            description={<span className="text-[var(--text-3)]">{category.budgetAmount != null ? `Budget ${category.budgetAmount}` : "No category budget configured"}</span>}
+            description={<span className="text-[var(--text-3)]">{category.budgetAmount != null ? t("categoryBudget", { amount: formatNumber(category.budgetAmount) }) : t("noCategoryBudget")}</span>}
           />
         </List.Item>
       )}
     />
-    <Modal open={open} onClose={closeModal} title={editing ? "Edit category" : "New category"}>
+    <Modal open={open} onClose={closeModal} title={editing ? t("editCategory") : t("newCategory")}>
       <Form form={form} layout="vertical" onFinish={submit}>
-        <Form.Item name="name" label="Name" rules={[{ required: true }]}><Input maxLength={60} placeholder="e.g. Groceries" /></Form.Item>
-        <Form.Item name="icon" label="Icon"><Input maxLength={20} placeholder="e.g. 🛒" /></Form.Item>
-        <Form.Item name="color" label="Color"><Input placeholder="#2563eb" /></Form.Item>
+        <Form.Item name="name" label={t("name")} rules={[{ required: true }]}><Input maxLength={60} placeholder={t("groceriesExample")} /></Form.Item>
+        <Form.Item name="icon" label={t("icon")}><Input maxLength={20} placeholder={t("categoryIconExample")} /></Form.Item>
+        <Form.Item name="color" label={t("color")}><Input placeholder="#2563eb" /></Form.Item>
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
-          <Button type="submit" variant="primary">Save</Button>
+          <Button type="button" variant="ghost" onClick={closeModal}>{t("cancel")}</Button>
+          <Button type="submit" variant="primary">{t("save")}</Button>
         </div>
       </Form>
     </Modal>

@@ -6,7 +6,10 @@ import {
   userSessionCookieOptions,
 } from "./sessionCookies";
 
-export const USER_SESSION_EXPIRED = "User session expired. Sign in again.";
+// This is a stable i18n message key (see src/i18n/messages.ts), not literal
+// English text — this file can't call t() itself, so UI call sites resolve
+// it via frontendError()/t() before displaying it.
+export const USER_SESSION_EXPIRED = "userSessionExpiredMessage";
 
 export async function getUserToken() {
   return (await cookies()).get(USER_ACCESS_COOKIE)?.value ?? null;

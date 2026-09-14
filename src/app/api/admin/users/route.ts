@@ -29,8 +29,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to load admin users",
+        // "failedLoadUsers" is a stable i18n message key (see
+        // src/i18n/messages.ts) — this route can't call t() itself, so the
+        // client resolves it via frontendError()/t() before displaying it.
+        error: error instanceof Error ? error.message : "failedLoadUsers",
       },
       { status: 500 },
     );

@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { CommandPalette } from "@/components/ui/CommandPalette";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
@@ -87,11 +89,12 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const { t } = useLocale();
 
   return (
     <div className="flex h-full w-[260px] flex-col overflow-y-auto bg-[var(--bg-1)] px-4 py-6">
-      <div className="flex items-center gap-2.5 px-2 pt-2 pb-7">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--emerald)]">
+      <div className="mb-4 flex items-center gap-2.5 border-b border-[var(--border-soft)] px-2 pt-2 pb-5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--emerald)] shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
           <span className="font-serif text-[17px] leading-none text-[var(--bg-0)]">B</span>
         </div>
         <span className="whitespace-nowrap text-[14.5px] font-semibold tracking-[0.01em] text-[var(--text-1)]">
@@ -99,39 +102,37 @@ function SidebarContent({
         </span>
       </div>
 
-      <p className="px-2 pb-2.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[var(--text-3)]">
-        Navigation
+      <p className="px-2.5 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+        {t("navigation")}
       </p>
 
-      <nav className="flex flex-col gap-0.5">
+      <nav className="flex flex-col gap-1">
         {navItems.map((item) => {
           const active = item.href ? pathname === item.href : false;
 
           const inner = (
             <>
-              {active && (
-                <span
-                  className="absolute -left-4 top-2 bottom-2 w-[3px] rounded-full bg-[var(--emerald)]"
-                  aria-hidden="true"
-                />
-              )}
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.6}
-                className="shrink-0"
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                  active
+                    ? "bg-[var(--emerald)]/20 text-[var(--emerald-text)]"
+                    : "bg-[var(--bg-2)] text-[var(--text-3)] group-hover:bg-[var(--bg-3)] group-hover:text-[var(--text-2)]"
+                }`}
               >
-                {item.icon}
-              </svg>
-              <span className={`flex-1 whitespace-nowrap text-[13.5px] ${active ? "font-medium" : ""}`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+                  {item.icon}
+                </svg>
+              </span>
+              <span
+                className={`flex-1 whitespace-nowrap text-[13.5px] ${
+                  active ? "font-semibold text-[var(--emerald-text)]" : ""
+                }`}
+              >
                 {item.label}
               </span>
               {item.soon && (
                 <span className="whitespace-nowrap rounded-full border border-[var(--border)] px-1.5 py-0.5 text-[9.5px] tracking-[0.04em] text-[var(--text-3)]">
-                  SOON
+                  {t("soon")}
                 </span>
               )}
             </>
@@ -141,7 +142,7 @@ function SidebarContent({
             return (
               <span
                 key={item.label}
-                className="relative flex items-center gap-[11px] rounded-lg px-2.5 py-[9px] text-[var(--text-3)]"
+                className="group flex items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 text-[var(--text-3)]"
                 aria-disabled="true"
               >
                 {inner}
@@ -154,10 +155,10 @@ function SidebarContent({
               key={item.label}
               href={item.href}
               onClick={onNavigate}
-              className={`relative flex items-center gap-[11px] rounded-lg px-2.5 py-[9px] transition-colors ${
+              className={`group flex items-center gap-3 rounded-xl border px-2.5 py-2 transition-colors ${
                 active
-                  ? "bg-[var(--bg-3)] text-[var(--text-1)]"
-                  : "text-[var(--text-2)] hover:bg-[var(--bg-3)]/60 hover:text-[var(--text-1)]"
+                  ? "border-[var(--emerald)]/30 bg-[var(--emerald-dim)] text-[var(--text-1)]"
+                  : "border-transparent text-[var(--text-2)] hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
               }`}
             >
               {inner}
@@ -208,8 +209,8 @@ function SidebarContent({
               type="button"
               onClick={onSignOut}
               disabled={signingOut}
-              aria-label="Sign out"
-              title="Sign out"
+              aria-label={t("signOut")}
+              title={t("signOut")}
               className="flex h-[30px] w-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:border-[var(--rose)]/40 hover:bg-[var(--bg-3)] hover:text-[var(--rose)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {signingOut ? (
@@ -257,6 +258,7 @@ export function AppShell({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [headerSlot, setHeaderSlot] = useState<ReactNode | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const { t } = useLocale();
   const collapsed = useSyncExternalStore(
     subscribeSidebarCollapsed,
     getSidebarCollapsedSnapshot,
@@ -302,7 +304,7 @@ export function AppShell({
               <button
                 onClick={() => setMobileSidebarOpen(true)}
                 className="cursor-pointer rounded-lg p-1 text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)] md:hidden"
-                aria-label="Open sidebar"
+                aria-label={t("openSidebar")}
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -310,8 +312,8 @@ export function AppShell({
               </button>
               <button
                 onClick={toggleCollapsed}
-                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-                title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
+                title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
                 className="hidden cursor-pointer rounded-lg p-1 text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)] md:block"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -325,8 +327,8 @@ export function AppShell({
               <button
                 type="button"
                 onClick={() => setPaletteOpen(true)}
-                aria-label="Search (Cmd+K)"
-                title="Search (Cmd+K)"
+                aria-label={t("searchShortcut")}
+                title={t("searchShortcut")}
                 className="flex h-[34px] w-[34px] items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
@@ -334,6 +336,7 @@ export function AppShell({
                   <path strokeLinecap="round" d="m21 21-4.3-4.3" />
                 </svg>
               </button>
+              <LanguageSwitcher />
               {headerSlot ? (
                 <>
                   {headerSlot}
@@ -352,17 +355,17 @@ export function AppShell({
         {mobileSidebarOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
             <button
-              aria-label="Close sidebar backdrop"
+              aria-label={t("closeSidebarBackdrop")}
               className="absolute inset-0 cursor-pointer bg-black/60 backdrop-blur-sm"
               onClick={() => setMobileSidebarOpen(false)}
             />
             <aside className="relative my-3 ml-3 flex h-[calc(100%-1.5rem)] w-80 max-w-[88vw] flex-col overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-4 shadow-2xl">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-medium text-[var(--text-2)]">Navigation</p>
+                <p className="text-sm font-medium text-[var(--text-2)]">{t("navigation")}</p>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
                   className="cursor-pointer rounded-lg border border-[var(--border-soft)] px-2.5 py-1 text-sm text-[var(--text-2)] transition-colors hover:bg-[var(--bg-3)]"
-                  aria-label="Close sidebar"
+                  aria-label={t("closeSidebar")}
                 >
                   ✕
                 </button>

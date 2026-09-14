@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -19,6 +20,7 @@ export function Modal({
   children: React.ReactNode;
   maxWidth?: string;
 }) {
+  const { t } = useLocale();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
@@ -79,7 +81,7 @@ export function Modal({
   const dialog = (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <button
-        aria-label="Close modal backdrop"
+        aria-label={t("closeModalBackdrop")}
         className="absolute inset-0 h-full w-full cursor-default"
         onClick={onClose}
         tabIndex={-1}

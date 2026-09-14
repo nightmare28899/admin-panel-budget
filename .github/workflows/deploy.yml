@@ -1,38 +1,44 @@
 name: Deploy Admin Panel
 
 on:
-push:
-branches: ["main"]
+  push:
+    branches: ["main"]
 
 jobs:
-deploy:
-runs-on: ubuntu-latest
-steps:
-- name: Deploy via SSH
-uses: appleboy/ssh-action@v1.2.0
-with:
-host: ${{ secrets.VPS_HOST }}
-username: ${{ secrets.VPS_USER }}
-key: ${{ secrets.VPS_SSH_KEY }}
-port: ${{ secrets.VPS_PORT }}
-script: |
-set -e
-cd /root
-if [ ! -d admin-panel-budget ]; then
-git clone git@github.com:nightmare28899/admin-panel-budget.git
-fi
-cd /root/admin-panel-budget
-git fetch origin main
-git reset --hard origin/main
-docker rm -f admin-panel-budget 2>/dev/null || true
-docker build -t admin-panel-budget .
-docker run -d --name admin-panel-budget \
---network back-end-budget-app_default \
--e NEXT_PUBLIC_API_BASE_URL=https://kevinlg.cloud/api \
--l traefik.enable=true \
--l 'traefik.http.routers.admin.rule=Host(`admin.kevinlg.cloud`)' \
--l traefik.http.routers.admin.entrypoints=websecure \
--l traefik.http.routers.admin.tls=true \
--l traefik.http.routers.admin.tls.certresolver=letsencrypt \
--l traefik.http.services.admin.loadbalancer.server.port=3000 \
-admin-panel-budget
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            cd /root
+            if [ ! -d admin-panel-budget ]; then
+              git clone git@github.com:nightmare28899/admin-panel-budget.git
+            fi
+            cd /root/admin-panel-budget
+            git fetch origin main
+            git reset --hard origin/main
+            docker rm -f admin-panel-budget 2>/dev/null || true
+            docker build -t admin-panel-budget . \
+              --build-arg NEXT_PUBLIC_API_URL=https://app.kevinlg.cloud/api \
+              --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCDhx3WgSF5MUWHPIF0kC04mcdWowVc5MQ \
+              --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=budget-app-bf7d9.firebaseapp.com \
+              --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=budget-app-bf7d9 \
+              --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=budget-app-bf7d9.firebasestorage.app \
+              --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=970775091718 \
+              --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=1:970775091718:web:d1e0141662ba997c0ac187
+            docker run -d --name admin-panel-budget \
+              --network back-end-budget-app_default \
+              -l traefik.enable=true \
+              -l 'traefik.http.routers.admin.rule=Host(`panel.kevinlg.cloud`)' \
+              -l traefik.http.routers.admin.entrypoints=websecure \
+              -l traefik.http.routers.admin.tls=true \
+              -l traefik.http.routers.admin.tls.certresolver=letsencrypt \
+              -l traefik.http.services.admin.loadbalancer.server.port=3000 \
+              admin-panel-budget

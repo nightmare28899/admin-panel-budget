@@ -1,10 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export default function Home() {
+  const { t } = useLocale();
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] px-6 py-16">
       <AmbientBackground variant="auth" />
+
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageSwitcher />
+      </div>
 
       <section className="relative w-full max-w-4xl" aria-labelledby="platform-heading">
         <div className="mx-auto mb-10 max-w-2xl text-center">
@@ -17,10 +26,10 @@ export default function Home() {
             Budget Panel
           </p>
           <h1 id="platform-heading" className="font-serif text-4xl font-semibold text-[var(--text-1)] sm:text-5xl">
-            Choose your workspace
+            {t("chooseWorkspace")}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-[var(--text-3)] sm:text-base">
-            Select the platform you want to access. You will continue to its secure sign-in page.
+            {t("chooseWorkspaceDescription")}
           </p>
         </div>
 
@@ -34,12 +43,12 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M5 21V8l7-4 7 4v13M9 12h.01M9 16h.01M15 12h.01M15 16h.01" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-[var(--text-1)]">Admin platform</h2>
+            <h2 className="text-xl font-semibold text-[var(--text-1)]">{t("adminPlatform")}</h2>
             <p className="mt-2 flex-1 text-sm leading-6 text-[var(--text-3)]">
-              Manage users, notifications, permissions, and platform administration.
+              {t("adminPlatformDescription")}
             </p>
             <span className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[var(--emerald-text)]">
-              Continue as administrator
+              {t("continueAsAdmin")}
               <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
             </span>
           </Link>
@@ -53,12 +62,12 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18v12H3zM3 10h18M7 15h3" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-[var(--text-1)]">Personal finance</h2>
+            <h2 className="text-xl font-semibold text-[var(--text-1)]">{t("personalFinance")}</h2>
             <p className="mt-2 flex-1 text-sm leading-6 text-[var(--text-3)]">
-              Track expenses, categories, subscriptions, and financial reports.
+              {t("personalFinanceDescription")}
             </p>
             <span className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[var(--info-text)]">
-              Continue to your finances
+              {t("continueToFinances")}
               <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
             </span>
           </Link>

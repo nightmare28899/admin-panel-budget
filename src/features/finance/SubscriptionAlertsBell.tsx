@@ -3,29 +3,73 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Popover } from "antd";
-import {
-  fetchSubscriptionGroups,
-  predictSubscriptionAlerts,
-  type SubscriptionAlert,
-} from "./subscriptionUtils";
+import { getSubscriptionsAction } from "@/lib/userActions";
+import { daysUntil, type Subscription } from "./subscriptions.types";
+import { toCalendarDate } from "./finance.types";
+import { useLocale } from "@/i18n/LocaleProvider";
 
-function formatDue(alert: SubscriptionAlert) {
+export type SubscriptionAlert = {
+  key: string;
+  title: string;
+  amount: number;
+  currency: string;
+  nextPaymentDate: string;
+  daysUntil: number;
+  status: "overdue" | "due-soon";
+};
+
+const ALERT_HORIZON_DAYS = 7;
+
+/**
+ * Builds "due soon"/"overdue" alerts straight from each active
+ * subscription's real nextPaymentDate. No more heuristic average-interval
+ * prediction now that the backend returns a real recurrence date — this is
+ * an exact calendar-day computation, not an estimate.
+ */
+export function buildSubscriptionAlerts(
+  subscriptions: Subscription[],
+  today: Date = new Date(),
+): SubscriptionAlert[] {
+  const alerts: SubscriptionAlert[] = [];
+
+  for (const subscription of subscriptions) {
+    if (!subscription.isActive) continue;
+
+    const remaining = daysUntil(subscription.nextPaymentDate, today);
+    if (remaining > ALERT_HORIZON_DAYS) continue;
+
+    alerts.push({
+      key: subscription.id,
+      title: subscription.name,
+      amount: Number(subscription.cost),
+      currency: subscription.currency,
+      nextPaymentDate: toCalendarDate(subscription.nextPaymentDate),
+      daysUntil: remaining,
+      status: remaining < 0 ? "overdue" : "due-soon",
+    });
+  }
+
+  return alerts.sort((a, b) => a.daysUntil - b.daysUntil);
+}
+
+export function formatDue(alert: SubscriptionAlert, t: ReturnType<typeof useLocale>["t"], formatNumber: ReturnType<typeof useLocale>["formatNumber"]) {
   if (alert.status === "overdue") {
     const days = Math.abs(alert.daysUntil);
-    return `Overdue by ${days} day${days === 1 ? "" : "s"}`;
+    return t("overdueBy", { count: formatNumber(days), days: t(days === 1 ? "day" : "days") });
   }
-  if (alert.daysUntil === 0) return "Due today";
-  return `Due in ${alert.daysUntil} day${alert.daysUntil === 1 ? "" : "s"}`;
+  if (alert.daysUntil === 0) return t("dueToday");
+  return t("dueIn", { count: formatNumber(alert.daysUntil), days: t(alert.daysUntil === 1 ? "day" : "days") });
 }
 
 export function SubscriptionAlertsBell() {
+  const { t, formatNumber } = useLocale();
   const [alerts, setAlerts] = useState<SubscriptionAlert[]>([]);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
-    void fetchSubscriptionGroups().then(({ groups }) => {
-      if (active) setAlerts(predictSubscriptionAlerts(groups));
+    void getSubscriptionsAction().then((result) => {
+      if (active && result.data) setAlerts(buildSubscriptionAlerts(result.data));
     });
     return () => {
       active = false;
@@ -36,9 +80,9 @@ export function SubscriptionAlertsBell() {
     <button
       type="button"
       aria-label={
-        alerts.length ? `Subscription alerts (${alerts.length})` : "Subscription alerts"
+         alerts.length ? t("subscriptionAlertsCount", { count: formatNumber(alerts.length) }) : t("subscriptionAlerts")
       }
-      title="Subscription alerts"
+       title={t("subscriptionAlerts")}
       className="relative flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
@@ -65,9 +109,9 @@ export function SubscriptionAlertsBell() {
       content={
         <div className="w-[300px] max-w-[85vw] overflow-hidden rounded-[var(--radius-md)]">
           <div className="border-b border-[var(--border-soft)] px-4 pt-3.5 pb-3">
-            <p className="text-[13px] font-semibold text-[var(--text-1)]">Subscription alerts</p>
+             <p className="text-[13px] font-semibold text-[var(--text-1)]">{t("subscriptionAlerts")}</p>
             <p className="mt-0.5 text-xs text-[var(--text-3)]">
-              Estimated from your payment history — not a guarantee.
+               {t("alertsEstimate")}
             </p>
           </div>
           <ul>
@@ -113,10 +157,10 @@ export function SubscriptionAlertsBell() {
                             overdue ? "text-[var(--rose)]" : "text-[var(--gold-text)]"
                           }`}
                         >
-                          {formatDue(alert)}
+                           {formatDue(alert, t, formatNumber)}
                         </span>
                         <span className="text-xs text-[var(--text-3)]">
-                          · ~{alert.currency} {alert.amount.toFixed(2)}
+                           · ~{alert.currency} {formatNumber(alert.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>
@@ -130,7 +174,7 @@ export function SubscriptionAlertsBell() {
             onClick={() => setOpen(false)}
             className="block border-t border-[var(--border-soft)] px-4 py-2.5 text-xs font-medium text-[var(--emerald-text)] transition-colors hover:bg-[var(--bg-3)] hover:underline"
           >
-            View all subscriptions →
+             {t("viewAllSubscriptions")}
           </Link>
         </div>
       }

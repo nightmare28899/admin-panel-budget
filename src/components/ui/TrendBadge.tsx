@@ -1,4 +1,7 @@
+"use client";
+
 import { Badge } from "./Badge";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export type Delta = {
   pct: number | null;
@@ -6,9 +9,10 @@ export type Delta = {
 };
 
 export function TrendBadge({ delta }: { delta: Delta }) {
+  const { t, formatNumber } = useLocale();
   const variant = delta.direction === "flat" ? "neutral" : delta.direction === "down" ? "success" : "danger";
   const arrow = delta.direction === "up" ? "▲" : delta.direction === "down" ? "▼" : "•";
-  const label = delta.pct === null ? "new" : `${Math.abs(delta.pct).toFixed(1)}%`;
+  const label = delta.pct === null ? t("newTrend") : formatNumber(Math.abs(delta.pct) / 100, { style: "percent", maximumFractionDigits: 1 });
 
   return (
     <Badge variant={variant} className="items-center gap-1 !px-2 !py-0.5 text-[10.5px] tabular-nums">
@@ -25,6 +29,7 @@ export function sparklineSamples(values: number[], maxPoints = 15): number[] {
 }
 
 export function Sparkline({ values, favorable }: { values: number[]; favorable: "up" | "down" | "flat" }) {
+  const { t } = useLocale();
   const samples = sparklineSamples(values);
   const width = 72;
   const height = 24;
@@ -50,7 +55,7 @@ export function Sparkline({ values, favorable }: { values: number[]; favorable: 
     .join(" ");
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Recent trend">
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={t("recentTrend")}>
       <polyline points={points} fill="none" stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

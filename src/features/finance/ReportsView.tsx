@@ -13,8 +13,14 @@ import type { Delta } from "@/components/ui/TrendBadge";
 import { getExpensesAction, getUserMeAction } from "@/lib/userActions";
 import { toCalendarDate } from "./finance.types";
 import type { Expense } from "./finance.types";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 type Granularity = "daily" | "weekly" | "monthly";
+
+function isGranularity(value: string | number): value is Granularity {
+  return value === "daily" || value === "weekly" || value === "monthly";
+}
 
 type Bucket = {
   key: string;
@@ -23,12 +29,6 @@ type Bucket = {
   totalsByCurrency: Record<string, number>;
   count: number;
 };
-
-const GRANULARITY_OPTIONS: { label: string; value: Granularity }[] = [
-  { label: "Daily", value: "daily" },
-  { label: "Weekly", value: "weekly" },
-  { label: "Monthly", value: "monthly" },
-];
 
 function bucketKeyFor(date: Dayjs, granularity: Granularity): { key: string; start: Dayjs } {
   if (granularity === "daily") {
@@ -98,6 +98,12 @@ function buildEmptyBuckets(from: Dayjs, to: Dayjs, granularity: Granularity): Bu
 
 export function ReportsView() {
   const router = useRouter();
+  const { t, formatDate, formatNumber } = useLocale();
+  const granularityOptions: { label: string; value: Granularity }[] = [
+    { label: t("daily"), value: "daily" },
+    { label: t("weekly"), value: "weekly" },
+    { label: t("monthly"), value: "monthly" },
+  ];
   const [range, setRange] = useState<[Dayjs, Dayjs]>([dayjs().subtract(29, "day").startOf("day"), dayjs().endOf("day")]);
   const [granularity, setGranularity] = useState<Granularity>("daily");
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -126,7 +132,7 @@ export function ReportsView() {
 
       const { expenses: collected, error: fetchError } = await fetchExpensesInRange(from, to);
       if (fetchError) {
-        setError(fetchError);
+        setError(frontendError(fetchError, t, "requestFailedGeneric"));
         setLoading(false);
         return;
       }
@@ -134,7 +140,7 @@ export function ReportsView() {
       setExpenses(collected);
       setLoading(false);
     },
-    [router],
+    [router, t],
   );
 
   useEffect(() => {
@@ -155,7 +161,10 @@ export function ReportsView() {
   }, [previousRange]);
 
   const buckets = useMemo(() => {
-    const empty = buildEmptyBuckets(range[0], range[1], granularity);
+    const empty = buildEmptyBuckets(range[0], range[1], granularity).map((bucket) => ({
+      ...bucket,
+      label: formatDate(bucket.start.toDate(), granularity === "monthly" ? { month: "short", year: "numeric" } : { month: "short", day: "numeric" }),
+    }));
     const byKey = new Map(empty.map((bucket) => [bucket.key, bucket]));
 
     for (const expense of expenses) {
@@ -171,7 +180,7 @@ export function ReportsView() {
     }
 
     return Array.from(byKey.values());
-  }, [expenses, granularity, range]);
+  }, [expenses, formatDate, granularity, range]);
 
   const currencyTotals = useMemo(() => {
     const totals: Record<string, number> = {};
@@ -229,9 +238,9 @@ export function ReportsView() {
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">Spending reports</h1>
+          <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("spendingReports")}</h1>
           <p className="mt-0.5 text-sm text-[var(--text-3)]">
-            Daily, weekly, and monthly totals from your expense history.
+            {t("reportsDescription")}
           </p>
         </div>
       </div>
@@ -245,7 +254,7 @@ export function ReportsView() {
           <button
             type="button"
             onClick={() => setError(undefined)}
-            aria-label="Dismiss error"
+            aria-label={t("dismissError")}
             className="shrink-0 cursor-pointer text-[var(--rose)]/70 transition-colors hover:text-[var(--rose)]"
           >
             ✕
@@ -256,14 +265,14 @@ export function ReportsView() {
       <Card className="!p-4 mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <DatePicker.RangePicker
-            aria-label="Report date range"
+            aria-label={t("reportDateRange")}
             value={range}
             allowClear={false}
             presets={[
-              { label: "Today", value: [dayjs().startOf("day"), dayjs().endOf("day")] },
-              { label: "This week", value: [dayjs().startOf("week"), dayjs().endOf("week")] },
-              { label: "This month", value: [dayjs().startOf("month"), dayjs().endOf("month")] },
-              { label: "Last 30 days", value: [dayjs().subtract(29, "day").startOf("day"), dayjs().endOf("day")] },
+              { label: t("today"), value: [dayjs().startOf("day"), dayjs().endOf("day")] },
+              { label: t("thisWeek"), value: [dayjs().startOf("week"), dayjs().endOf("week")] },
+              { label: t("thisMonthPreset"), value: [dayjs().startOf("month"), dayjs().endOf("month")] },
+              { label: t("last30Days"), value: [dayjs().subtract(29, "day").startOf("day"), dayjs().endOf("day")] },
             ]}
             onChange={(dates) => {
               if (dates && dates[0] && dates[1]) {
@@ -272,10 +281,12 @@ export function ReportsView() {
             }}
           />
           <Segmented
-            aria-label="Bucket granularity"
-            options={GRANULARITY_OPTIONS}
+            aria-label={t("bucketGranularity")}
+            options={granularityOptions}
             value={granularity}
-            onChange={(value) => setGranularity(value as Granularity)}
+            onChange={(value) => {
+              if (isGranularity(value)) setGranularity(value);
+            }}
           />
         </div>
       </Card>
@@ -287,26 +298,26 @@ export function ReportsView() {
           <StatCard
             tone="info"
             icon={<WalletOutlined />}
-            label="Total spent"
+            label={t("totalSpent")}
             unit={primaryCurrency || undefined}
-            value={primaryCurrency ? grandTotal.toFixed(2) : "—"}
+            value={primaryCurrency ? formatNumber(grandTotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
             trend={primaryCurrency && <TrendBadge delta={totalSpentDelta} />}
             sparkline={primaryCurrency && <Sparkline values={bucketTotalsSeries} favorable={totalSpentDelta.direction} />}
           />
           <StatCard
             tone="gold"
             icon={<BarChartOutlined />}
-            label={`Average per ${granularity === "daily" ? "day" : granularity === "weekly" ? "week" : "month"}`}
+            label={t("averagePer", { period: t(granularity === "daily" ? "dayPeriod" : granularity === "weekly" ? "weekPeriod" : "monthPeriod") })}
             unit={primaryCurrency || undefined}
-            value={primaryCurrency ? averagePerBucket.toFixed(2) : "—"}
+            value={primaryCurrency ? formatNumber(averagePerBucket, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
             trend={primaryCurrency && <TrendBadge delta={averageDelta} />}
             sparkline={primaryCurrency && <Sparkline values={bucketTotalsSeries} favorable={averageDelta.direction} />}
           />
           <StatCard
             tone="emerald"
             icon={<SwapOutlined />}
-            label="Transactions"
-            value={String(transactionCount)}
+            label={t("transactions")}
+            value={formatNumber(transactionCount)}
             trend={<TrendBadge delta={transactionsDelta} />}
             sparkline={<Sparkline values={bucketCountsSeries} favorable={transactionsDelta.direction} />}
           />
@@ -316,28 +327,28 @@ export function ReportsView() {
       {currencies.length > 1 && (
         <Card className="!p-4 mb-4">
           <p className="mb-2 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">
-            Other currencies in range
+             {t("otherCurrencies")}
           </p>
           <div className="flex flex-wrap gap-4">
             {currencies.slice(1).map((currency) => (
               <span key={currency} className="font-mono text-sm text-[var(--text-2)]">
-                {currencyTotals[currency].toFixed(2)} {currency}
+                 {formatNumber(currencyTotals[currency], { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
               </span>
             ))}
           </div>
         </Card>
       )}
 
-      <Card className="!p-4" title="Spending over time">
+       <Card className="!p-4" title={t("spendingOverTime")}>
         {loading ? (
           <ChartSkeleton />
         ) : buckets.length === 0 ? (
-          <p className="py-8 text-center text-sm text-[var(--text-3)]">No data in this range.</p>
+           <p className="py-8 text-center text-sm text-[var(--text-3)]">{t("noDataRange")}</p>
         ) : (
           <div className="w-full overflow-x-auto">
             <svg
               role="img"
-              aria-label="Bar chart of spending per bucket"
+               aria-label={t("spendingBarChart")}
               viewBox={`0 0 ${Math.max(320, buckets.length * 40)} 220`}
               className="h-[220px] w-full min-w-[320px]"
               preserveAspectRatio="none"
@@ -354,8 +365,7 @@ export function ReportsView() {
                 return (
                   <g key={bucket.key}>
                     <title>
-                      {bucket.label}: {value.toFixed(2)} {primaryCurrency ?? ""} ({bucket.count} transaction
-                      {bucket.count === 1 ? "" : "s"})
+                       {t("chartTitle", { label: bucket.label, value: formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), currency: primaryCurrency ?? "", count: formatNumber(bucket.count), transactions: t(bucket.count === 1 ? "transactionWord" : "transactionsWord") })}
                     </title>
                     <rect
                       x={x}

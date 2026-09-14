@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchSubscriptionGroups, predictSubscriptionAlerts } from "./subscriptionUtils";
-import type { SubscriptionAlert } from "./subscriptionUtils";
+import { getSubscriptionsAction } from "@/lib/userActions";
+import { buildSubscriptionAlerts, type SubscriptionAlert } from "./SubscriptionAlertsBell";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 const BANNER_THRESHOLD_DAYS = 3;
 
 export function SubscriptionDueBanner() {
+  const { t, formatNumber } = useLocale();
   const [alerts, setAlerts] = useState<SubscriptionAlert[]>([]);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     let active = true;
-    void fetchSubscriptionGroups().then(({ groups }) => {
-      if (!active) return;
-      const urgent = predictSubscriptionAlerts(groups).filter(
+    void getSubscriptionsAction().then((result) => {
+      if (!active || !result.data) return;
+      const urgent = buildSubscriptionAlerts(result.data).filter(
         (alert) => alert.status === "overdue" || alert.daysUntil <= BANNER_THRESHOLD_DAYS,
       );
       setAlerts(urgent);
@@ -30,10 +32,10 @@ export function SubscriptionDueBanner() {
   const [first, ...rest] = alerts;
   const isOverdue = first.status === "overdue";
   const dueText = isOverdue
-    ? `was due ${Math.abs(first.daysUntil)} day${Math.abs(first.daysUntil) === 1 ? "" : "s"} ago`
+    ? t("wasDueAgo", { count: formatNumber(Math.abs(first.daysUntil)), days: t(Math.abs(first.daysUntil) === 1 ? "day" : "days") })
     : first.daysUntil === 0
-      ? "is due today"
-      : `is due in ${first.daysUntil} day${first.daysUntil === 1 ? "" : "s"}`;
+       ? t("isDueToday")
+       : t("isDueIn", { count: formatNumber(first.daysUntil), days: t(first.daysUntil === 1 ? "day" : "days") });
 
   const accentText = isOverdue ? "text-[var(--rose)]" : "text-[var(--gold-text)]";
   const containerClasses = isOverdue
@@ -52,14 +54,14 @@ export function SubscriptionDueBanner() {
         <strong className="font-semibold text-[var(--text-1)]">{first.title}</strong>{" "}
         <span className={`font-medium ${accentText}`}>{dueText}</span>{" "}
         <span className="text-xs text-[var(--text-3)]">
-          (~{first.currency} {first.amount.toFixed(2)}, based on your payment history)
+           {t("basedOnHistory", { currency: first.currency, amount: formatNumber(first.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) })}
         </span>
         .
         {rest.length > 0 && (
           <>
             {" "}
             <Link href="/finance/subscriptions" className={`underline ${accentText}`}>
-              +{rest.length} more →
+               {t("moreCount", { count: formatNumber(rest.length) })}
             </Link>
           </>
         )}
@@ -67,7 +69,7 @@ export function SubscriptionDueBanner() {
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        aria-label="Dismiss"
+         aria-label={t("dismiss")}
         className={`shrink-0 cursor-pointer transition-colors ${dismissClasses}`}
       >
         ✕

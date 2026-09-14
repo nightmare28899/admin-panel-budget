@@ -6,9 +6,13 @@ import { useRouter } from "next/navigation";
 import { loginAction } from "@/lib/actions";
 import { Button } from "@/components/ui/Button";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 export default function LoginPage() {
     const router = useRouter();
+    const { t } = useLocale();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -41,9 +45,10 @@ export default function LoginPage() {
             const res = await loginAction(email, password);
 
             if (res.error) {
-                setError(res.error);
+                const message = frontendError(res.error, t, "loginFailed");
+                setError(message);
                 triggerErrorFeedback();
-                showToast(res.error, "error");
+                showToast(message, "error");
                 setLoading(false);
                 return;
             }
@@ -55,7 +60,7 @@ export default function LoginPage() {
 
             setLoading(false);
         } catch (err) {
-            const message = err instanceof Error ? err.message : "Login failed";
+            const message = frontendError(err instanceof Error ? err.message : undefined, t, "loginFailed");
             setError(message);
             triggerErrorFeedback();
             showToast(message, "error");
@@ -66,6 +71,11 @@ export default function LoginPage() {
     return (
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] p-6">
             <AmbientBackground variant="auth" />
+
+            <div className="absolute top-6 right-6 z-20">
+                <LanguageSwitcher />
+            </div>
+
             {toast && (
                 <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
                     <div
@@ -85,9 +95,9 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => setToast(null)}
                             className="cursor-pointer rounded-[var(--radius-sm)] px-2 py-1 text-xs text-[var(--text-2)] transition-colors hover:bg-[var(--bg-3)]"
-                            aria-label="Dismiss notification"
+                            aria-label={t("dismissNotification")}
                         >
-                            Close
+                            {t("close")}
                         </button>
                     </div>
                 </div>
@@ -104,14 +114,14 @@ export default function LoginPage() {
                     className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-3)] transition-colors hover:text-[var(--emerald-text)] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)]"
                 >
                     <span aria-hidden="true">←</span>
-                    Back to platform selection
+                    {t("backToPlatformSelection")}
                 </Link>
-                <h1 className="text-2xl font-semibold text-[var(--text-1)]">Admin Panel</h1>
-                <p className="mb-6 text-[var(--text-3)]">Sign in to continue.</p>
+                <h1 className="text-2xl font-semibold text-[var(--text-1)]">{t("adminPanel")}</h1>
+                <p className="mb-6 text-[var(--text-3)]">{t("signInToContinue")}</p>
 
                 <form onSubmit={onSubmit} className="space-y-4" aria-busy={loading}>
                     <div>
-                        <label htmlFor="admin-login-email" className="mb-1 block text-sm text-[var(--text-2)]">Email</label>
+                        <label htmlFor="admin-login-email" className="mb-1 block text-sm text-[var(--text-2)]">{t("email")}</label>
                         <input
                             id="admin-login-email"
                             name="email"
@@ -134,7 +144,7 @@ export default function LoginPage() {
                     </div>
 
                     <div>
-                        <label htmlFor="admin-login-password" className="mb-1 block text-sm text-[var(--text-2)]">Password</label>
+                        <label htmlFor="admin-login-password" className="mb-1 block text-sm text-[var(--text-2)]">{t("password")}</label>
                         <div className="relative">
                             <input
                                 id="admin-login-password"
@@ -148,7 +158,7 @@ export default function LoginPage() {
                                     setPassword(e.target.value);
                                     if (error) setError("");
                                 }}
-                                placeholder="Enter your password"
+                                placeholder={t("enterPassword")}
                                 className={`input pr-12 ${
                                     error
                                         ? "border-[var(--rose)]/60 focus:border-[var(--rose)] focus:ring-[var(--rose)]/40"
@@ -160,7 +170,7 @@ export default function LoginPage() {
                                 onClick={() => setShowPassword((prev) => !prev)}
                                 disabled={loading}
                                 className="absolute inset-y-0 right-2 my-auto h-8 cursor-pointer rounded-[var(--radius-sm)] px-2 text-[var(--text-2)] transition hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                             >
                                 {showPassword ? "🙈" : "👁️"}
                             </button>
@@ -180,10 +190,10 @@ export default function LoginPage() {
                                 >
                                     <path strokeLinecap="round" d="M12 3a9 9 0 1 0 9 9" />
                                 </svg>
-                                <span role="status" aria-live="polite">Iniciando sesión…</span>
+                                <span role="status" aria-live="polite">{t("signingIn")}</span>
                             </>
                         ) : (
-                            "Sign in"
+                            t("signIn")
                         )}
                     </Button>
                 </form>

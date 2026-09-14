@@ -2,9 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { getCreditCardsAction } from "@/lib/userActions";
 import type { CreditCardSummary } from "../statement-import.types";
 import { useSessionRedirect } from "./useSessionRedirect";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 /** The user's active credit cards — used by both the upload picker and the history filter. */
 export function useCreditCards() {
+  const { t } = useLocale();
   const redirectIfExpired = useSessionRedirect();
   const [cards, setCards] = useState<CreditCardSummary[]>([]);
   const [cardsError, setCardsError] = useState<string>();
@@ -17,13 +20,13 @@ export function useCreditCards() {
 
     if (result.error) {
       setCards([]);
-      setCardsError(result.error);
+      setCardsError(frontendError(result.error, t, "requestFailedGeneric"));
     } else {
       setCards(result.data ?? []);
       setCardsError(undefined);
     }
     setLoading(false);
-  }, [redirectIfExpired]);
+  }, [redirectIfExpired, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void reload(), 0);

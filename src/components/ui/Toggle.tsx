@@ -1,3 +1,7 @@
+"use client";
+
+import { useLocale } from "@/i18n/LocaleProvider";
+
 export type ToggleColor = "emerald" | "gold";
 
 const ON_COLOR_CLASSES: Record<ToggleColor, string> = {
@@ -22,6 +26,7 @@ export function Toggle({
   title?: string;
   className?: string;
 }) {
+  const { t } = useLocale();
   const track = (
     <button
       role="switch"
@@ -33,7 +38,7 @@ export function Toggle({
         checked ? ON_COLOR_CLASSES[onColor] : "bg-[var(--bg-3)] hover:bg-[var(--border)]"
       } ${className}`}
     >
-      <span className="sr-only">Toggle</span>
+      <span className="sr-only">{title ?? label ?? t("toggle")}</span>
       <span
         className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-[var(--bg-0)] shadow ring-0 transition duration-200 ease-in-out ${
           checked ? "translate-x-5" : "translate-x-0"

@@ -8,12 +8,19 @@ import type {
   CreditCardSummary,
   ConfirmStatementImportPayload,
   ConfirmStatementImportResponse,
+  DeleteStatementImportResponse,
+  MarkStatementImportPaidPayload,
   RevertStatementImportResponse,
   StatementImportCreateResponse,
   StatementImportDetail,
   StatementImportListResponse,
   UpdateStatementRowsPayload,
 } from "@/features/finance/statement-import.types";
+import type {
+  CreateSubscriptionPayload,
+  Subscription,
+  UpdateSubscriptionPayload,
+} from "@/features/finance/subscriptions.types";
 
 export const userApi = {
   login: (email: string, password: string) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
@@ -54,6 +61,20 @@ export const userApi = {
     request<ConfirmStatementImportResponse>(`/statement-imports/${id}/confirm`, { method: "POST", body: JSON.stringify(body) }, token),
   revertStatementImport: (token: string, id: string, body: ConfirmStatementImportPayload) =>
     request<RevertStatementImportResponse>(`/statement-imports/${id}/revert`, { method: "POST", body: JSON.stringify(body) }, token),
+  markStatementImportPaid: (token: string, id: string, body: MarkStatementImportPaidPayload) =>
+    request<StatementImportDetail>(`/statement-imports/${id}/paid`, { method: "PATCH", body: JSON.stringify(body) }, token),
+  deleteStatementImport: (token: string, id: string) =>
+    request<DeleteStatementImportResponse>(`/statement-imports/${id}`, { method: "DELETE" }, token),
+  listSubscriptions: (token: string) =>
+    request<Subscription[]>("/subscriptions", { method: "GET" }, token),
+  getSubscription: (token: string, id: string) =>
+    request<Subscription>(`/subscriptions/${id}`, { method: "GET" }, token),
+  createSubscription: (token: string, body: CreateSubscriptionPayload) =>
+    request<Subscription>("/subscriptions", { method: "POST", body: JSON.stringify(body) }, token),
+  updateSubscription: (token: string, id: string, body: UpdateSubscriptionPayload) =>
+    request<Subscription>(`/subscriptions/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
+  deactivateSubscription: (token: string, id: string) =>
+    request<{ message: string; subscription: Subscription }>(`/subscriptions/${id}`, { method: "DELETE" }, token),
 };
 
 export type UserAccount = { id: string; email: string; name: string; role: string; currency?: string; isActive?: boolean; isPremium?: boolean; avatarUrl?: string | null };

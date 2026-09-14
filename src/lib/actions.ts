@@ -45,7 +45,7 @@ export async function loginAction(email: string, password: string) {
         const res = await api.login(email, password);
 
         if (!isAdminRole(res.user?.role)) {
-            return { error: "You don’t have permissions to access this platform." };
+            return { error: "noPlatformAccess" };
         }
 
         const cookieStore = await cookies();
@@ -53,7 +53,7 @@ export async function loginAction(email: string, password: string) {
 
         return { success: true };
     } catch (err) {
-        return { error: err instanceof Error ? err.message : "Login failed" };
+        return { error: err instanceof Error ? err.message : "loginFailed" };
     }
 }
 
@@ -84,7 +84,7 @@ export async function renewSessionAction() {
         const refreshed = await api.refreshToken(refreshToken);
         if (!isAdminRole(refreshed.user?.role)) {
             await logoutAction();
-            return { error: "You don’t have permissions to access this platform." };
+            return { error: "noPlatformAccess" };
         }
         const cookieStore = await cookies();
         setSessionCookies(cookieStore, refreshed);
@@ -108,7 +108,7 @@ async function getRefreshToken() {
 function getErrorMessage(error: unknown): string {
     if (error instanceof Error) return error.message;
     if (typeof error === "string") return error;
-    return "Action failed";
+    return "requestFailedGeneric";
 }
 
 async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promise<ActionResult<T>> {

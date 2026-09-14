@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Button, type ButtonVariant } from "./Button";
 import { Modal } from "./Modal";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export function ConfirmModal({
   open,
@@ -10,9 +11,9 @@ export function ConfirmModal({
   onConfirm,
   title,
   description,
-  confirmLabel = "Confirm",
-  confirmingLabel = "Working…",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  confirmingLabel,
+  cancelLabel,
   confirmVariant = "danger",
   loading = false,
 }: {
@@ -27,6 +28,7 @@ export function ConfirmModal({
   confirmVariant?: ButtonVariant;
   loading?: boolean;
 }) {
+  const { t } = useLocale();
   const closeIfIdle = () => {
     if (!loading) onClose();
   };
@@ -36,7 +38,7 @@ export function ConfirmModal({
       <p className="text-sm leading-6 text-[var(--text-2)]">{description}</p>
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={closeIfIdle} disabled={loading}>
-          {cancelLabel}
+          {cancelLabel ?? t("cancel")}
         </Button>
         <Button
           type="button"
@@ -45,7 +47,7 @@ export function ConfirmModal({
           disabled={loading}
           aria-busy={loading}
         >
-          {loading ? confirmingLabel : confirmLabel}
+          {loading ? (confirmingLabel ?? t("working")) : (confirmLabel ?? t("confirm"))}
         </Button>
       </div>
     </Modal>

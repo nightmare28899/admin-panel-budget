@@ -51,8 +51,12 @@ export type SendTestPushResponse = {
     failureReasons?: Record<string, number>;
 };
 
+// The empty-body fallback below is a stable i18n message key carrying its
+// {status} interpolation value (see src/i18n/messages.ts + src/i18n/errors.ts
+// frontendError, which knows how to split and translate this exact shape) —
+// this file runs outside React and can't call t() itself.
 function parseApiErrorMessage(raw: string, status: number): string {
-    if (!raw) return `Request failed (${status})`;
+    if (!raw) return `requestFailedWithStatus:${status}`;
 
     try {
         const parsed = JSON.parse(raw) as { message?: string | string[] };

@@ -18,8 +18,11 @@ import { MetricCardsSkeleton, SkeletonBlock, TableSkeleton } from "@/components/
 import { Modal } from "@/components/ui/Modal";
 import { Toast, ToastType } from "@/components/ui/Toast";
 import { Toggle } from "@/components/ui/Toggle";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 import {
   clampDailyBudgetInput,
+  currencyMessageKey,
   DAILY_BUDGET_MAX,
   normalizeSupportedCurrency,
   SUPPORTED_CURRENCIES,
@@ -27,19 +30,19 @@ import {
 
 type StatusFilter = "all" | "active" | "premium";
 
-const STATUS_FILTERS: Array<{ key: StatusFilter; label: string }> = [
-  { key: "all", label: "All" },
-  { key: "active", label: "Active" },
-  { key: "premium", label: "Premium" },
-];
-
-function formatDailyBudget(value: UserRow["dailyBudget"]): string {
+function formatDailyBudget(value: UserRow["dailyBudget"], formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string): string {
   const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? amount.toFixed(2) : "0.00";
+  return formatNumber(Number.isFinite(amount) ? amount : 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export default function UsersPage() {
   const { runServerAction } = useSessionRenewal();
+  const { t, formatNumber } = useLocale();
+  const statusFilters: Array<{ key: StatusFilter; label: string }> = [
+    { key: "all", label: t("all") },
+    { key: "active", label: t("active") },
+    { key: "premium", label: t("premium") },
+  ];
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -78,17 +81,17 @@ export default function UsersPage() {
     try {
       const res = await runServerAction(() => getUsersAction(true));
       if (res.error) {
-        setError(res.error);
+        setError(frontendError(res.error, t, "failedLoadUsers"));
       } else {
         setError("");
         setUsers(Array.isArray(res.data?.users) ? res.data.users : []);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load users");
+      setError(frontendError(e instanceof Error ? e.message : undefined, t, "failedLoadUsers"));
     } finally {
       setLoading(false);
     }
-  }, [runServerAction]);
+  }, [runServerAction, t]);
 
   useEffect(() => {
     loadUsers();
@@ -117,8 +120,8 @@ export default function UsersPage() {
           id="users-search"
           name="usersSearch"
           type="search"
-          aria-label="Search users"
-          placeholder="Search users…"
+          aria-label={t("searchUsers")}
+          placeholder={t("searchUsers")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-32 rounded-full border border-[var(--border-soft)] bg-[var(--bg-2)] py-[7px] pl-9 pr-[14px] text-sm text-[var(--text-1)] placeholder:text-[var(--text-3)] outline-none transition-colors focus:border-[var(--emerald)] sm:w-[240px]"
@@ -126,7 +129,7 @@ export default function UsersPage() {
       </div>,
     );
     return () => setHeaderSlot(null);
-  }, [searchQuery, setHeaderSlot]);
+  }, [searchQuery, setHeaderSlot, t]);
 
   useEffect(() => {
     if (!openMenuId) return;
@@ -184,12 +187,10 @@ export default function UsersPage() {
           u.id === confirmingUser.id ? { ...u, isActive: !confirmingUser.isActive } : u,
         ),
       );
-      showToast(`User ${confirmingUser.isActive ? "disabled" : "activated"} successfully`, "success");
+      showToast(t("userStatusUpdated", { status: confirmingUser.isActive ? t("disabled").toLowerCase() : t("activated") }), "success");
     } catch (err) {
       showToast(
-        err instanceof Error
-          ? err.message
-          : `Failed to ${confirmingUser.isActive ? "disable" : "activate"} user`,
+        frontendError(err instanceof Error ? err.message : undefined, t, "failedUpdateUser"),
         "error",
       );
     } finally {
@@ -224,11 +225,11 @@ export default function UsersPage() {
       );
 
       showToast(
-        `Premium ${target.isPremium ? "disabled" : "enabled"} for ${target.name}`,
+        t(target.isPremium ? "premiumDisabledForUser" : "premiumEnabledForUser", { name: target.name }),
         "success",
       );
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to update premium status", "error");
+      showToast(frontendError(err instanceof Error ? err.message : undefined, t, "failedUpdatePremium"), "error");
     } finally {
       setActionLoading(false);
     }
@@ -264,10 +265,10 @@ export default function UsersPage() {
             : u,
         ),
       );
-      showToast("User updated successfully", "success");
+      showToast(t("userUpdated"), "success");
       setEditingUser(null);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to update user", "error");
+      showToast(frontendError(err instanceof Error ? err.message : undefined, t, "failedUpdateUser"), "error");
     } finally {
       setActionLoading(false);
     }
@@ -317,42 +318,42 @@ export default function UsersPage() {
             aria-hidden="true"
           />
         <div className="relative flex-1 border-b border-[var(--border-soft)] px-6 py-5 sm:border-b-0 sm:border-r">
-          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Total users</p>
-          <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--text-1)]">{totalUsers}</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">{t("totalUsers")}</p>
+          <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--text-1)]">{formatNumber(totalUsers)}</p>
           <p className="mt-2 text-[11.5px] text-[var(--text-3)]">
             {newThisMonth > 0 ? (
               <span className="inline-flex items-center gap-1 text-[var(--emerald-text)]">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>
                   <path d="M7 17 17 7M9 7h8v8" />
                 </svg>
-                {newThisMonth} this month
+                {t("thisMonth", { count: formatNumber(newThisMonth) })}
               </span>
             ) : (
-              "No new signups"
+              t("noNewSignups")
             )}
           </p>
         </div>
         <div className="relative flex-1 border-b border-[var(--border-soft)] px-6 py-5 sm:border-b-0 sm:border-r">
-          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Active users</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">{t("activeUsers")}</p>
           <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--text-1)]">{activeUsers}</p>
-          <p className="mt-2 text-[11.5px] text-[var(--text-3)]">{activePct}% of total</p>
+          <p className="mt-2 text-[11.5px] text-[var(--text-3)]">{t("ofTotal", { percent: formatNumber(activePct) })}</p>
         </div>
         <div className="relative flex-1 border-b border-[var(--border-soft)] px-6 py-5 sm:border-b-0 sm:border-r">
-          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Premium accounts</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">{t("premiumAccounts")}</p>
           <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--gold-text)]">{premiumUsers}</p>
-          <p className="mt-2 text-[11.5px] text-[var(--gold-text)]">{premiumPct}% of total</p>
+          <p className="mt-2 text-[11.5px] text-[var(--gold-text)]">{t("ofTotal", { percent: formatNumber(premiumPct) })}</p>
         </div>
         <div className="relative flex-1 px-6 py-5">
-          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">Admin accounts</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-3)]">{t("adminAccounts")}</p>
           <p className="mt-2.5 font-mono text-[28px] font-medium tabular-nums text-[var(--text-1)]">{adminUsers}</p>
-          <p className="mt-2 text-[11.5px] text-[var(--text-3)]">Elevated access</p>
+          <p className="mt-2 text-[11.5px] text-[var(--text-3)]">{t("elevatedAccess")}</p>
         </div>
         </div>
       )}
 
       <div className="mb-3.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[14.5px] font-medium text-[var(--text-1)]">All users</span>
+          <span className="text-[14.5px] font-medium text-[var(--text-1)]">{t("allUsers")}</span>
           {loading ? (
             <SkeletonBlock className="h-3 w-6" aria-hidden="true" />
           ) : (
@@ -360,7 +361,7 @@ export default function UsersPage() {
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          {STATUS_FILTERS.map((f) => (
+          {statusFilters.map((f) => (
             <button
               key={f.key}
               type="button"
@@ -392,22 +393,22 @@ export default function UsersPage() {
             <thead>
               <tr className="border-b border-[var(--border-soft)]">
                 <th scope="col" className="px-6 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                  User
+                   {t("users")}
                 </th>
                 <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                  Role
+                   {t("role")}
                 </th>
                 <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                  Status
+                   {t("status")}
                 </th>
                 <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                  Plan
+                   {t("plan")}
                 </th>
                 <th scope="col" className="px-3 py-3 text-right text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                  Daily budget
+                   {t("dailyBudget")}
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                  Actions
+                   {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -415,7 +416,7 @@ export default function UsersPage() {
               {!loading && filteredUsers.length === 0 ? (
                 <tr>
                   <td className="px-6 py-8 text-center text-[var(--text-3)]" colSpan={6}>
-                    No users found
+                     {t("noUsersFound")}
                   </td>
                 </tr>
               ) : (
@@ -445,7 +446,7 @@ export default function UsersPage() {
                               boxShadow: `0 0 0 3px ${u.isActive ? "var(--emerald-dim)" : "var(--bg-3)"}`,
                             }}
                           />
-                          <span className="text-[12.5px] text-[var(--text-2)]">{u.isActive ? "Active" : "Disabled"}</span>
+                           <span className="text-[12.5px] text-[var(--text-2)]">{u.isActive ? t("active") : t("disabled")}</span>
                         </div>
                       </td>
                       <td className="px-3 py-3.5">
@@ -454,15 +455,15 @@ export default function UsersPage() {
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M12 2 9.5 8.5 3 9.3l5 4.4L6.4 20 12 16.3 17.6 20 16 13.7l5-4.4-6.5-.8Z" />
                             </svg>
-                            Premium
+                             {t("premium")}
                           </span>
                         ) : (
-                          <span className="text-[12.5px] text-[var(--text-3)]">Free</span>
+                           <span className="text-[12.5px] text-[var(--text-3)]">{t("free")}</span>
                         )}
                       </td>
                       <td className="px-3 py-3.5 text-right font-mono text-[13px] tabular-nums text-[var(--text-1)]">
                         {u.currency ? `${u.currency} ` : ""}
-                        {formatDailyBudget(u.dailyBudget)}
+                         {formatDailyBudget(u.dailyBudget, formatNumber)}
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center justify-end gap-1">
@@ -470,8 +471,8 @@ export default function UsersPage() {
                             type="button"
                             onClick={() => openEdit(u)}
                             disabled={actionLoading}
-                            title={`Edit ${u.name}`}
-                            aria-label={`Edit ${u.name}`}
+                             title={t("editUser", { name: u.name })}
+                             aria-label={t("editUser", { name: u.name })}
                             className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}>
@@ -484,8 +485,8 @@ export default function UsersPage() {
                             ref={openMenuId === u.id ? menuButtonRef : undefined}
                             onClick={(e) => toggleMenu(u.id, e)}
                             disabled={actionLoading}
-                            title="More actions"
-                            aria-label="More actions"
+                             title={t("moreActions")}
+                             aria-label={t("moreActions")}
                             aria-haspopup="menu"
                             aria-expanded={openMenuId === u.id}
                             className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
@@ -509,9 +510,7 @@ export default function UsersPage() {
         {!loading && filteredUsers.length > 0 && (
           <div className="relative flex flex-col items-start justify-between gap-3 px-6 py-3.5 text-xs text-[var(--text-3)] sm:flex-row sm:items-center">
             <p>
-              Showing <span className="text-[var(--text-2)]">{startIndex + 1}</span>-
-              <span className="text-[var(--text-2)]">{Math.min(endIndex, filteredUsers.length)}</span> of{" "}
-              <span className="text-[var(--text-2)]">{filteredUsers.length}</span> users
+               {t("showingUsers", { start: startIndex + 1, end: Math.min(endIndex, filteredUsers.length), total: filteredUsers.length })}
             </p>
 
             <div className="flex items-center gap-2">
@@ -522,11 +521,10 @@ export default function UsersPage() {
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={safeCurrentPage === 1}
               >
-                Previous
+                 {t("previous")}
               </Button>
               <span className="px-2 text-[var(--text-2)]">
-                Page <span className="font-semibold text-[var(--text-1)]">{safeCurrentPage}</span> of{" "}
-                <span className="font-semibold text-[var(--text-1)]">{totalPages}</span>
+                 {t("pageOf", { page: safeCurrentPage, total: totalPages })}
               </span>
               <Button
                 type="button"
@@ -535,7 +533,7 @@ export default function UsersPage() {
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={safeCurrentPage === totalPages}
               >
-                Next
+                 {t("next")}
               </Button>
             </div>
           </div>
@@ -559,20 +557,20 @@ export default function UsersPage() {
                 className="z-50 w-[200px] rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] p-2 shadow-2xl"
               >
                 <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
-                  <span className="text-[12px] text-[var(--text-2)]">Premium</span>
+                   <span className="text-[12px] text-[var(--text-2)]">{t("premium")}</span>
                   <Toggle
                     checked={Boolean(menuUser.isPremium)}
                     onChange={() => togglePremium(menuUser)}
                     disabled={actionLoading}
                     onColor="gold"
-                    title={menuUser.isPremium ? "Disable premium" : "Enable premium"}
+                     title={menuUser.isPremium ? t("disablePremium") : t("enablePremium")}
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
                   <span
                     className={`text-[12px] ${menuUserIsAdmin ? "text-[var(--text-3)]" : "text-[var(--text-2)]"}`}
                   >
-                    Account active
+                     {t("accountActive")}
                   </span>
                   <Toggle
                     checked={Boolean(menuUser.isActive)}
@@ -584,10 +582,10 @@ export default function UsersPage() {
                     onColor="emerald"
                     title={
                       menuUserIsAdmin
-                        ? "Admins cannot be disabled"
+                         ? t("adminsCannotDisabled")
                         : menuUser.isActive
-                          ? "Disable user"
-                          : "Activate user"
+                           ? t("disableUser")
+                           : t("activateUser")
                     }
                     className={menuUserIsAdmin ? "cursor-not-allowed opacity-30" : ""}
                   />
@@ -598,10 +596,10 @@ export default function UsersPage() {
           document.body,
         )}
 
-      <Modal open={Boolean(editingUser)} onClose={() => setEditingUser(null)} title="Edit User">
+       <Modal open={Boolean(editingUser)} onClose={() => setEditingUser(null)} title={t("editUserTitle")}>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label htmlFor="edit-user-name" className="mb-1 block text-sm text-[var(--text-2)]">Name</label>
+                 <label htmlFor="edit-user-name" className="mb-1 block text-sm text-[var(--text-2)]">{t("name")}</label>
                 <input
                   id="edit-user-name"
                   name="name"
@@ -615,7 +613,7 @@ export default function UsersPage() {
                 />
               </div>
               <div>
-                <label htmlFor="edit-user-daily-budget" className="mb-1 block text-sm text-[var(--text-2)]">Daily Budget</label>
+                 <label htmlFor="edit-user-daily-budget" className="mb-1 block text-sm text-[var(--text-2)]">{t("dailyBudget")}</label>
                 <input
                   id="edit-user-daily-budget"
                   name="dailyBudget"
@@ -633,11 +631,11 @@ export default function UsersPage() {
                   className="input"
                 />
                 <p className="mt-1 text-xs text-[var(--text-3)]">
-                  Maximum {DAILY_BUDGET_MAX.toLocaleString()} per day.
+                   {t("maximumPerDay", { amount: formatNumber(DAILY_BUDGET_MAX) })}
                 </p>
               </div>
               <div>
-                <label htmlFor="edit-user-currency" className="mb-1 block text-sm text-[var(--text-2)]">Currency</label>
+                 <label htmlFor="edit-user-currency" className="mb-1 block text-sm text-[var(--text-2)]">{t("currency")}</label>
                 <select
                   id="edit-user-currency"
                   name="currency"
@@ -650,13 +648,13 @@ export default function UsersPage() {
                 >
                   {SUPPORTED_CURRENCIES.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}
+                       {t(currencyMessageKey(option.value))}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label htmlFor="edit-user-password" className="mb-1 block text-sm text-[var(--text-2)]">Temporary Password (optional)</label>
+                 <label htmlFor="edit-user-password" className="mb-1 block text-sm text-[var(--text-2)]">{t("temporaryPassword")}</label>
                 <input
                   id="edit-user-password"
                   name="password"
@@ -665,20 +663,20 @@ export default function UsersPage() {
                   minLength={6}
                   value={editForm.password}
                   onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-                  placeholder="Set a temporary password"
+                   placeholder={t("setTemporaryPassword")}
                   className="input"
                 />
                 <p className="mt-1 text-xs text-[var(--text-3)]">
-                  Leave empty to keep current password. Minimum 6 characters.
+                   {t("passwordHelp")}
                 </p>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="ghost" onClick={() => setEditingUser(null)} disabled={actionLoading}>
-                  Cancel
+                   {t("cancel")}
                 </Button>
                 <Button type="submit" variant="primary" disabled={actionLoading}>
-                  {actionLoading ? "Saving..." : "Save Changes"}
+                   {actionLoading ? t("saving") : t("saveChanges")}
                 </Button>
               </div>
             </form>
@@ -689,23 +687,22 @@ export default function UsersPage() {
       <Modal
         open={Boolean(confirmingUser)}
         onClose={() => setConfirmingUser(null)}
-        title="Change User Status"
+         title={t("changeUserStatus")}
         maxWidth="max-w-sm"
       >
             <p className="text-sm text-[var(--text-2)]">
-              Are you sure you want to {confirmingUser?.isActive ? "disable" : "activate"}{" "}
-              <strong>{confirmingUser?.name}</strong>?
+               {t("changeUserStatusQuestion", { action: confirmingUser?.isActive ? t("disableUser").toLowerCase() : t("activateUser").toLowerCase(), name: confirmingUser?.name ?? "" })}
             </p>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="ghost" onClick={() => setConfirmingUser(null)} disabled={actionLoading}>
-                Cancel
+                 {t("cancel")}
               </Button>
               <Button
                 variant={confirmingUser?.isActive ? "danger" : "success"}
                 onClick={executeToggleStatus}
                 disabled={actionLoading}
               >
-                {actionLoading ? "Processing..." : "Confirm"}
+                 {actionLoading ? t("processing") : t("confirm")}
               </Button>
             </div>
       </Modal>

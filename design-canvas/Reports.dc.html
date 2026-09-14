@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--bg-0:#080b11;--bg-1:#0e131b;--bg-2:#171d26;--bg-3:#262e3a;--border:rgba(148,163,184,.18);--border-soft:rgba(148,163,184,.10);--text-1:#e8ebf1;--text-2:#b6beca;--text-3:#8f99a9;--blue:#3b82f6;--blue-dim:rgba(59,130,246,.16);--blue-text:#8fb8fb;--r-xl:16px}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg-0);color:var(--text-1);font-family:'Geist',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:'Geist Mono',ui-monospace,'SF Mono',monospace;font-variant-numeric:tabular-nums}
+.serif{font-family:'Instrument Serif',Georgia,serif;font-style:italic}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh">
+
+  <aside style="width:260px;flex:none;background:var(--bg-1);border-right:1px solid var(--border-soft);display:flex;flex-direction:column;padding:20px 14px">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 8px 22px">
+      <div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(155deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;flex:none"><span class="serif" style="font-size:18px;color:#fff">B</span></div>
+      <span style="font-weight:600;font-size:14.5px;letter-spacing:-.01em">Budget Panel</span>
+    </div>
+    <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);padding:10px 10px 8px">Finance</div>
+    <nav style="display:flex;flex-direction:column;gap:2px">
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-2)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2.5-1.5L13 21l-2.5-1.5L8 21l-2-1.5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+        <span style="font-size:13.5px">Expenses</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-2)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.6 3H5a2 2 0 0 0-2 2v7.6c0 .5.2 1 .6 1.4l9 9a2 2 0 0 0 2.8 0l6.4-6.4a2 2 0 0 0 0-2.8l-9-9a2 2 0 0 0-1.4-.6z"/><circle cx="8" cy="8" r="1.4"/></svg>
+        <span style="font-size:13.5px">Categories</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-2)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a9 9 0 0 1 15.3-5.3L21 6"/><path d="M21 3v5h-5"/><path d="M21 15a9 9 0 0 1-15.3 5.3L3 18"/><path d="M3 21v-5h5"/></svg>
+        <span style="font-size:13.5px">Subscriptions</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;background:var(--bg-3);position:relative;color:var(--text-1)">
+        <span style="position:absolute;left:-14px;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--blue)"></span>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8fb8fb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M2.5 20h19"/></svg>
+        <span style="font-size:13.5px;font-weight:500">Reports</span>
+      </div>
+    </nav>
+    <div style="margin-top:auto;padding-top:14px;border-top:1px solid var(--border-soft)">
+      <a href="#" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--bg-3);display:flex;align-items:center;justify-content:center;flex:none"><span class="serif" style="font-size:15px">A</span></div>
+        <div><div style="font-size:13px;font-weight:500">Ana Torres</div><div style="font-size:11.5px;color:var(--text-3)">Personal account</div></div>
+      </a>
+    </div>
+  </aside>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header style="height:64px;flex:none;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--border-soft)">
+      <h1 class="serif" style="font-size:22px;margin:0;font-weight:400">Reports</h1>
+    </header>
+
+    <main style="flex:1;padding:32px 40px;max-width:1000px">
+      <div style="margin-bottom:22px">
+        <h2 class="serif" style="font-size:26px;margin:0 0 4px;font-weight:400">Spending report</h2>
+        <p style="font-size:13px;color:var(--text-3);margin:0">See how your spending trends over any period</p>
+      </div>
+
+      <div style="background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px;background:var(--bg-3);border:1px solid var(--border-soft);border-radius:999px;padding:7px 14px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+          <span style="font-size:12.5px;color:var(--text-2)">Aug 29 &ndash; Sep 4, 2026</span>
+        </div>
+        <div style="display:flex;background:var(--bg-3);border:1px solid var(--border-soft);border-radius:999px;padding:3px;gap:2px;margin-left:auto">
+          <button style="padding:6px 14px;border-radius:999px;background:var(--bg-2);color:var(--text-1);font-size:12.5px;font-weight:500;border:none">Daily</button>
+          <button style="padding:6px 14px;border-radius:999px;background:transparent;color:var(--text-3);font-size:12.5px;border:none">Weekly</button>
+          <button style="padding:6px 14px;border-radius:999px;background:transparent;color:var(--text-3);font-size:12.5px;border:none">Monthly</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:20px">
+        <div style="background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:18px 20px">
+          <div style="font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Total spent</div>
+          <div class="mono" style="font-size:24px;font-weight:600">$785.48</div>
+        </div>
+        <div style="background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:18px 20px">
+          <div style="font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Average per day</div>
+          <div class="mono" style="font-size:24px;font-weight:600">$112.21</div>
+        </div>
+        <div style="background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:18px 20px">
+          <div style="font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Transactions</div>
+          <div class="mono" style="font-size:24px;font-weight:600">24</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <h3 style="font-size:14px;font-weight:600;margin:0">Spending by day</h3>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)">
+            <span style="width:9px;height:9px;border-radius:2px;background:#3b82f6;display:inline-block"></span>
+            Daily spend
+          </div>
+        </div>
+
+        <svg viewBox="0 0 700 300" style="width:100%;height:auto">
+          <line x1="40" y1="50" x2="40" y2="250" stroke="var(--border)" stroke-width="1"/>
+          <line x1="40" y1="250" x2="680" y2="250" stroke="var(--border)" stroke-width="1"/>
+          <line x1="40" y1="200" x2="680" y2="200" stroke="var(--border-soft)" stroke-width="1"/>
+          <line x1="40" y1="150" x2="680" y2="150" stroke="var(--border-soft)" stroke-width="1"/>
+          <line x1="40" y1="100" x2="680" y2="100" stroke="var(--border-soft)" stroke-width="1"/>
+          <line x1="40" y1="50" x2="680" y2="50" stroke="var(--border-soft)" stroke-width="1"/>
+
+          <text x="34" y="253" text-anchor="end" font-size="11" fill="var(--text-3)" font-family="Geist Mono, monospace">$0</text>
+          <text x="34" y="203" text-anchor="end" font-size="11" fill="var(--text-3)" font-family="Geist Mono, monospace">$50</text>
+          <text x="34" y="153" text-anchor="end" font-size="11" fill="var(--text-3)" font-family="Geist Mono, monospace">$100</text>
+          <text x="34" y="103" text-anchor="end" font-size="11" fill="var(--text-3)" font-family="Geist Mono, monospace">$150</text>
+          <text x="34" y="53" text-anchor="end" font-size="11" fill="var(--text-3)" font-family="Geist Mono, monospace">$200</text>
+
+          <rect x="62.7" y="205" width="46" height="45" rx="5" fill="#3b82f6" fill-opacity="0.55"/>
+          <rect x="154.1" y="132" width="46" height="118" rx="5" fill="#3b82f6" fill-opacity="0.75"/>
+          <rect x="245.6" y="186" width="46" height="64" rx="5" fill="#3b82f6" fill-opacity="0.6"/>
+          <rect x="337" y="50" width="46" height="200" rx="5" fill="#3b82f6"/>
+          <rect x="428.4" y="162" width="46" height="88" rx="5" fill="#3b82f6" fill-opacity="0.65"/>
+          <rect x="519.8" y="102" width="46" height="148" rx="5" fill="#3b82f6" fill-opacity="0.8"/>
+          <rect x="611.3" y="210" width="46" height="40" rx="5" fill="#3b82f6" fill-opacity="0.5"/>
+
+          <text x="85.7" y="270" text-anchor="middle" font-size="11.5" fill="var(--text-3)" font-family="Geist, sans-serif">Mon</text>
+          <text x="177.1" y="270" text-anchor="middle" font-size="11.5" fill="var(--text-3)" font-family="Geist, sans-serif">Tue</text>
+          <text x="268.6" y="270" text-anchor="middle" font-size="11.5" fill="var(--text-3)" font-family="Geist, sans-serif">Wed</text>
+          <text x="360" y="270" text-anchor="middle" font-size="11.5" fill="var(--text-1)" font-weight="600" font-family="Geist, sans-serif">Thu</text>
+          <text x="451.4" y="270" text-anchor="middle" font-size="11.5" fill="var(--text-3)" font-family="Geist, sans-serif">Fri</text>
+          <text x="542.8" y="270" text-anchor="middle" font-size="11.5" fill="var(--text-3)" font-family="Geist, sans-serif">Sat</text>
+          <text x="634.3" y="270" text-anchor="middle" font-size="11.5" fill="var(--text-3)" font-family="Geist, sans-serif">Sun</text>
+
+          <g>
+            <rect x="313" y="10" width="94" height="34" rx="8" fill="#0e131b" stroke="var(--border)"/>
+            <text x="360" y="23" text-anchor="middle" font-size="10.5" fill="var(--text-3)" font-family="Geist, sans-serif">Thu, Sep 4</text>
+            <text x="360" y="38" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--text-1)" font-family="Geist Mono, monospace">$200.00</text>
+          </g>
+        </svg>
+      </div>
+
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

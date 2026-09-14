@@ -12,12 +12,9 @@ import type {
   CreditCardOverviewResponse,
   CreditCardWritePayload,
 } from "./credit-cards.types";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 type FilterTab = "all" | "active" | "inactive";
-
-function formatMoney(value: number) {
-  return `MXN ${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export function CreditCardManager({
   overview,
@@ -32,6 +29,9 @@ export function CreditCardManager({
   onDeactivate: (id: string) => Promise<void>;
   onReactivate: (id: string) => Promise<void>;
 }) {
+  const { t, formatNumber } = useLocale();
+  const formatMoney = (value: number) => `MXN ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const filterLabels: Record<FilterTab, string> = { all: t("all"), active: t("active"), inactive: t("inactive") };
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CreditCardOverviewItem>();
   const [saving, setSaving] = useState(false);
@@ -77,34 +77,34 @@ export function CreditCardManager({
         <StatCard
           tone="info"
           icon="💳"
-          label="Total cards"
+          label={t("totalCards")}
           value={String(portfolio.activeCards)}
-          extra={<span className="text-xs text-[var(--text-3)]">of {portfolio.trackedCards} tracked</span>}
+          extra={<span className="text-xs text-[var(--text-3)]">{t("trackedCards", { count: formatNumber(portfolio.trackedCards) })}</span>}
         />
         <StatCard
           tone="gold"
           icon="📈"
-          label="Spent this cycle"
+          label={t("spentThisCycle")}
           value={formatMoney(portfolio.totalCurrentCycleSpend)}
           extra={
             portfolio.totalCreditLimit > 0 ? (
-              <span className="text-xs text-[var(--text-3)]">{formatMoney(portfolio.totalCreditLimit)} limit</span>
+              <span className="text-xs text-[var(--text-3)]">{t("limitAmount", { amount: formatMoney(portfolio.totalCreditLimit) })}</span>
             ) : undefined
           }
         />
         <StatCard
           tone="emerald"
           icon="🛡️"
-          label="Available credit"
+          label={t("availableCredit")}
           value={formatMoney(portfolio.totalAvailableCredit)}
-          extra={<span className="text-xs text-[var(--text-3)]">of {formatMoney(portfolio.totalCreditLimit)}</span>}
+          extra={<span className="text-xs text-[var(--text-3)]">{t("ofAmount", { amount: formatMoney(portfolio.totalCreditLimit) })}</span>}
         />
         <StatCard
           tone="rose"
           icon="⚡"
-          label="Transactions"
+          label={t("transactions")}
           value={String(totalTransactions)}
-          extra={<span className="text-xs text-[var(--text-3)]">This cycle</span>}
+          extra={<span className="text-xs text-[var(--text-3)]">{t("thisCycle")}</span>}
         />
       </div>
 
@@ -115,26 +115,26 @@ export function CreditCardManager({
               key={tab}
               type="button"
               onClick={() => setFilter(tab)}
-              className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors ${
+              className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                 filter === tab
-                  ? "bg-[var(--emerald)] text-[var(--bg-0)]"
-                  : "text-[var(--text-3)] hover:text-[var(--text-2)]"
+                  ? "border-[var(--emerald)]/30 bg-[var(--emerald-dim)] text-[var(--emerald-text)] hover:border-[var(--emerald)]/50 hover:bg-[var(--emerald)]/25 active:bg-[var(--emerald)]/35"
+                  : "border-transparent text-[var(--text-3)] hover:border-[var(--emerald)]/30 hover:bg-[var(--emerald-dim)] hover:text-[var(--emerald-text)]"
               }`}
             >
-              {tab}
+              {filterLabels[tab]}
             </button>
           ))}
         </div>
         <Button type="button" variant="tinted" onClick={() => setOpen(true)}>
-          + Add card
+          {t("addCard")}
         </Button>
       </div>
 
       {visibleCards.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[var(--border-soft)] px-4 py-8 text-center">
-          <p className="text-sm font-medium text-[var(--text-2)]">No cards to show.</p>
+          <p className="text-sm font-medium text-[var(--text-2)]">{t("noCardsShow")}</p>
           <p className="mt-1 text-xs text-[var(--text-3)]">
-            {filter === "active" ? "Add your first card to start tracking it." : "Try another filter."}
+            {filter === "active" ? t("addFirstCard") : t("tryAnotherFilter")}
           </p>
         </div>
       ) : (
@@ -164,48 +164,48 @@ export function CreditCardManager({
         </div>
       )}
 
-      <Modal open={open} onClose={closeModal} title={editing ? "Edit card" : "Add card"}>
+      <Modal open={open} onClose={closeModal} title={editing ? t("editCard") : t("addCard")}>
         <Form form={form} layout="vertical" onFinish={(values) => void submit(values)}>
-          <Form.Item name="name" label="Card name" rules={[{ required: true }]}>
-            <Input maxLength={80} placeholder="e.g. Rewards" />
+          <Form.Item name="name" label={t("cardName")} rules={[{ required: true }]}>
+            <Input maxLength={80} placeholder={t("rewardsExample")} />
           </Form.Item>
-          <Form.Item name="bank" label="Bank" rules={[{ required: true }]}>
-            <Input maxLength={80} placeholder="e.g. Banamex" />
+          <Form.Item name="bank" label={t("bank")} rules={[{ required: true }]}>
+            <Input maxLength={80} placeholder={t("bankExample")} />
           </Form.Item>
-          <Form.Item name="brand" label="Brand" rules={[{ required: true }]}>
-            <Input maxLength={30} placeholder="e.g. Visa" />
+          <Form.Item name="brand" label={t("brand")} rules={[{ required: true }]}>
+            <Input maxLength={30} placeholder={t("brandExample")} />
           </Form.Item>
           <Form.Item
             name="last4"
-            label="Last 4 digits"
-            rules={[{ required: true }, { pattern: /^\d{4}$/, message: "Exactly 4 digits" }]}
+            label={t("last4")}
+            rules={[{ required: true }, { pattern: /^\d{4}$/, message: t("exactly4Digits") }]}
           >
             <Input maxLength={4} placeholder="1234" />
           </Form.Item>
           <Form.Item
             name="color"
-            label="Color (optional)"
-            rules={[{ pattern: /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/, message: "Hex color like #7C3AED" }]}
+            label={t("colorOptional")}
+            rules={[{ pattern: /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/, message: t("hexColor") }]}
           >
             <Input placeholder="#7C3AED" />
           </Form.Item>
-          <Form.Item name="creditLimit" label="Credit limit (optional)">
+          <Form.Item name="creditLimit" label={t("creditLimitOptional")}>
             <InputNumber min={0} className="w-full" placeholder="25000" />
           </Form.Item>
           <div className="grid grid-cols-2 gap-3">
-            <Form.Item name="closingDay" label="Closing day (optional)">
+            <Form.Item name="closingDay" label={t("closingDayOptional")}>
               <InputNumber min={1} max={31} className="w-full" placeholder="25" />
             </Form.Item>
-            <Form.Item name="paymentDueDay" label="Payment due day (optional)">
+            <Form.Item name="paymentDueDay" label={t("paymentDueDayOptional")}>
               <InputNumber min={1} max={31} className="w-full" placeholder="12" />
             </Form.Item>
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={closeModal}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" variant="primary" loading={saving}>
-              Save
+              {t("save")}
             </Button>
           </div>
         </Form>
@@ -215,14 +215,14 @@ export function CreditCardManager({
         open={Boolean(deactivateTarget)}
         onClose={() => setDeactivateTarget(undefined)}
         onConfirm={confirmDeactivate}
-        title="Deactivate this card?"
+        title={t("deactivateCardQuestion")}
         description={
           deactivateTarget
-            ? `${deactivateTarget.bank} · ${deactivateTarget.name} will stop appearing as an option for new expenses and statement imports. It stays visible here and can be reactivated anytime.`
+            ? t("deactivateCardDescription", { bank: deactivateTarget.bank, name: deactivateTarget.name })
             : undefined
         }
-        confirmLabel="Deactivate"
-        confirmingLabel="Deactivating…"
+        confirmLabel={t("deactivate")}
+        confirmingLabel={t("deactivating")}
         confirmVariant="danger"
         loading={deactivating}
       />

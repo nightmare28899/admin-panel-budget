@@ -1,12 +1,16 @@
 export const DAILY_BUDGET_MAX = 1_000_000;
 
 export const SUPPORTED_CURRENCIES = [
-  { value: "USD", label: "US Dollar (USD)" },
-  { value: "MXN", label: "Mexican Peso (MXN)" },
-  { value: "EUR", label: "Euro (EUR)" },
+  { value: "USD" },
+  { value: "MXN" },
+  { value: "EUR" },
 ] as const;
 
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number]["value"];
+
+export function currencyMessageKey(currency: SupportedCurrency) {
+  return currency === "USD" ? "usdName" : currency === "EUR" ? "eurName" : "mxnName";
+}
 
 export function clampDailyBudgetInput(value: string): number {
   const amount = Number(value);

@@ -2,11 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { getStatementImportsAction } from "@/lib/userActions";
 import type { StatementImportListResponse } from "../statement-import.types";
 import { useSessionRedirect } from "./useSessionRedirect";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 
 const PAGE_SIZE = 20;
 
 /** The paginated, card-filterable statement import history list. */
 export function useStatementImportsList() {
+  const { t } = useLocale();
   const redirectIfExpired = useSessionRedirect();
   const [history, setHistory] = useState<StatementImportListResponse>();
   const [page, setPage] = useState(1);
@@ -22,10 +25,10 @@ export function useStatementImportsList() {
     const result = await getStatementImportsAction(query.toString());
     if (redirectIfExpired(result.sessionExpired)) return;
 
-    if (result.error) setError(result.error);
+    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
     else setHistory(result.data);
     setLoading(false);
-  }, [page, filterCardId, redirectIfExpired]);
+  }, [page, filterCardId, redirectIfExpired, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void reload(), 0);

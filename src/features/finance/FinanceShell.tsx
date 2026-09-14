@@ -6,24 +6,17 @@ import { userLogoutAction } from "@/lib/userActions";
 import { AppShell, type AppShellNavItem } from "@/components/layout/AppShell";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SubscriptionAlertsBell } from "./SubscriptionAlertsBell";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 type FinanceUser = {
   name?: string;
   email?: string;
 };
 
-const PAGE_TITLES: Record<string, string> = {
-  "/finance/expenses": "Expenses",
-  "/finance/cards": "My Cards",
-  "/finance/statements": "Card statements",
-  "/finance/categories": "Categories",
-  "/finance/subscriptions": "Subscriptions",
-  "/finance/reports": "Reports",
-};
-
-const NAV_ITEMS: AppShellNavItem[] = [
+function createNavItems(t: ReturnType<typeof useLocale>["t"]): AppShellNavItem[] {
+  return [
   {
-    label: "Expenses",
+    label: t("expenses"),
     href: "/finance/expenses",
     icon: (
       <>
@@ -34,7 +27,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "My Cards",
+    label: t("myCards"),
     href: "/finance/cards",
     icon: (
       <>
@@ -43,7 +36,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "Statements",
+    label: t("statements"),
     href: "/finance/statements",
     icon: (
       <>
@@ -53,7 +46,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "Categories",
+    label: t("categories"),
     href: "/finance/categories",
     icon: (
       <>
@@ -63,7 +56,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "Subscriptions",
+    label: t("subscriptions"),
     href: "/finance/subscriptions",
     icon: (
       <>
@@ -75,7 +68,7 @@ const NAV_ITEMS: AppShellNavItem[] = [
     ),
   },
   {
-    label: "Reports",
+    label: t("reports"),
     href: "/finance/reports",
     icon: (
       <>
@@ -83,7 +76,8 @@ const NAV_ITEMS: AppShellNavItem[] = [
       </>
     ),
   },
-];
+  ];
+}
 
 export function FinanceShell({
   user,
@@ -93,6 +87,15 @@ export function FinanceShell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { t } = useLocale();
+  const pageTitles: Record<string, string> = {
+    "/finance/expenses": t("expenses"),
+    "/finance/cards": t("myCards"),
+    "/finance/statements": t("cardStatements"),
+    "/finance/categories": t("categories"),
+    "/finance/subscriptions": t("subscriptions"),
+    "/finance/reports": t("reports"),
+  };
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
 
@@ -105,8 +108,8 @@ export function FinanceShell({
   return (
     <>
       <AppShell
-        navItems={NAV_ITEMS}
-        pageTitles={PAGE_TITLES}
+        navItems={createNavItems(t)}
+        pageTitles={pageTitles}
         defaultTitle="Budget Panel"
         user={user}
         onSignOut={() => setLogoutConfirmationOpen(true)}
@@ -121,11 +124,11 @@ export function FinanceShell({
         open={logoutConfirmationOpen}
         onClose={() => setLogoutConfirmationOpen(false)}
         onConfirm={handleLogout}
-        title="Sign out?"
-        description="You will need to sign in again to access your personal finance workspace."
-        confirmLabel="Sign out"
-        confirmingLabel="Signing out…"
-        cancelLabel="Stay signed in"
+        title={t("signOutQuestion")}
+        description={t("financeSignOutDescription")}
+        confirmLabel={t("signOut")}
+        confirmingLabel={t("signingOut")}
+        cancelLabel={t("staySignedIn")}
         loading={loggingOut}
       />
     </>

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 type AvatarSize = "sm" | "md" | "lg";
 
@@ -27,6 +28,7 @@ export function Avatar({
   size?: AvatarSize | number;
   className?: string;
 }) {
+  const { t } = useLocale();
   const px = typeof size === "number" ? size : SIZE_PX[size];
   const textClass = typeof size === "number" ? "text-base" : SIZE_TEXT[size];
   const dimensionStyle = { width: px, height: px };
@@ -36,7 +38,7 @@ export function Avatar({
       {avatarUrl ? (
         <Image
           src={avatarUrl}
-          alt={name || "User Avatar"}
+          alt={name || t("userAvatar")}
           width={px}
           height={px}
           unoptimized
