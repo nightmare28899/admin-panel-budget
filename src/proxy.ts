@@ -14,10 +14,6 @@ function base64UrlDecode(segment: string): string {
   return atob(padded);
 }
 
-// The finance layout is a Server Component and can't write cookies during
-// render, so it can't refresh an expired access token on its own — it would
-// just bounce the user to login. Middleware runs before that render and CAN
-// write cookies, so this is where proactive refresh belongs.
 function isAccessTokenExpired(token: string): boolean {
   const parts = token.split(".");
   if (parts.length !== 3) return true;
@@ -42,7 +38,7 @@ function buildCookieHeader(
     .join("; ");
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const accessToken = request.cookies.get(USER_ACCESS_COOKIE)?.value;
 
   if (accessToken && !isAccessTokenExpired(accessToken)) {
@@ -64,7 +60,6 @@ export async function middleware(request: NextRequest) {
 
     if (!res.ok) {
       if (res.status !== 401) {
-        // Backend hiccup, not a truly dead session — don't force a logout.
         return NextResponse.next();
       }
 
@@ -81,9 +76,6 @@ export async function middleware(request: NextRequest) {
       refreshToken: string;
     };
 
-    // Forward the fresh tokens on the request itself so the Server Component
-    // rendering this same response reads the new access token instead of the
-    // expired one it saw when the browser sent the request.
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(
       "cookie",
@@ -99,9 +91,6 @@ export async function middleware(request: NextRequest) {
     response.cookies.set(USER_REFRESH_COOKIE, session.refreshToken, cookieOptions);
     return response;
   } catch {
-    // Network/backend failure: let the request through and let the
-    // page-level guard decide, instead of bouncing the user on a transient
-    // error.
     return NextResponse.next();
   }
 }
