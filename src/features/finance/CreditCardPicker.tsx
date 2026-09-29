@@ -73,9 +73,7 @@ export function CreditCardPicker({
                 ? `0 18px 34px -12px ${background}, 0 0 0 2px var(--emerald)`
                 : `0 12px 24px -14px ${background}`,
             }}
-            className={`group relative flex h-40 w-56 shrink-0 cursor-pointer flex-col justify-between overflow-hidden! rounded-[28px] p-4 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-1)] ${
-              selected ? "-translate-y-1 scale-[1.03]" : "hover:-translate-y-1 hover:scale-[1.015]"
-            }`}
+            className="group relative flex h-40 w-56 shrink-0 cursor-pointer flex-col justify-between overflow-hidden! rounded-[28px] p-4 text-left transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-1)]"
           >
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/30" />
 
@@ -85,11 +83,14 @@ export function CreditCardPicker({
               </span>
               <div className="flex items-center gap-2">
                 <CreditCardContactlessIcon />
-                {selected && (
-                  <span className="flex h-6 w-6 animate-badge-pop items-center justify-center rounded-full bg-white text-xs font-bold text-[var(--emerald-text)] shadow-sm">
-                    ✓
-                  </span>
-                )}
+                <span
+                  aria-hidden="true"
+                  className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-bold text-[var(--emerald-text)] shadow-sm transition-opacity duration-200 ${
+                    selected ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  ✓
+                </span>
               </div>
             </div>
 
