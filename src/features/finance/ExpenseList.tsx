@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { Empty, Popconfirm, Select } from "antd";
-import { DeleteOutlined, EditOutlined, LeftOutlined, PictureOutlined, RightOutlined } from "@ant-design/icons";
+import { CreditCardOutlined, DeleteOutlined, EditOutlined, LeftOutlined, PictureOutlined, RightOutlined } from "@ant-design/icons";
 import type { Expense } from "./finance.types";
 import { toCalendarDate } from "./finance.types";
 import { categoryTokens } from "./categoryVisuals";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useLocale } from "@/i18n/LocaleProvider";
 
@@ -13,18 +15,23 @@ function TransactionRow({
   onEdit,
   onDelete,
   onReceipt,
+  deletingExpenseId,
 }: {
   expense: Expense;
   onEdit: (expense: Expense) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<void>;
   onReceipt: (expense: Expense) => void;
+  deletingExpenseId?: string;
 }) {
   const { t, formatDate, formatNumber } = useLocale();
-  const { bg, text, icon: Icon } = categoryTokens(expense.category);
+  const { bg, text, icon } = categoryTokens(expense.category);
+  const FallbackIcon = icon.kind === "component" ? icon.component : undefined;
   const calendarDate = toCalendarDate(expense.date);
   const displayDate = calendarDate
     ? formatDate(`${calendarDate}T12:00:00`, { year: "numeric", month: "short", day: "numeric" })
     : "—";
+  const isDeleting = deletingExpenseId === expense.id;
+  const deletionPending = deletingExpenseId !== undefined;
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-[var(--bg-3)]/40 sm:px-3">
@@ -33,7 +40,7 @@ function TransactionRow({
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg"
           style={{ background: bg, color: text }}
         >
-          <Icon />
+          {icon.kind === "glyph" ? icon.glyph : FallbackIcon && <FallbackIcon />}
         </span>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-[var(--text-1)]">{expense.title}</p>
@@ -52,6 +59,34 @@ function TransactionRow({
               </>
             )}
           </p>
+          {(expense.creditCard || expense.statementRow) && (
+            <p className="mt-1 flex flex-wrap items-center gap-1.5">
+              {expense.creditCard && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--bg-3)]/60 px-2 py-0.5 text-[11px] text-[var(--text-3)]">
+                  <CreditCardOutlined /> {expense.creditCard.name} •••• {expense.creditCard.last4}
+                </span>
+              )}
+              {expense.statementRow && (
+                <>
+                  <Link href={`/finance/statements/${expense.statementRow.statementImportId}`}>
+                    <Badge variant={expense.statementRow.statementImport.paymentStatus === "PAID" ? "success" : expense.statementRow.statementImport.paymentStatus === "PARTIAL" ? "warning" : "neutral"}>
+                      {expense.statementRow.statementImport.paymentStatus === "PAID"
+                        ? t("paid")
+                        : expense.statementRow.statementImport.paymentStatus === "PARTIAL"
+                          ? t("partial")
+                          : t("unpaid")}
+                    </Badge>
+                  </Link>
+                  {expense.statementRow.statementImport.periodStart && expense.statementRow.statementImport.periodEnd && (
+                    <span className="text-[11px] text-[var(--text-3)]">
+                      {formatDate(expense.statementRow.statementImport.periodStart, { dateStyle: "medium" })}–
+                      {formatDate(expense.statementRow.statementImport.periodEnd, { dateStyle: "medium" })}
+                    </span>
+                  )}
+                </>
+              )}
+            </p>
+          )}
         </div>
       </div>
 
@@ -84,7 +119,7 @@ function TransactionRow({
           )}
           <Popconfirm
             title={t("deleteExpenseQuestion")}
-            okButtonProps={{ danger: true, shape: "round" }}
+            okButtonProps={{ danger: true, shape: "round", loading: isDeleting, disabled: deletionPending }}
             cancelButtonProps={{ shape: "round" }}
             onConfirm={() => onDelete(expense.id)}
           >
@@ -93,6 +128,7 @@ function TransactionRow({
               variant="ghost"
               size="sm"
               className="!h-7 !px-2 text-[var(--rose)] hover:text-[var(--rose)]"
+              disabled={deletionPending}
               aria-label={t("deleteExpenseNamed", { title: expense.title })}
             >
               <DeleteOutlined />
@@ -115,7 +151,8 @@ type Props = {
   onPageSizeChange: (pageSize: number) => void;
   onLoadMore: () => void;
   onEdit: (expense: Expense) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<void>;
+  deletingExpenseId?: string;
   onReceipt: (expense: Expense) => void;
 };
 
@@ -133,6 +170,7 @@ export function ExpenseList({
   onPageSizeChange,
   onEdit,
   onDelete,
+  deletingExpenseId,
   onReceipt,
 }: Props) {
   const { t, formatNumber } = useLocale();
@@ -156,6 +194,7 @@ export function ExpenseList({
               expense={expense}
               onEdit={onEdit}
               onDelete={onDelete}
+              deletingExpenseId={deletingExpenseId}
               onReceipt={onReceipt}
             />
           ))

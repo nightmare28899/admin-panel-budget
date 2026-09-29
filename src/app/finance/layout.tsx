@@ -13,9 +13,15 @@ export default async function FinanceLayout({
 
   const profile = await getUserMeForLayoutAction();
   const user = profile.data?.user;
-  if (profile.error || !user || !user.isActive) {
+  if (profile.sessionExpired) {
     redirect("/user-login");
   }
+
+  if (profile.error || !user) {
+    throw new Error("Unable to load the user profile");
+  }
+
+  if (!user.isActive) redirect("/user-login");
 
   return <FinanceShell user={user}>{children}</FinanceShell>;
 }

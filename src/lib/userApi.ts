@@ -9,12 +9,15 @@ import type {
   ConfirmStatementImportPayload,
   ConfirmStatementImportResponse,
   DeleteStatementImportResponse,
-  MarkStatementImportPaidPayload,
+  CorrectStatementPaymentPayload,
   RevertStatementImportResponse,
   StatementImportCreateResponse,
   StatementImportDetail,
   StatementImportListResponse,
   UpdateStatementRowsPayload,
+  StatementPaymentMutationResponse,
+  StatementPaymentWritePayload,
+  VoidStatementPaymentPayload,
 } from "@/features/finance/statement-import.types";
 import type {
   CreateSubscriptionPayload,
@@ -31,11 +34,11 @@ export const userApi = {
   summary: (token: string) => request<Summary>("/expenses/today", { method: "GET" }, token),
   expenses: (token: string, query: string) => request<ExpenseListResponse>(`/expenses?${query}`, { method: "GET" }, token),
   expense: (token: string, id: string) => request<Expense>(`/expenses/${id}`, { method: "GET" }, token),
+  cardExpenseBreakdown: (token: string, query: string) =>
+    request<CardExpenseBreakdownResponse>(`/analytics/cards?${query}`, { method: "GET" }, token),
   createExpense: (token: string, body: FormData) => request<Expense>("/expenses", { method: "POST", body }, token),
   updateExpense: (token: string, id: string, body: ExpenseWritePayload) => request<Expense>(`/expenses/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
   deleteExpense: (token: string, id: string) => request<unknown>(`/expenses/${id}`, { method: "DELETE" }, token),
-  cardExpenseBreakdown: (token: string, query: string) =>
-    request<CardExpenseBreakdownResponse>(`/analytics/cards?${query}`, { method: "GET" }, token),
   categories: (token: string) => request<Category[]>("/categories", { method: "GET" }, token),
   createCategory: (token: string, body: CategoryWritePayload) => request<Category>("/categories", { method: "POST", body: JSON.stringify(body) }, token),
   updateCategory: (token: string, id: string, body: CategoryWritePayload) => request<Category>(`/categories/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
@@ -63,8 +66,14 @@ export const userApi = {
     request<ConfirmStatementImportResponse>(`/statement-imports/${id}/confirm`, { method: "POST", body: JSON.stringify(body) }, token),
   revertStatementImport: (token: string, id: string, body: ConfirmStatementImportPayload) =>
     request<RevertStatementImportResponse>(`/statement-imports/${id}/revert`, { method: "POST", body: JSON.stringify(body) }, token),
-  markStatementImportPaid: (token: string, id: string, body: MarkStatementImportPaidPayload) =>
-    request<StatementImportDetail>(`/statement-imports/${id}/paid`, { method: "PATCH", body: JSON.stringify(body) }, token),
+  resumeStatementImport: (token: string, id: string, body: ConfirmStatementImportPayload) =>
+    request<StatementImportDetail>(`/statement-imports/${id}/resume`, { method: "POST", body: JSON.stringify(body) }, token),
+  createStatementPayment: (token: string, id: string, body: StatementPaymentWritePayload) =>
+    request<StatementPaymentMutationResponse>(`/statement-imports/${id}/payments`, { method: "POST", body: JSON.stringify(body) }, token),
+  correctStatementPayment: (token: string, id: string, body: CorrectStatementPaymentPayload) =>
+    request<StatementPaymentMutationResponse>(`/statement-payments/${id}/corrections`, { method: "POST", body: JSON.stringify(body) }, token),
+  voidStatementPayment: (token: string, id: string, body: VoidStatementPaymentPayload) =>
+    request<StatementPaymentMutationResponse>(`/statement-payments/${id}/void`, { method: "POST", body: JSON.stringify(body) }, token),
   deleteStatementImport: (token: string, id: string) =>
     request<DeleteStatementImportResponse>(`/statement-imports/${id}`, { method: "DELETE" }, token),
   listSubscriptions: (token: string) =>
@@ -77,6 +86,12 @@ export const userApi = {
     request<Subscription>(`/subscriptions/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
   deactivateSubscription: (token: string, id: string) =>
     request<{ message: string; subscription: Subscription }>(`/subscriptions/${id}`, { method: "DELETE" }, token),
+  deleteSubscriptionPermanently: (token: string, id: string) =>
+    request<{ message: string }>(`/subscriptions/${id}/permanent`, { method: "DELETE" }, token),
+  linkExpensesToSubscription: (token: string, id: string, expenseIds: string[]) =>
+    request<{ message: string; linkedCount: number }>(`/subscriptions/${id}/link-expenses`, { method: "POST", body: JSON.stringify({ expenseIds }) }, token),
+  unlinkExpensesFromSubscription: (token: string, id: string, expenseIds: string[]) =>
+    request<{ message: string; unlinkedCount: number }>(`/subscriptions/${id}/unlink-expenses`, { method: "POST", body: JSON.stringify({ expenseIds }) }, token),
 };
 
 export type UserAccount = { id: string; email: string; name: string; role: string; currency?: string; isActive?: boolean; isPremium?: boolean; avatarUrl?: string | null };

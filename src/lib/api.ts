@@ -51,6 +51,16 @@ export type SendTestPushResponse = {
     failureReasons?: Record<string, number>;
 };
 
+export class ApiError extends Error {
+    constructor(
+        public readonly status: number,
+        message: string,
+    ) {
+        super(message);
+        this.name = "ApiError";
+    }
+}
+
 // The empty-body fallback below is a stable i18n message key carrying its
 // {status} interpolation value (see src/i18n/messages.ts + src/i18n/errors.ts
 // frontendError, which knows how to split and translate this exact shape) —
@@ -93,7 +103,7 @@ export async function request<T>(
 
     if (!res.ok) {
         const text = await res.text();
-        throw new Error(parseApiErrorMessage(text, res.status));
+        throw new ApiError(res.status, parseApiErrorMessage(text, res.status));
     }
 
     return res.json() as Promise<T>;

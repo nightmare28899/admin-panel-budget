@@ -39,15 +39,31 @@ export const KEYWORD_ICONS: Array<[RegExp, typeof ShoppingOutlined]> = [
   [/subscription|entertain|streaming/i, RocketOutlined],
 ];
 
+export type CategoryIconVisual =
+  | { kind: "glyph"; glyph: string }
+  | { kind: "component"; component: typeof ShoppingOutlined };
+
+export type CategoryVisualTokens = {
+  bg: string;
+  text: string;
+  icon: CategoryIconVisual;
+};
+
 // Shared across ExpenseList (transaction rows) and SubscriptionsView
 // (subscription rows) so the same category always renders with the same
 // color/icon on both pages.
-export function categoryTokens(category: Category | null | undefined) {
-  if (!category) return NEUTRAL_TOKEN;
+export function categoryTokens(category: Category | null | undefined): CategoryVisualTokens {
+  if (!category) return { ...NEUTRAL_TOKEN, icon: { kind: "component", component: NEUTRAL_TOKEN.icon } };
 
   const base = CATEGORY_TOKENS[hashToIndex(category.id ?? category.name, CATEGORY_TOKENS.length)];
+  const persistedGlyph = category.icon?.trim();
+  if (persistedGlyph) return { ...base, icon: { kind: "glyph", glyph: persistedGlyph } };
+
   const keywordIcon = KEYWORD_ICONS.find(([pattern]) => pattern.test(category.name))?.[1];
-  return keywordIcon ? { ...base, icon: keywordIcon } : base;
+  return {
+    ...base,
+    icon: { kind: "component", component: keywordIcon ?? base.icon },
+  };
 }
 
 export function hashToIndex(value: string, length: number): number {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Select, Switch } from "antd";
+import { Select } from "antd";
 import { CreditCardOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -11,16 +11,20 @@ import { Card } from "@/components/ui/Card";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { CreditCardsSkeleton, ListSkeleton } from "@/components/ui/ContentSkeleton";
 import { CreditCardPicker } from "./CreditCardPicker";
+import { MarkStatementPaidModal } from "./MarkStatementPaidModal";
 import { useCreditCards } from "./hooks/useCreditCards";
 import { useFeedbackBanner } from "./hooks/useFeedbackBanner";
 import { useStatementDelete } from "./hooks/useStatementDelete";
 import { useStatementImportsList } from "./hooks/useStatementImportsList";
-import { useStatementPaidToggle } from "./hooks/useStatementPaidToggle";
 import { useStatementRetry } from "./hooks/useStatementRetry";
 import { useStatementUpload } from "./hooks/useStatementUpload";
 import { STATUS_META } from "./statement-import.utils";
 import type { StatementImportStatus } from "./statement-import.types";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { createStatementPaymentAction, getCreditCardsOverviewAction } from "@/lib/userActions";
+import type { CreditCardOverviewResponse } from "./credit-cards.types";
+import { StatementDebtSummary } from "./StatementDebtSummary";
+import { frontendError } from "@/i18n/errors";
 
 export function StatementImportsView() {
   const router = useRouter();
@@ -36,6 +40,9 @@ export function StatementImportsView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
   const [selectedCardId, setSelectedCardId] = useState<string>();
+  const [pendingPaidId, setPendingPaidId] = useState<string>();
+  const [recordingPayment, setRecordingPayment] = useState(false);
+  const [overview, setOverview] = useState<CreditCardOverviewResponse>();
 
   const feedback = useFeedbackBanner();
   const creditCards = useCreditCards();
@@ -62,11 +69,18 @@ export function StatementImportsView() {
     setNotice: feedback.setNotice,
   });
 
-  const paidToggle = useStatementPaidToggle({
-    onToggled: imports.reload,
-    setError: feedback.setError,
-    setNotice: feedback.setNotice,
-  });
+  const loadOverview = async () => {
+    const result = await getCreditCardsOverviewAction("includeInactive=true");
+    if (result.error) feedback.setError(frontendError(result.error, t, "requestFailedGeneric"));
+    else setOverview(result.data);
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadOverview(), 0);
+    return () => window.clearTimeout(timer);
+    // The overview refreshes explicitly after payment writes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const deleteImport = useStatementDelete({
     onDeleted: imports.reload,
@@ -75,6 +89,9 @@ export function StatementImportsView() {
   });
 
   const bannerMessage = feedback.error || imports.error;
+  const pendingPaidStatement = imports.history?.items.find(
+    (item) => item.id === pendingPaidId,
+  );
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
@@ -161,21 +178,31 @@ export function StatementImportsView() {
                 accept="application/pdf,.pdf"
                 disabled={upload.uploading}
                 onChange={(event) => upload.selectFile(event.target.files?.[0])}
-                className="block w-full cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--bg-3)]/60 px-3 py-2 text-sm text-[var(--text-2)] file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:bg-[var(--emerald-dim)] file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[var(--emerald-text)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="peer sr-only"
               />
+              <div className="flex min-h-11 items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-3)]/60 p-2 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--emerald)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-2)]">
+                <label
+                  htmlFor="statement-file"
+                  aria-disabled={upload.uploading}
+                  className={`shrink-0 rounded-full bg-[var(--emerald-dim)] px-3 py-1.5 text-xs font-semibold text-[var(--emerald-text)] transition-opacity ${
+                    upload.uploading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                  }`}
+                >
+                  {t("choosePdfFile")}
+                </label>
+                <span className="min-w-0 truncate text-sm text-[var(--text-2)]">
+                  {upload.file ? upload.file.name : t("noFileSelected")}
+                  {upload.file && (
+                    <span className="ml-2 text-xs text-[var(--text-3)]">
+                      {formatNumber(upload.file.size / (1024 * 1024), { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MB
+                    </span>
+                  )}
+                </span>
+              </div>
               <p className="mt-1.5 text-xs text-[var(--text-3)]">
                  {t("pdfHelp")}
               </p>
             </div>
-
-            {upload.file && (
-              <div className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/40 px-3 py-2 text-sm text-[var(--text-2)]">
-                <span className="font-medium text-[var(--text-1)]">{upload.file.name}</span>
-                <span className="ml-2 text-xs text-[var(--text-3)]">
-                   {formatNumber(upload.file.size / (1024 * 1024), { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MB
-                </span>
-              </div>
-            )}
 
             <Button
               type="button"
@@ -200,6 +227,11 @@ export function StatementImportsView() {
           </p>
         </Card>
       </div>
+
+       <StatementDebtSummary
+         card={overview?.cards.find((card) => card.id === imports.filterCardId)}
+         portfolio={imports.filterCardId ? undefined : overview?.portfolio.byCurrency}
+       />
 
        <Card title={t("importHistory")} className="!p-5">
         {creditCards.cards.length > 0 && (
@@ -266,8 +298,8 @@ export function StatementImportsView() {
                              {t("warningCount", { count: formatNumber(statementImport.warningCount), warnings: t(statementImport.warningCount === 1 ? "warning" : "warnings") })}
                           </Badge>
                         )}
-                        <Badge variant={statementImport.isPaid ? "success" : "neutral"}>
-                           {statementImport.isPaid ? t("paid") : t("unpaid")}
+                        <Badge variant={statementImport.paymentStatus === "PAID" ? "success" : statementImport.paymentStatus === "PARTIAL" ? "warning" : "neutral"}>
+                           {statementImport.paymentStatus === "PAID" ? t("paid") : statementImport.paymentStatus === "PARTIAL" ? t("partial") : t("unpaid")}
                         </Badge>
                       </div>
                       <p className="mt-1 text-xs text-[var(--text-3)]">
@@ -280,17 +312,17 @@ export function StatementImportsView() {
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <label className="flex items-center gap-1.5 text-xs text-[var(--text-3)]">
-                         {t("paid")}
-                        <Switch
-                          size="small"
-                          checked={statementImport.isPaid}
-                          loading={paidToggle.togglingId === statementImport.id}
-                          disabled={Boolean(paidToggle.togglingId) && paidToggle.togglingId !== statementImport.id}
-                           aria-label={t("markStatementPaidState", { name: statementImport.sourceFileName || t("statements"), state: statementImport.isPaid ? t("unpaid").toLowerCase() : t("paid").toLowerCase() })}
-                          onChange={(checked) => void paidToggle.toggle(statementImport.id, checked)}
-                        />
-                      </label>
+                      {statementImport.status === "CONFIRMED" && statementImport.paymentSummary.currency !== null && (
+                        <Button
+                          type="button"
+                          variant="success"
+                          size="sm"
+                          disabled={recordingPayment}
+                          onClick={() => setPendingPaidId(statementImport.id)}
+                        >
+                          {t("recordPayment")}
+                        </Button>
+                      )}
                       {statementImport.status !== "UPLOADED" && (
                         <Button
                           type="button"
@@ -378,6 +410,33 @@ export function StatementImportsView() {
         confirmingLabel={t("deleting")}
         confirmVariant="danger"
         loading={deleteImport.deleting}
+      />
+
+      <MarkStatementPaidModal
+        open={Boolean(pendingPaidId)}
+        onClose={() => setPendingPaidId(undefined)}
+        onConfirm={async (value) => {
+          if (!pendingPaidId || !pendingPaidStatement) return;
+          setRecordingPayment(true);
+          const result = await createStatementPaymentAction(pendingPaidId, {
+            ...value,
+            expectedVersion: pendingPaidStatement.paymentVersion,
+            idempotencyKey: crypto.randomUUID(),
+          });
+          setRecordingPayment(false);
+          if (result.error) {
+            feedback.setError(frontendError(result.error, t, "paidStatusFailed"));
+            return;
+          }
+          await Promise.all([imports.reload(), loadOverview()]);
+          feedback.setNotice(t("paymentRecorded"));
+          setPendingPaidId(undefined);
+        }}
+        defaultAmount={
+          pendingPaidStatement?.paymentSummary.currentPaymentDue
+        }
+        defaultCurrency={pendingPaidStatement?.paymentSummary.currency ?? undefined}
+        loading={recordingPayment}
       />
     </div>
   );

@@ -12,13 +12,16 @@ import {
 } from "@/features/finance/testDataFixtures";
 import type {
   ConfirmStatementImportPayload,
-  MarkStatementImportPaidPayload,
+  CorrectStatementPaymentPayload,
+  StatementPaymentWritePayload,
   UpdateStatementRowsPayload,
+  VoidStatementPaymentPayload,
 } from "@/features/finance/statement-import.types";
 import type {
   CreateSubscriptionPayload,
   UpdateSubscriptionPayload,
 } from "@/features/finance/subscriptions.types";
+import { ApiError } from "./api";
 import { userApi } from "./userApi";
 import {
   clearUserSession,
@@ -46,11 +49,6 @@ export type SeedTestDataSummary = {
 // resolve it via frontendError()/t() before displaying it.
 const errorText = (error: unknown) =>
   error instanceof Error ? error.message : "requestFailedGeneric";
-
-const isUnauthorizedError = (error: unknown) => {
-  const message = errorText(error);
-  return message.includes("401") || message.toLowerCase().includes("unauthorized");
-};
 
 function testDataGenerationEnabled() {
   if (process.env.TEST_DATA_ENABLED !== "true") return false;
@@ -222,16 +220,30 @@ export async function userLogoutAction(): Promise<Result> {
   return {};
 }
 
-async function refreshUserSession() {
+function isUnauthorizedError(error: unknown): error is ApiError {
+  return error instanceof ApiError && error.status === 401;
+}
+
+function userErrorResult<T>(error: unknown): Result<T> {
+  return isUnauthorizedError(error)
+    ? { error: USER_SESSION_EXPIRED, sessionExpired: true }
+    : { error: errorText(error) };
+}
+
+async function refreshUserSession(): Promise<Result> {
   const refreshToken = await getUserRefreshToken();
-  if (!refreshToken) return false;
+  if (!refreshToken) {
+    return { error: USER_SESSION_EXPIRED, sessionExpired: true };
+  }
 
   try {
     await setUserSession(await userApi.refresh(refreshToken));
-    return true;
-  } catch {
-    await clearUserSession();
-    return false;
+    return {};
+  } catch (error) {
+    if (isUnauthorizedError(error)) {
+      await clearUserSession();
+    }
+    return userErrorResult<undefined>(error);
   }
 }
 
@@ -245,24 +257,28 @@ async function withUser<T>(
   try {
     return { data: await operation(token) };
   } catch (error) {
-    const message = errorText(error);
-    const unauthorized =
-      message.includes("401") || message.toLowerCase().includes("unauthorized");
+    if (retryAfterRefresh && isUnauthorizedError(error)) {
+      const refreshResult = await refreshUserSession();
+      if (refreshResult.error) {
+        return {
+          error: refreshResult.error,
+          sessionExpired: refreshResult.sessionExpired,
+        };
+      }
 
-    if (retryAfterRefresh && unauthorized && (await refreshUserSession())) {
       const nextToken = await getUserToken();
       if (nextToken) {
         try {
           return { data: await operation(nextToken) };
-        } catch {
-          // Return session-expired state below without exposing response details.
+        } catch (retryError) {
+          return userErrorResult<T>(retryError);
         }
       }
+
+      return { error: USER_SESSION_EXPIRED, sessionExpired: true };
     }
 
-    return unauthorized
-      ? { error: USER_SESSION_EXPIRED, sessionExpired: true }
-      : { error: message };
+    return userErrorResult<T>(error);
   }
 }
 
@@ -293,6 +309,10 @@ export async function getExpensesAction(query: string) {
   return withUser((token) => userApi.expenses(token, query), true);
 }
 
+export async function getCardExpenseBreakdownAction(query: string) {
+  return withUser((token) => userApi.cardExpenseBreakdown(token, query), true);
+}
+
 export async function getExpenseAction(id: string) {
   return withUser((token) => userApi.expense(token, id), true);
 }
@@ -307,10 +327,6 @@ export async function getCreditCardsAction() {
 
 export async function getCreditCardsOverviewAction(query: string) {
   return withUser((token) => userApi.creditCardsOverview(token, query), true);
-}
-
-export async function getCardExpenseBreakdownAction(query: string) {
-  return withUser((token) => userApi.cardExpenseBreakdown(token, query), true);
 }
 
 export async function createCreditCardAction(body: CreditCardWritePayload) {
@@ -406,13 +422,32 @@ export async function revertStatementImportAction(
   return withFreshUser((token) => userApi.revertStatementImport(token, id, body));
 }
 
-export async function markStatementImportPaidAction(
+export async function resumeStatementImportAction(
   id: string,
-  isPaid: boolean,
+  body: ConfirmStatementImportPayload,
 ) {
-  return withFreshUser((token) =>
-    userApi.markStatementImportPaid(token, id, { isPaid } satisfies MarkStatementImportPaidPayload),
-  );
+  return withFreshUser((token) => userApi.resumeStatementImport(token, id, body));
+}
+
+export async function createStatementPaymentAction(
+  id: string,
+  body: StatementPaymentWritePayload,
+) {
+  return withFreshUser((token) => userApi.createStatementPayment(token, id, body));
+}
+
+export async function correctStatementPaymentAction(
+  id: string,
+  body: CorrectStatementPaymentPayload,
+) {
+  return withFreshUser((token) => userApi.correctStatementPayment(token, id, body));
+}
+
+export async function voidStatementPaymentAction(
+  id: string,
+  body: VoidStatementPaymentPayload,
+) {
+  return withFreshUser((token) => userApi.voidStatementPayment(token, id, body));
 }
 
 export async function deleteStatementImportAction(id: string) {
@@ -430,6 +465,14 @@ export async function getSubscriptionsAction() {
   return withUser((token) => userApi.listSubscriptions(token), true);
 }
 
+export async function linkExpensesToSubscriptionAction(id: string, expenseIds: string[]) {
+  return withFreshUser((token) => userApi.linkExpensesToSubscription(token, id, expenseIds));
+}
+
+export async function unlinkExpensesFromSubscriptionAction(id: string, expenseIds: string[]) {
+  return withFreshUser((token) => userApi.unlinkExpensesFromSubscription(token, id, expenseIds));
+}
+
 export async function createSubscriptionAction(body: CreateSubscriptionPayload) {
   return withFreshUser((token) => userApi.createSubscription(token, body));
 }
@@ -443,6 +486,10 @@ export async function updateSubscriptionAction(
 
 export async function deactivateSubscriptionAction(id: string) {
   return withFreshUser((token) => userApi.deactivateSubscription(token, id));
+}
+
+export async function deleteSubscriptionAction(id: string) {
+  return withFreshUser((token) => userApi.deleteSubscriptionPermanently(token, id));
 }
 
 export async function createExpenseAction(

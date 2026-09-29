@@ -11,6 +11,7 @@ import type {
   Category,
   Expense,
   ExpenseListResponse,
+  ExpensePaymentStatus,
   ExpenseWritePayload,
   Summary,
 } from "./finance.types";
@@ -33,6 +34,7 @@ import { MetricCardsSkeleton, TableSkeleton } from "@/components/ui/ContentSkele
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Modal } from "@/components/ui/Modal";
 import { SubscriptionDueBanner } from "./SubscriptionDueBanner";
+import { useCreditCards } from "./hooks/useCreditCards";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
 
@@ -62,17 +64,29 @@ export function ExpensesView() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
-  const [filters, setFilters] = useState({
+  const [notice, setNotice] = useState<string>();
+  const [formError, setFormError] = useState<string>();
+  const [filters, setFilters] = useState<{
+    q: string;
+    from: string;
+    to: string;
+    categoryId: string;
+    creditCardId: string;
+    paymentStatus: ExpensePaymentStatus | "";
+  }>({
     q: "",
     from: "",
     to: "",
     categoryId: "",
+    creditCardId: "",
+    paymentStatus: "",
   });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [drawer, setDrawer] = useState(false);
   const [editing, setEditing] = useState<Expense>();
   const [saving, setSaving] = useState(false);
+  const [deletingExpenseId, setDeletingExpenseId] = useState<string>();
   const [receiptUrl, setReceiptUrl] = useState<string>();
   const [receiptLoading, setReceiptLoading] = useState(false);
   const [receiptError, setReceiptError] = useState<string>();
@@ -84,6 +98,7 @@ export function ExpensesView() {
   }>();
   const [activeUserLoadCompleted, setActiveUserLoadCompleted] = useState(false);
   const autoSeedAttemptedRef = useRef(false);
+  const { cards: creditCards } = useCreditCards();
 
   const reload = useCallback(
     async (nextPage = 1) => {
@@ -151,20 +166,30 @@ export function ExpensesView() {
   };
 
   const saveExpense = async (values: ExpenseWritePayload, receipt?: File) => {
+    if (saving) return;
+
     setSaving(true);
-    const result = editing
-      ? await updateExpenseAction(editing.id, values)
-      : await createExpenseAction(values, receipt);
-    setSaving(false);
+    setError(undefined);
+    setNotice(undefined);
+    setFormError(undefined);
 
-    if (result.error) {
-      setError(frontendError(result.error, t, "requestFailedGeneric"));
-      return;
+    try {
+      const result = editing
+        ? await updateExpenseAction(editing.id, values)
+        : await createExpenseAction(values, receipt);
+
+      if (result.error) {
+        setFormError(frontendError(result.error, t, "requestFailedGeneric"));
+        return;
+      }
+
+      setNotice(t(editing ? "expenseUpdated" : "expenseCreated"));
+      setDrawer(false);
+      setEditing(undefined);
+      await reload(page);
+    } finally {
+      setSaving(false);
     }
-
-    setDrawer(false);
-    setEditing(undefined);
-    void reload(page);
   };
 
   const openReceipt = async (expense: Expense) => {
@@ -179,9 +204,34 @@ export function ExpensesView() {
     setReceiptLoading(false);
   };
 
-  const refreshAfter = async (result: { error?: string }) => {
-    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
-    else void reload(page);
+  const deleteExpense = async (id: string) => {
+    if (deletingExpenseId) return;
+
+    setDeletingExpenseId(id);
+    setError(undefined);
+    setNotice(undefined);
+    setFormError(undefined);
+
+    try {
+      const result = await deleteExpenseAction(id);
+      if (result.error) {
+        setError(frontendError(result.error, t, "requestFailedGeneric"));
+        return;
+      }
+
+      setNotice(t("expenseDeleted"));
+      const remainingTotal = Math.max(0, (list?.pagination.totalCount ?? rows.length) - 1);
+      const lastPage = Math.max(1, Math.ceil(remainingTotal / pageSize));
+      await reload(Math.min(page, lastPage));
+    } finally {
+      setDeletingExpenseId(undefined);
+    }
+  };
+
+  const closeExpenseForm = () => {
+    if (saving) return;
+    setDrawer(false);
+    setFormError(undefined);
   };
 
   const generateTestData = useCallback(async () => {
@@ -294,6 +344,7 @@ export function ExpensesView() {
               variant="tinted"
               onClick={() => {
                 setEditing(undefined);
+                setFormError(undefined);
                 setDrawer(true);
               }}
             >
@@ -330,6 +381,24 @@ export function ExpensesView() {
               onClick={() => setError(undefined)}
               aria-label={t("dismissError")}
               className="shrink-0 cursor-pointer text-[var(--rose)]/70 transition-colors hover:text-[var(--rose)]"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {notice && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-[var(--emerald)]/40 bg-[var(--emerald-dim)] px-4 py-3 text-sm text-[var(--emerald-text)]"
+          >
+            <span>{notice}</span>
+            <button
+              type="button"
+              onClick={() => setNotice(undefined)}
+              aria-label={t("dismissNotification")}
+              className="shrink-0 cursor-pointer text-[var(--emerald-text)]/70 transition-colors hover:text-[var(--emerald-text)]"
             >
               ✕
             </button>
@@ -397,6 +466,40 @@ export function ExpensesView() {
                 }))
               }
             />
+            <Select
+              aria-label={t("filterByCard")}
+              allowClear
+              placeholder={t("allCards")}
+              style={{ width: 200 }}
+              value={filters.creditCardId || undefined}
+              options={creditCards.map((card) => ({
+                value: card.id,
+                label: `${card.bank} · ${card.name} •••• ${card.last4}`,
+              }))}
+              onChange={(value) =>
+                setFilters((current) => ({
+                  ...current,
+                  creditCardId: value ?? "",
+                }))
+              }
+            />
+            <Select
+              aria-label={t("filterPaymentStatus")}
+              value={filters.paymentStatus}
+              style={{ width: 180 }}
+              options={[
+                { value: "", label: t("all") },
+                { value: "PAID", label: t("paid") },
+                { value: "PARTIAL", label: t("partial") },
+                { value: "UNPAID", label: t("unpaid") },
+              ]}
+              onChange={(value: ExpensePaymentStatus | "") =>
+                setFilters((current) => ({
+                  ...current,
+                  paymentStatus: value,
+                }))
+              }
+            />
           </div>
           {initialLoading ? (
             <TableSkeleton rows={7} columns={5} />
@@ -413,11 +516,11 @@ export function ExpensesView() {
               onLoadMore={() => void loadMore()}
               onEdit={(expense) => {
                 setEditing(expense);
+                setFormError(undefined);
                 setDrawer(true);
               }}
-              onDelete={async (id) =>
-                refreshAfter(await deleteExpenseAction(id))
-              }
+              onDelete={deleteExpense}
+              deletingExpenseId={deletingExpenseId}
               onReceipt={(expense) => void openReceipt(expense)}
             />
           )}
@@ -426,17 +529,19 @@ export function ExpensesView() {
 
       <Modal
         open={drawer}
-        onClose={() => setDrawer(false)}
+        onClose={closeExpenseForm}
         title={editing ? t("editExpense") : t("newExpense")}
         maxWidth="max-w-xl"
       >
         <div className="max-h-[75vh] overflow-y-auto pr-1">
           <ExpenseForm
             categories={categories}
+            creditCards={creditCards}
             expense={editing}
             loading={saving}
+            error={formError}
             onSubmit={saveExpense}
-            onCancel={() => setDrawer(false)}
+            onCancel={closeExpenseForm}
           />
         </div>
       </Modal>

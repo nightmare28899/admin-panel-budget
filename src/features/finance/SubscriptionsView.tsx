@@ -22,16 +22,21 @@ import {
 import {
   createSubscriptionAction,
   deactivateSubscriptionAction,
+  deleteSubscriptionAction,
   getCategoriesAction,
   getSubscriptionsAction,
   getUserMeAction,
+  linkExpensesToSubscriptionAction,
   updateSubscriptionAction,
 } from "@/lib/userActions";
 import { Modal } from "@/components/ui/Modal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/Button";
 import { CreditCardsSkeleton } from "@/components/ui/ContentSkeleton";
 import { categoryTokens } from "./categoryVisuals";
 import { CreditCardPicker } from "./CreditCardPicker";
+import { ChargeGroupDetail } from "./ChargeGroupDetail";
+import { fetchAllExpensesForCategory, groupCharges, type ChargeGroup } from "./subscriptionCharges";
 import { useCreditCards } from "./hooks/useCreditCards";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
@@ -88,6 +93,8 @@ const PILL_SECONDARY =
 
 const PILL_DESTRUCTIVE =
   "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-[var(--sub-danger)]/30 bg-[var(--sub-danger)]/[0.15] font-medium text-[var(--sub-danger)] transition-colors hover:bg-[var(--sub-danger)] hover:text-white disabled:cursor-not-allowed disabled:opacity-40";
+
+const SUBSCRIPTION_ROWS_SCROLL_HEIGHT = 460;
 
 const BILLING_CYCLE_LABEL_KEYS = {
   DAILY: "daily",
@@ -168,6 +175,7 @@ function StatTileSkeleton() {
 // resetFields()/setFieldsValue() bookkeeping needed on the parent.
 function SubscriptionForm({
   subscription,
+  prefill,
   categories,
   creditCards,
   creditCardsLoading,
@@ -178,6 +186,15 @@ function SubscriptionForm({
   onCancel,
 }: {
   subscription?: Subscription;
+  /** Seeds the form from a detected recurring charge group when creating a subscription from it — ignored when editing an existing `subscription`. */
+  prefill?: {
+    name: string;
+    cost: number;
+    currency: string;
+    categoryId?: string | null;
+    paymentMethod?: string;
+    creditCardId?: string | null;
+  };
   categories: Category[];
   creditCards: CreditCardSummary[];
   creditCardsLoading: boolean;
@@ -190,7 +207,7 @@ function SubscriptionForm({
   const { t } = useLocale();
   const [form] = Form.useForm<SubscriptionFormValues>();
   const [selectedCreditCardId, setSelectedCreditCardId] = useState<string | undefined>(
-    subscription?.creditCardId ?? undefined,
+    subscription?.creditCardId ?? prefill?.creditCardId ?? undefined,
   );
   const [localError, setLocalError] = useState<string>();
   const watchedPaymentMethod =
@@ -232,7 +249,18 @@ function SubscriptionForm({
               categoryId: subscription.categoryId ?? undefined,
               reminderDays: subscription.reminderDays,
             }
-          : { currency: "MXN", billingCycle: "MONTHLY", paymentMethod: "CREDIT_CARD", reminderDays: 3 }
+          : prefill
+            ? {
+                name: prefill.name,
+                cost: prefill.cost,
+                currency: prefill.currency,
+                billingCycle: "MONTHLY",
+                nextPaymentDate: dayjs().add(1, "month"),
+                paymentMethod: prefill.paymentMethod ?? "CREDIT_CARD",
+                categoryId: prefill.categoryId ?? undefined,
+                reminderDays: 3,
+              }
+            : { currency: "MXN", billingCycle: "MONTHLY", paymentMethod: "CREDIT_CARD", reminderDays: 3 }
       }
       onFinish={submit}
     >
@@ -346,8 +374,59 @@ export function SubscriptionsView() {
   const [formError, setFormError] = useState<string>();
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string>();
+  const [deleteTarget, setDeleteTarget] = useState<Subscription>();
+  const [deletingSubscription, setDeletingSubscription] = useState(false);
+  const [chargeGroups, setChargeGroups] = useState<ChargeGroup[]>([]);
+  const [linkedChargesBySubscriptionId, setLinkedChargesBySubscriptionId] = useState<
+    Map<string, ChargeGroup>
+  >(new Map());
+  const [chargesError, setChargesError] = useState<string>();
+  const [noChargesCategory, setNoChargesCategory] = useState(false);
+  const [linkingGroup, setLinkingGroup] = useState<ChargeGroup>();
 
   const { cards: creditCards, cardsError: creditCardsError, loading: creditCardsLoading } = useCreditCards();
+
+  const loadCharges = useCallback(async (loadedCategories: Category[]) => {
+    const categoryLabel = t("subscriptionCategoryLabel");
+    const chargesCategory = loadedCategories.find(
+      (candidate) => candidate.name.trim().toLocaleLowerCase() === categoryLabel.trim().toLocaleLowerCase(),
+    );
+
+    if (!chargesCategory) {
+      setNoChargesCategory(true);
+      setChargeGroups([]);
+      setLinkedChargesBySubscriptionId(new Map());
+      return;
+    }
+    setNoChargesCategory(false);
+
+    const result = await fetchAllExpensesForCategory(chargesCategory.id);
+    if (result.error) {
+      setChargesError(frontendError(result.error, t, "requestFailedGeneric"));
+      return;
+    }
+    setChargesError(undefined);
+
+    // Expense.subscriptionId is the real link once "Convertir en suscripción"
+    // has run on a group — only charges still missing that link are
+    // genuinely unmatched "leftover" groups; the rest render inline under
+    // the subscription they were explicitly attached to.
+    const unlinked = result.expenses.filter((expense) => !expense.subscriptionId);
+    const linked = result.expenses.filter((expense) => expense.subscriptionId);
+    setChargeGroups(groupCharges(unlinked));
+
+    const bySubscriptionId = new Map<string, ChargeGroup>();
+    for (const expense of linked) {
+      const subscriptionId = expense.subscriptionId!;
+      const existing = bySubscriptionId.get(subscriptionId);
+      if (existing) existing.charges.push(expense);
+      else bySubscriptionId.set(subscriptionId, { key: subscriptionId, displayName: expense.title, charges: [expense] });
+    }
+    for (const group of bySubscriptionId.values()) {
+      group.charges.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    }
+    setLinkedChargesBySubscriptionId(bySubscriptionId);
+  }, [t]);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -374,7 +453,8 @@ export function SubscriptionsView() {
     }
     setSubscriptions(subs.data ?? []);
     setLoading(false);
-  }, [router, t]);
+    void loadCharges(cats.data ?? []);
+  }, [router, t, loadCharges]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void reload(), 0);
@@ -396,7 +476,15 @@ export function SubscriptionsView() {
   const closeForm = () => {
     setFormOpen(false);
     setEditingSubscription(undefined);
+    setLinkingGroup(undefined);
     setFormError(undefined);
+  };
+
+  const startConvert = (group: ChargeGroup) => {
+    setEditingSubscription(undefined);
+    setFormError(undefined);
+    setLinkingGroup(group);
+    setFormOpen(true);
   };
 
   const saveSubscription = async (payload: CreateSubscriptionPayload) => {
@@ -408,6 +496,12 @@ export function SubscriptionsView() {
     if (result.error) {
       setFormError(frontendError(result.error, t, "requestFailedGeneric"));
       return;
+    }
+    if (!editingSubscription && linkingGroup && result.data) {
+      await linkExpensesToSubscriptionAction(
+        result.data.id,
+        linkingGroup.charges.map((charge) => charge.id),
+      );
     }
     closeForm();
     void reload();
@@ -427,6 +521,20 @@ export function SubscriptionsView() {
     setBusyId(undefined);
     if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
     else void reload();
+  };
+
+  const confirmDeleteSubscription = async () => {
+    if (!deleteTarget) return;
+    setDeletingSubscription(true);
+    const result = await deleteSubscriptionAction(deleteTarget.id);
+    setDeletingSubscription(false);
+    if (result.error) {
+      setError(frontendError(result.error, t, "requestFailedGeneric"));
+      setDeleteTarget(undefined);
+      return;
+    }
+    setDeleteTarget(undefined);
+    void reload();
   };
 
   // Backend already returns subscriptions ordered by nextPaymentDate
@@ -461,18 +569,37 @@ export function SubscriptionsView() {
     { key: "paused", label: t("subsTabPaused", { count: formatNumber(pausedSubscriptions.length) }) },
   ];
 
-  // Client-side pagination over the filtered list — same fixed page size
-  // pattern used by ExpenseList/the previous version of this view.
-  const totalPages = Math.max(1, Math.ceil(filteredSubscriptions.length / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const pageStartIndex = filteredSubscriptions.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
-  const pageEndIndex = pageStartIndex === 0 ? 0 : Math.min(pageStartIndex + pageSize - 1, filteredSubscriptions.length);
-  const pagedSubscriptions = filteredSubscriptions.slice((safePage - 1) * pageSize, (safePage - 1) * pageSize + pageSize);
-  const batchSum = pagedSubscriptions.reduce((sum, subscription) => sum + Number(subscription.cost), 0);
   const pageSizeOptions = [5, 10, 20, 50].map((size) => ({
     value: size,
     label: t("rowsPerPageOption", { count: formatNumber(size) }),
   }));
+
+  // A subscription plan and its charge history are linked by Expense.subscriptionId
+  // (set once someone runs "Convertir en suscripción" on a detected group).
+  // Charges still missing that link have no active/paused state, so they ride
+  // along in every tab instead of being tied to the active/paused filter —
+  // one single list instead of a second table underneath.
+  const unmatchedChargeGroups = chargeGroups;
+
+  type SubscriptionRow =
+    | { type: "subscription"; subscription: Subscription }
+    | { type: "chargeOnly"; group: ChargeGroup };
+  const combinedRows: SubscriptionRow[] = [
+    ...filteredSubscriptions.map((subscription): SubscriptionRow => ({ type: "subscription", subscription })),
+    ...unmatchedChargeGroups.map((group): SubscriptionRow => ({ type: "chargeOnly", group })),
+  ];
+
+  // Client-side pagination over the combined list — same fixed page size
+  // pattern used by ExpenseList/the previous version of this view.
+  const totalPages = Math.max(1, Math.ceil(combinedRows.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStartIndex = combinedRows.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
+  const pageEndIndex = pageStartIndex === 0 ? 0 : Math.min(pageStartIndex + pageSize - 1, combinedRows.length);
+  const pagedRows = combinedRows.slice((safePage - 1) * pageSize, (safePage - 1) * pageSize + pageSize);
+  const batchSum = pagedRows.reduce(
+    (sum, row) => (row.type === "subscription" ? sum + Number(row.subscription.cost) : sum),
+    0,
+  );
 
   const dueBadge = (subscription: Subscription) => {
     if (!subscription.isActive) return null;
@@ -626,13 +753,13 @@ export function SubscriptionsView() {
                 ))}
               </div>
             </div>
-          ) : subscriptions.length === 0 ? (
+          ) : subscriptions.length === 0 && chargeGroups.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-14 text-center">
               <p className="max-w-sm font-[family-name:var(--font-sub-inter)] text-sm text-[var(--sub-text-medium)]">
                 {t("noSubscriptionsYetHelp")}
               </p>
             </div>
-          ) : filteredSubscriptions.length === 0 ? (
+          ) : combinedRows.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-14 text-center">
               <p className="max-w-sm font-[family-name:var(--font-sub-inter)] text-sm text-[var(--sub-text-medium)]">
                 {t("noSubscriptionsForFilter")}
@@ -640,11 +767,31 @@ export function SubscriptionsView() {
             </div>
           ) : (
             <>
-              <ul>
-                {pagedSubscriptions.map((subscription) => {
-                  const { icon: Icon } = categoryTokens(subscription.category);
+              <ul
+                className="overflow-y-auto"
+                style={{ maxHeight: SUBSCRIPTION_ROWS_SCROLL_HEIGHT }}
+              >
+                {pagedRows.map((row) => {
+                  if (row.type === "chargeOnly") {
+                    return (
+                      <li key={`charge-${row.group.key}`} className="border-b border-[var(--sub-border-subtle)] py-3 last:border-b-0">
+                        <ChargeGroupDetail
+                          group={row.group}
+                          categories={categories}
+                          variant="standalone"
+                          onChanged={() => void reload()}
+                          onConvert={() => startConvert(row.group)}
+                        />
+                      </li>
+                    );
+                  }
+
+                  const subscription = row.subscription;
+                  const { icon } = categoryTokens(subscription.category);
+                  const FallbackIcon = icon.kind === "component" ? icon.component : undefined;
                   const due = dueBadge(subscription);
                   const busy = busyId === subscription.id;
+                  const matchedGroup = linkedChargesBySubscriptionId.get(subscription.id);
 
                   return (
                     <li
@@ -654,7 +801,7 @@ export function SubscriptionsView() {
                       <div className="flex flex-wrap items-center justify-between gap-2.5">
                         <div className="flex min-w-0 flex-1 items-center gap-2.5">
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[var(--sub-surface-base)] text-lg text-[var(--sub-primary-light)]">
-                            <Icon />
+                            {icon.kind === "glyph" ? icon.glyph : FallbackIcon && <FallbackIcon />}
                           </span>
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-1.5">
@@ -690,40 +837,56 @@ export function SubscriptionsView() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="font-[family-name:var(--font-sub-mono)] text-[13px] font-medium tracking-[-0.01em] tabular-nums text-[var(--sub-text-high)]">
-                            {subscription.currency} {formatNumber(Number(subscription.cost), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </span>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => openEdit(subscription)}
-                              className={`${PILL_SECONDARY} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
-                            >
-                              {t("edit")}
-                            </button>
-                            {subscription.isActive ? (
-                              <button
-                                type="button"
-                                disabled={busy}
-                                onClick={() => void pauseSubscription(subscription.id)}
-                                className={`${PILL_DESTRUCTIVE} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
-                              >
-                                {busy ? t("pausing") : t("pause")}
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled={busy}
-                                onClick={() => void resumeSubscription(subscription.id)}
-                                className={`${PILL_SECONDARY} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
-                              >
-                                {busy ? t("resuming") : t("resume")}
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        <span className="shrink-0 font-[family-name:var(--font-sub-mono)] text-[13px] font-medium tracking-[-0.01em] tabular-nums text-[var(--sub-text-high)]">
+                          {subscription.currency} {formatNumber(Number(subscription.cost), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
                       </div>
+
+                      <div className="mt-2.5 flex justify-end gap-2 border-t border-[var(--sub-border-subtle)] pt-2.5">
+                        <button
+                          type="button"
+                          onClick={() => openEdit(subscription)}
+                          className={`${PILL_SECONDARY} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                        >
+                          {t("edit")}
+                        </button>
+                        {subscription.isActive ? (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => void pauseSubscription(subscription.id)}
+                            className={`${PILL_DESTRUCTIVE} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                          >
+                            {busy ? t("pausing") : t("pause")}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => void resumeSubscription(subscription.id)}
+                            className={`${PILL_SECONDARY} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                          >
+                            {busy ? t("resuming") : t("resume")}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(subscription)}
+                          className={`${PILL_DESTRUCTIVE} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                        >
+                          {t("deleteSubscription")}
+                        </button>
+                      </div>
+                      {matchedGroup && (
+                        <div className="mt-2.5 rounded-xl border border-[var(--sub-border-subtle)] bg-[var(--sub-surface-base)]/60 p-2.5">
+                          <ChargeGroupDetail
+                            group={matchedGroup}
+                            categories={categories}
+                            variant="inline"
+                            onChanged={() => void reload()}
+                          />
+                        </div>
+                      )}
                     </li>
                   );
                 })}
@@ -732,16 +895,16 @@ export function SubscriptionsView() {
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2.5 border-t border-[var(--sub-border-subtle)] pt-2.5">
                 <div className="flex flex-col gap-0.5">
                   <span className="font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-text-medium)]">
-                    {filteredSubscriptions.length === 0
+                    {combinedRows.length === 0
                       ? t("noRecords")
                       : t("showingRecords", {
                           start: formatNumber(pageStartIndex),
                           end: formatNumber(pageEndIndex),
-                          total: formatNumber(filteredSubscriptions.length),
-                          records: t(filteredSubscriptions.length === 1 ? "record" : "records"),
+                          total: formatNumber(combinedRows.length),
+                          records: t(combinedRows.length === 1 ? "record" : "records"),
                         })}
                   </span>
-                  {pagedSubscriptions.length > 0 && (
+                  {pagedRows.some((row) => row.type === "subscription") && (
                     <span className="font-[family-name:var(--font-sub-mono)] text-xs text-[var(--sub-text-low)]">
                       {t("visibleBatchTotal", {
                         amount: `${currencyLabel} ${formatNumber(batchSum, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
@@ -794,18 +957,39 @@ export function SubscriptionsView() {
             </>
           )}
         </div>
+
+        {chargesError && (
+          <p className="mt-3 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-danger)]">{chargesError}</p>
+        )}
+        {noChargesCategory && (
+          <p className="mt-3 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-text-medium)]">
+            {t("noSubscriptionCategory", { category: t("subscriptionCategoryLabel") })}
+          </p>
+        )}
       </div>
 
       <Modal
         open={formOpen}
         onClose={closeForm}
-        title={editingSubscription ? t("editSubscriptionTitle") : t("newSubscriptionTitle")}
+        title={editingSubscription ? t("editSubscriptionTitle") : linkingGroup ? t("convertToSubscription") : t("newSubscriptionTitle")}
         maxWidth="max-w-xl"
       >
         <div className="max-h-[75vh] overflow-y-auto pr-1">
           {formOpen && (
             <SubscriptionForm
               subscription={editingSubscription}
+              prefill={
+                linkingGroup
+                  ? {
+                      name: linkingGroup.displayName,
+                      cost: Number(linkingGroup.charges[0].cost),
+                      currency: linkingGroup.charges[0].currency,
+                      categoryId: linkingGroup.charges[0].categoryId ?? linkingGroup.charges[0].category?.id,
+                      paymentMethod: linkingGroup.charges[0].creditCardId ? "CREDIT_CARD" : (linkingGroup.charges[0].paymentMethod ?? undefined),
+                      creditCardId: linkingGroup.charges[0].creditCardId,
+                    }
+                  : undefined
+              }
               categories={categories}
               creditCards={creditCards}
               creditCardsLoading={creditCardsLoading}
@@ -818,6 +1002,18 @@ export function SubscriptionsView() {
           )}
         </div>
       </Modal>
+
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(undefined)}
+        onConfirm={confirmDeleteSubscription}
+        title={t("deleteSubscriptionQuestion")}
+        description={deleteTarget ? t("deleteSubscriptionDescription", { name: deleteTarget.name }) : t("cannotUndo")}
+        confirmLabel={t("deleteSubscription")}
+        confirmingLabel={t("deleting")}
+        confirmVariant="danger"
+        loading={deletingSubscription}
+      />
     </div>
   );
 }

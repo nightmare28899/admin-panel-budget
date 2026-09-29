@@ -40,6 +40,43 @@ export type StatementPaymentTargetKind =
   | "OTHER";
 
 export type MoneyValue = number | string;
+export type StatementPaymentStatus = "UNPAID" | "PARTIAL" | "PAID";
+export type StatementPaymentSource = "MANUAL" | "LEGACY_BACKFILL" | "CORRECTION";
+
+export type StatementPaymentIntegrityFlags = {
+  missingReconciliation: boolean;
+  failedReconciliation: boolean;
+  missingPaymentBasis: boolean;
+  conflictingNoInterestTargets: boolean;
+};
+
+export type StatementPaymentSummary = {
+  currency: string | null;
+  closingBalance: number | null;
+  paidTotal: number;
+  paymentStatus: StatementPaymentStatus;
+  isPaid: boolean;
+  remainingStatement: number | null;
+  noInterestTarget: number | null;
+  remainingNoInterest: number | null;
+  currentPaymentDue: number | null;
+  dueDate: string | null;
+  overpaid: number;
+  integrityFlags: StatementPaymentIntegrityFlags;
+};
+
+export type StatementPayment = {
+  id: string;
+  amount: MoneyValue;
+  currency: string;
+  paidAt: string;
+  note?: string | null;
+  source: StatementPaymentSource;
+  supersedesId?: string | null;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  createdAt: string;
+};
 
 export type CreditCardSummary = {
   id: string;
@@ -47,6 +84,7 @@ export type CreditCardSummary = {
   bank: string;
   brand: string;
   last4: string;
+  currency: string;
   color?: string | null;
   creditLimit?: MoneyValue | null;
   closingDay?: number | null;
@@ -78,6 +116,11 @@ export type StatementImportListItem = {
   revertedAt?: string | null;
   isPaid: boolean;
   paidAt?: string | null;
+  paidAmount?: MoneyValue | null;
+  paymentStatus: StatementPaymentStatus;
+  paymentVersion: number;
+  paymentSummary: StatementPaymentSummary;
+  reconciliation?: { closingBalance: MoneyValue; currency: string } | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -101,6 +144,7 @@ export type StatementImportCreateResponse = {
 };
 
 export type StatementReconciliation = {
+  currency: string;
   openingBalance: MoneyValue;
   chargesTotal: MoneyValue;
   paymentsTotal: MoneyValue;
@@ -159,11 +203,15 @@ export type StatementRow = {
   amount: MoneyValue;
   currency: string;
   kind: StatementRowKind;
+  parsedTransactionDate?: string | null;
+  parsedAmount: MoneyValue;
+  parsedCurrency: string;
+  parsedKind: StatementRowKind;
+  isAdjusted: boolean;
   decision: StatementRowDecision;
   categoryId?: string | null;
   linkedCreditCardId?: string | null;
   warningCodes?: string[] | null;
-  rawText?: string | null;
   decisionNote?: string | null;
   category?: Category | null;
   linkedCreditCard?: LinkedCreditCardSummary | null;
@@ -183,6 +231,8 @@ export type StatementImportDetail = StatementImportListItem & {
   instruments: StatementInstrument[];
   financingPlans: StatementFinancingPlan[];
   rows: StatementRow[];
+  adjustmentCount: number;
+  paymentHistory: StatementPayment[];
 };
 
 export type UpdateStatementRowPayload = {
@@ -221,13 +271,30 @@ export type RevertStatementImportResponse = {
   alreadyReverted: boolean;
 };
 
-export type MarkStatementImportPaidPayload = {
-  isPaid: boolean;
+export type StatementPaymentWritePayload = {
+  amount: number;
+  currency: string;
+  paidAt: string;
+  note?: string;
+  expectedVersion: number;
+  idempotencyKey: string;
 };
 
-// Exact backend response shape is unconfirmed at the time of writing (the
-// endpoint is being implemented in a sibling repo); this mirrors the small
-// confirmation-object shape used elsewhere in this API (e.g. userApi.logout).
+export type CorrectStatementPaymentPayload = StatementPaymentWritePayload & {
+  reason: string;
+};
+
+export type VoidStatementPaymentPayload = {
+  expectedVersion: number;
+  reason: string;
+};
+
+export type StatementPaymentMutationResponse = {
+  paymentVersion: number;
+  summary: StatementPaymentSummary;
+  history: StatementPayment[];
+};
+
 export type DeleteStatementImportResponse = {
   message: string;
 };
