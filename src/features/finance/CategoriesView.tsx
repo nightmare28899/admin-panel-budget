@@ -22,6 +22,8 @@ export function CategoriesView() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [notice, setNotice] = useState<string>();
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string>();
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -43,9 +45,43 @@ export function CategoriesView() {
     return () => window.clearTimeout(timer);
   }, [reload]);
 
-  const refreshAfter = async (result: { error?: string }) => {
-    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
-    else void reload();
+  const saveCategory = async (
+    operation: () => Promise<{ error?: string }>,
+    successMessage: "categoryCreated" | "categoryUpdated",
+  ): Promise<boolean> => {
+    setError(undefined);
+    setNotice(undefined);
+
+    const result = await operation();
+    if (result.error) {
+      setError(frontendError(result.error, t, "requestFailedGeneric"));
+      return false;
+    }
+
+    setNotice(t(successMessage));
+    await reload();
+    return true;
+  };
+
+  const handleDelete = async (id: string) => {
+    if (deletingCategoryId) return;
+
+    setDeletingCategoryId(id);
+    setError(undefined);
+    setNotice(undefined);
+
+    try {
+      const result = await deleteCategoryAction(id);
+      if (result.error) {
+        setError(frontendError(result.error, t, "requestFailedGeneric"));
+        return;
+      }
+
+      setNotice(t("categoryDeleted"));
+      await reload();
+    } finally {
+      setDeletingCategoryId(undefined);
+    }
   };
 
   return (
@@ -76,21 +112,38 @@ export function CategoriesView() {
         </div>
       )}
 
+      {notice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-[var(--emerald)]/40 bg-[var(--emerald-dim)] px-4 py-3 text-sm text-[var(--emerald-text)]"
+        >
+          <span>{notice}</span>
+          <button
+            type="button"
+            onClick={() => setNotice(undefined)}
+            aria-label={t("dismissNotification")}
+            className="shrink-0 cursor-pointer text-[var(--emerald-text)]/70 transition-colors hover:text-[var(--emerald-text)]"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <Card className="!p-4">
         {loading && categories.length === 0 ? (
           <ListSkeleton />
         ) : (
           <CategoryManager
             categories={categories}
-            onCreate={async (body: CategoryWritePayload) =>
-              refreshAfter(await createCategoryAction(body))
+            onCreate={(body: CategoryWritePayload) =>
+              saveCategory(() => createCategoryAction(body), "categoryCreated")
             }
-            onUpdate={async (id, body: CategoryWritePayload) =>
-              refreshAfter(await updateCategoryAction(id, body))
+            onUpdate={(id, body: CategoryWritePayload) =>
+              saveCategory(() => updateCategoryAction(id, body), "categoryUpdated")
             }
-            onDelete={async (id) =>
-              refreshAfter(await deleteCategoryAction(id))
-            }
+            onDelete={handleDelete}
+            deletingCategoryId={deletingCategoryId}
           />
         )}
       </Card>

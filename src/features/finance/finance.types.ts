@@ -1,9 +1,31 @@
-export type Category = { id: string; name: string; icon?: string | null; color?: string | null; budgetAmount?: number | null };
-export type Expense = { id: string; title: string; cost: number | string; currency: string; date: string; note?: string | null; merchantName?: string | null; locationLabel?: string | null; category?: Category | null; categoryId?: string | null; paymentMethod?: string | null; isInstallment?: boolean; installmentCount?: number | null; imageUrl?: string | null; imagePresignedUrl?: string };
-export type ExpenseWritePayload = { title: string; cost: string; currency: string; date?: string; categoryId: string; note?: string; merchantName?: string; locationLabel?: string };
+import type { LinkedCreditCardSummary } from "./statement-import.types";
+
+export type CategoryUsage = {
+  expenseCount: number;
+  subscriptionCount: number;
+  statementRowCount: number;
+};
+export type ExpensePaymentStatus = "PAID" | "PARTIAL" | "UNPAID";
+export type Category = { id: string; name: string; icon?: string | null; color?: string | null; budgetAmount?: number | null; usage?: CategoryUsage };
+export type Expense = { id: string; title: string; cost: number | string; currency: string; date: string; note?: string | null; merchantName?: string | null; locationLabel?: string | null; category?: Category | null; categoryId?: string | null; paymentMethod?: string | null; isInstallment?: boolean; installmentCount?: number | null; imageUrl?: string | null; imagePresignedUrl?: string; creditCardId?: string | null; creditCard?: LinkedCreditCardSummary | null; statementRow?: { statementImportId: string; statementImport: { isPaid: boolean; paymentStatus: "PAID" | "PARTIAL" | "UNPAID"; sourceFileName?: string | null; periodStart?: string | null; periodEnd?: string | null } } | null; isSubscription?: boolean; subscriptionId?: string | null };
+export type ExpenseWritePayload = { title: string; cost: string; currency: string; date?: string; categoryId: string; note?: string; merchantName?: string; locationLabel?: string; paymentMethod?: string; creditCardId?: string };
 export type CategoryWritePayload = { name: string; icon?: string; color?: string; budgetAmount?: number };
 export type ExpenseListResponse = { expenses: Expense[]; total: number; currencyBreakdown?: Array<{ currency: string; total: number }>; pagination: { page: number; limit: number; totalCount: number; totalPages: number; hasNext: boolean; hasPrev: boolean } };
 export type Summary = { total: number; currency?: string | null; currencyBreakdown?: Array<{ currency: string; total: number }>; budgetAmount?: number; spentInBudgetPeriod?: number; remaining?: number; percentage?: number; expenses?: Expense[] };
+export type CurrencyTotal = { currency: string; total: number };
+export type CardExpenseBreakdownGroup = {
+  creditCardId: string | null;
+  card: LinkedCreditCardSummary | null;
+  expenseCount: number;
+  totalsByCurrency: CurrencyTotal[];
+};
+export type CardExpenseBreakdownResponse = {
+  from: string;
+  to: string;
+  totalCount: number;
+  currencyBreakdown: CurrencyTotal[];
+  groups: CardExpenseBreakdownGroup[];
+};
 
 export function toCalendarDate(value: string | null | undefined): string {
   const match = typeof value === "string"
