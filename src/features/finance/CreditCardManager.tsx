@@ -79,6 +79,7 @@ export function CreditCardManager({
           icon="💳"
           label={t("totalCards")}
           value={String(portfolio.activeCards)}
+          extraPlacement="below"
           extra={<span className="text-xs text-[var(--text-3)]">{t("trackedCards", { count: formatNumber(portfolio.trackedCards) })}</span>}
         />
         {portfolio.byCurrency.map((summary) => (
@@ -88,6 +89,7 @@ export function CreditCardManager({
             icon="📈"
             label={`${t("spentThisCycle")} · ${summary.currency}`}
             value={formatMoney(summary.totalCurrentCycleSpend, summary.currency)}
+            extraPlacement="below"
             extra={<span className="text-xs text-[var(--text-3)]">{t("availableCredit")}: {formatMoney(summary.totalAvailableCredit, summary.currency)}</span>}
           />
         ))}
@@ -96,6 +98,7 @@ export function CreditCardManager({
           icon="⚡"
           label={t("transactions")}
           value={String(totalTransactions)}
+          extraPlacement="below"
           extra={<span className="text-xs text-[var(--text-3)]">{t("thisCycle")}</span>}
         />
       </div>

@@ -32,6 +32,7 @@ export function StatCard({
   trend,
   sparkline,
   extra,
+  extraPlacement = "side",
   className = "",
 }: {
   tone: StatCardTone;
@@ -42,6 +43,8 @@ export function StatCard({
   trend?: ReactNode;
   sparkline?: ReactNode;
   extra?: ReactNode;
+  /** "below" gives long secondary text the full card width instead of a side column. */
+  extraPlacement?: "side" | "below";
   className?: string;
 }) {
   return (
@@ -69,8 +72,9 @@ export function StatCard({
               </div>
             )}
           </div>
+          {extra && extraPlacement === "below" && <div className="mt-1.5 min-w-0">{extra}</div>}
         </div>
-        {extra && <div className="shrink-0 whitespace-nowrap">{extra}</div>}
+        {extra && extraPlacement === "side" && <div className="shrink-0 whitespace-nowrap">{extra}</div>}
       </div>
     </div>
   );
