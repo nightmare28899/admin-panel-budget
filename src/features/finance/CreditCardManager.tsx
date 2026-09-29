@@ -30,7 +30,7 @@ export function CreditCardManager({
   onReactivate: (id: string) => Promise<void>;
 }) {
   const { t, formatNumber } = useLocale();
-  const formatMoney = (value: number) => `MXN ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatMoney = (value: number, currency: string) => `${currency} ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const filterLabels: Record<FilterTab, string> = { all: t("all"), active: t("active"), inactive: t("inactive") };
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CreditCardOverviewItem>();
@@ -81,24 +81,16 @@ export function CreditCardManager({
           value={String(portfolio.activeCards)}
           extra={<span className="text-xs text-[var(--text-3)]">{t("trackedCards", { count: formatNumber(portfolio.trackedCards) })}</span>}
         />
-        <StatCard
-          tone="gold"
-          icon="📈"
-          label={t("spentThisCycle")}
-          value={formatMoney(portfolio.totalCurrentCycleSpend)}
-          extra={
-            portfolio.totalCreditLimit > 0 ? (
-              <span className="text-xs text-[var(--text-3)]">{t("limitAmount", { amount: formatMoney(portfolio.totalCreditLimit) })}</span>
-            ) : undefined
-          }
-        />
-        <StatCard
-          tone="emerald"
-          icon="🛡️"
-          label={t("availableCredit")}
-          value={formatMoney(portfolio.totalAvailableCredit)}
-          extra={<span className="text-xs text-[var(--text-3)]">{t("ofAmount", { amount: formatMoney(portfolio.totalCreditLimit) })}</span>}
-        />
+        {portfolio.byCurrency.map((summary) => (
+          <StatCard
+            key={summary.currency}
+            tone="gold"
+            icon="📈"
+            label={`${t("spentThisCycle")} · ${summary.currency}`}
+            value={formatMoney(summary.totalCurrentCycleSpend, summary.currency)}
+            extra={<span className="text-xs text-[var(--text-3)]">{t("availableCredit")}: {formatMoney(summary.totalAvailableCredit, summary.currency)}</span>}
+          />
+        ))}
         <StatCard
           tone="rose"
           icon="⚡"
@@ -154,6 +146,7 @@ export function CreditCardManager({
                   creditLimit: card.creditLimit ?? undefined,
                   closingDay: card.closingDay ?? undefined,
                   paymentDueDay: card.paymentDueDay ?? undefined,
+                  currency: card.currency,
                 });
                 setOpen(true);
               }}
@@ -165,7 +158,7 @@ export function CreditCardManager({
       )}
 
       <Modal open={open} onClose={closeModal} title={editing ? t("editCard") : t("addCard")}>
-        <Form form={form} layout="vertical" onFinish={(values) => void submit(values)}>
+        <Form form={form} layout="vertical" initialValues={{ currency: "MXN" }} onFinish={(values) => void submit(values)}>
           <Form.Item name="name" label={t("cardName")} rules={[{ required: true }]}>
             <Input maxLength={80} placeholder={t("rewardsExample")} />
           </Form.Item>
@@ -181,6 +174,17 @@ export function CreditCardManager({
             rules={[{ required: true }, { pattern: /^\d{4}$/, message: t("exactly4Digits") }]}
           >
             <Input maxLength={4} placeholder="1234" />
+          </Form.Item>
+          <Form.Item
+            name="currency"
+            label={t("currency")}
+            normalize={(value: string) => value.trim().toUpperCase()}
+            rules={[
+              { required: true },
+              { pattern: /^[A-Z]{3}$/, message: t("currencyCodeRequired") },
+            ]}
+          >
+            <Input maxLength={3} placeholder="MXN" className="uppercase" />
           </Form.Item>
           <Form.Item
             name="color"

@@ -3,6 +3,7 @@ export type CreditCardWritePayload = {
   bank: string;
   brand: string;
   last4: string;
+  currency: string;
   color?: string;
   creditLimit?: number;
   closingDay?: number;
@@ -10,16 +11,52 @@ export type CreditCardWritePayload = {
 };
 
 export type CreditCardCycle = {
+  currency: string;
   start: string;
   end: string;
   spend: number;
   expenseCount: number;
+  currencyMismatchCount: number;
 };
 
 export type CreditCardStatus = {
+  currency: string;
   limit: number | null;
   availableCredit: number | null;
   utilizationPercent: number | null;
+  owedBalance: number;
+};
+
+export type CreditCardNextPayment = {
+  currency: string;
+  amount: number;
+  dueDate: string | null;
+  previousAmount: number | null;
+};
+
+export type CreditCardStatementSummary = {
+  statementImportId: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  closingBalance: number | null;
+  paidTotal: number;
+  paymentStatus: "UNPAID" | "PARTIAL" | "PAID";
+  remainingStatement: number;
+  noInterestTarget: number | null;
+  currentPaymentDue: number | null;
+  dueDate: string | null;
+  postCloseSpend: number;
+  postCloseExpenseCount: number;
+  projectedNextCloseDate: string | null;
+  projectedNextCloseAmount: number;
+  projectedTotalDebt: number;
+  overpaid: number;
+  integrityFlags: {
+    missingReconciliation: boolean;
+    failedReconciliation: boolean;
+    missingPaymentBasis: boolean;
+    conflictingNoInterestTargets: boolean;
+  };
 };
 
 export type CreditCardSchedule = {
@@ -30,9 +67,11 @@ export type CreditCardSchedule = {
 };
 
 export type CreditCardSubscriptionsSummary = {
+  currency: string;
   activeCount: number;
   monthlyRecurringSpend: number;
   nextChargeDate: string | null;
+  currencyMismatchCount: number;
 };
 
 export type CreditCardFlags = {
@@ -41,6 +80,7 @@ export type CreditCardFlags = {
   overLimit: boolean;
   paymentDueSoon: boolean;
   closingSoon: boolean;
+  currencyMismatch: boolean;
 };
 
 export type CreditCardOverviewItem = {
@@ -56,25 +96,46 @@ export type CreditCardOverviewItem = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  currency: string;
   currentCycle: CreditCardCycle;
   creditStatus: CreditCardStatus;
+  nextPayment: CreditCardNextPayment | null;
+  statementSummary: CreditCardStatementSummary;
   schedule: CreditCardSchedule;
   subscriptions: CreditCardSubscriptionsSummary;
   flags: CreditCardFlags;
+  currencyMismatchCount: number;
+};
+
+export type CreditCardPortfolioCurrency = {
+  currency: string;
+  cardCount: number;
+  totalCreditLimit: number;
+  totalCurrentCycleSpend: number;
+  totalAvailableCredit: number;
+  totalOwedBalance: number;
+  totalClosingBalance: number;
+  totalPaid: number;
+  totalStatementRemainder: number;
+  totalCurrentPaymentDue: number;
+  earliestPaymentDueDate: string | null;
+  totalPostCloseSpend: number;
+  postCloseExpenseCount: number;
+  totalProjectedNextCloseAmount: number;
+  earliestProjectedNextCloseDate: string | null;
+  totalProjectedDebt: number;
+  utilizationPercent: number | null;
+  monthlyRecurringSpend: number;
 };
 
 export type CreditCardPortfolio = {
   trackedCards: number;
   activeCards: number;
   cardsWithLimit: number;
-  totalCreditLimit: number;
-  totalCurrentCycleSpend: number;
-  totalAvailableCredit: number;
-  utilizationPercent: number | null;
+  byCurrency: CreditCardPortfolioCurrency[];
   paymentDueSoonCount: number;
   highUtilizationCount: number;
   linkedSubscriptionsCount: number;
-  monthlyRecurringSpend: number;
 };
 
 export type CreditCardOverviewResponse = {

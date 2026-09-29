@@ -1,5 +1,5 @@
 import { request } from "./api";
-import type { Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
+import type { CardExpenseBreakdownResponse, Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
 import type {
   CreditCardOverviewResponse,
   CreditCardWritePayload,
@@ -34,6 +34,8 @@ export const userApi = {
   createExpense: (token: string, body: FormData) => request<Expense>("/expenses", { method: "POST", body }, token),
   updateExpense: (token: string, id: string, body: ExpenseWritePayload) => request<Expense>(`/expenses/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
   deleteExpense: (token: string, id: string) => request<unknown>(`/expenses/${id}`, { method: "DELETE" }, token),
+  cardExpenseBreakdown: (token: string, query: string) =>
+    request<CardExpenseBreakdownResponse>(`/analytics/cards?${query}`, { method: "GET" }, token),
   categories: (token: string) => request<Category[]>("/categories", { method: "GET" }, token),
   createCategory: (token: string, body: CategoryWritePayload) => request<Category>("/categories", { method: "POST", body: JSON.stringify(body) }, token),
   updateCategory: (token: string, id: string, body: CategoryWritePayload) => request<Category>(`/categories/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),

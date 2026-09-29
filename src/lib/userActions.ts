@@ -309,6 +309,10 @@ export async function getCreditCardsOverviewAction(query: string) {
   return withUser((token) => userApi.creditCardsOverview(token, query), true);
 }
 
+export async function getCardExpenseBreakdownAction(query: string) {
+  return withUser((token) => userApi.cardExpenseBreakdown(token, query), true);
+}
+
 export async function createCreditCardAction(body: CreditCardWritePayload) {
   return withFreshUser((token) => userApi.createCreditCard(token, body));
 }

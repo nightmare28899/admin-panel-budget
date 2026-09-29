@@ -1,52 +1,54 @@
 "use client";
 
 import { DatePicker, Segmented } from "antd";
-import { BarChartOutlined, SwapOutlined, WalletOutlined } from "@ant-design/icons";
+import {
+  BarChartOutlined,
+  CreditCardOutlined,
+  SwapOutlined,
+  WalletOutlined,
+} from "@ant-design/icons";
 import dayjs, { type Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { StatCard } from "@/components/ui/StatCard";
-import { ChartSkeleton, MetricCardsSkeleton } from "@/components/ui/ContentSkeleton";
+import {
+  ChartSkeleton,
+  MetricCardsSkeleton,
+} from "@/components/ui/ContentSkeleton";
 import { Sparkline, TrendBadge } from "@/components/ui/TrendBadge";
 import type { Delta } from "@/components/ui/TrendBadge";
-import { getExpensesAction, getUserMeAction } from "@/lib/userActions";
-import { toCalendarDate } from "./finance.types";
-import type { Expense } from "./finance.types";
+import {
+  getCardExpenseBreakdownAction,
+  getExpensesAction,
+  getUserMeAction,
+} from "@/lib/userActions";
+import type {
+  CardExpenseBreakdownResponse,
+  Expense,
+} from "./finance.types";
+import {
+  buildReportBuckets,
+  getEffectiveRangeEnd,
+  getPreviousRange,
+  isCardBreakdownReconciled,
+  MAX_REPORT_PAGES,
+  resolvePrimaryCurrency,
+  type ReportGranularity,
+} from "./reportMetrics";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
 
-type Granularity = "daily" | "weekly" | "monthly";
-
-function isGranularity(value: string | number): value is Granularity {
-  return value === "daily" || value === "weekly" || value === "monthly";
-}
-
-type Bucket = {
-  key: string;
-  label: string;
-  start: Dayjs;
-  totalsByCurrency: Record<string, number>;
-  count: number;
+type ExpenseRangeResult = {
+  expenses: Expense[];
+  complete: boolean;
+  error?: string;
 };
 
-function bucketKeyFor(date: Dayjs, granularity: Granularity): { key: string; start: Dayjs } {
-  if (granularity === "daily") {
-    const start = date.startOf("day");
-    return { key: start.format("YYYY-MM-DD"), start };
-  }
-  if (granularity === "weekly") {
-    const start = date.startOf("week");
-    return { key: start.format("YYYY-MM-DD"), start };
-  }
-  const start = date.startOf("month");
-  return { key: start.format("YYYY-MM"), start };
-}
-
-function labelFor(start: Dayjs, granularity: Granularity): string {
-  if (granularity === "daily") return start.format("MMM D");
-  if (granularity === "weekly") return start.format("MMM D");
-  return start.format("MMM YYYY");
+function isGranularity(
+  value: string | number,
+): value is ReportGranularity {
+  return value === "daily" || value === "weekly" || value === "monthly";
 }
 
 function computeDelta(current: number, previous: number): Delta {
@@ -54,18 +56,19 @@ function computeDelta(current: number, previous: number): Delta {
     return { pct: null, direction: current === 0 ? "flat" : "up" };
   }
   const pct = ((current - previous) / previous) * 100;
-  return { pct, direction: pct > 0.05 ? "up" : pct < -0.05 ? "down" : "flat" };
+  return {
+    pct,
+    direction: pct > 0.05 ? "up" : pct < -0.05 ? "down" : "flat",
+  };
 }
 
-// Lower spend, a lower per-period average, and fewer transactions all read as
-// tighter budget control here, so "down" is favorable across every KPI card.
+async function fetchExpensesInRange(
+  from: Dayjs,
+  to: Dayjs,
+): Promise<ExpenseRangeResult> {
+  const expenses: Expense[] = [];
 
-async function fetchExpensesInRange(from: Dayjs, to: Dayjs): Promise<{ expenses: Expense[]; error?: string }> {
-  const collected: Expense[] = [];
-  let page = 1;
-  // Safety cap: this account has well under a thousand records; this bound
-  // just guards against ever looping on unexpected data.
-  for (let i = 0; i < 10; i += 1) {
+  for (let page = 1; page <= MAX_REPORT_PAGES; page += 1) {
     const params = new URLSearchParams({
       page: String(page),
       limit: "100",
@@ -73,172 +76,223 @@ async function fetchExpensesInRange(from: Dayjs, to: Dayjs): Promise<{ expenses:
       to: to.format("YYYY-MM-DD"),
     });
     const result = await getExpensesAction(params.toString());
-    if (result.error) return { expenses: collected, error: result.error };
-    collected.push(...(result.data?.expenses ?? []));
-    if (!result.data?.pagination.hasNext) break;
-    page += 1;
+    if (result.error || !result.data) {
+      return { expenses, complete: false, error: result.error };
+    }
+
+    expenses.push(...result.data.expenses);
+    if (!result.data.pagination.hasNext) {
+      return {
+        expenses,
+        complete: expenses.length >= result.data.pagination.totalCount,
+      };
+    }
   }
-  return { expenses: collected };
+
+  return { expenses, complete: false };
 }
 
-function buildEmptyBuckets(from: Dayjs, to: Dayjs, granularity: Granularity): Bucket[] {
-  const buckets: Bucket[] = [];
-  let cursor = bucketKeyFor(from, granularity).start;
-  const lastKey = bucketKeyFor(to, granularity).key;
-
-  // Safety cap so a bad range can never produce a runaway loop.
-  for (let i = 0; i < 400; i += 1) {
-    const { key, start } = bucketKeyFor(cursor, granularity);
-    buckets.push({ key, label: labelFor(start, granularity), start, totalsByCurrency: {}, count: 0 });
-    if (key === lastKey) break;
-    cursor = granularity === "daily" ? cursor.add(1, "day") : granularity === "weekly" ? cursor.add(1, "week") : cursor.add(1, "month");
-  }
-  return buckets;
+function sumCurrency(expenses: Expense[], currency: string | null) {
+  if (!currency) return 0;
+  return expenses.reduce((sum, expense) => {
+    if (expense.currency !== currency) return sum;
+    const cost = typeof expense.cost === "string" ? Number(expense.cost) : expense.cost;
+    return Number.isFinite(cost) ? sum + cost : sum;
+  }, 0);
 }
 
 export function ReportsView() {
   const router = useRouter();
   const { t, formatDate, formatNumber } = useLocale();
-  const granularityOptions: { label: string; value: Granularity }[] = [
-    { label: t("daily"), value: "daily" },
-    { label: t("weekly"), value: "weekly" },
-    { label: t("monthly"), value: "monthly" },
-  ];
-  const [range, setRange] = useState<[Dayjs, Dayjs]>([dayjs().subtract(29, "day").startOf("day"), dayjs().endOf("day")]);
-  const [granularity, setGranularity] = useState<Granularity>("daily");
+  const requestSequence = useRef(0);
+  const [range, setRange] = useState<[Dayjs, Dayjs]>([
+    dayjs().subtract(29, "day").startOf("day"),
+    dayjs().endOf("day"),
+  ]);
+  const [granularity, setGranularity] =
+    useState<ReportGranularity>("daily");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [previousExpenses, setPreviousExpenses] = useState<Expense[]>([]);
+  const [configuredCurrency, setConfiguredCurrency] = useState<string>();
+  const [cardBreakdown, setCardBreakdown] =
+    useState<CardExpenseBreakdownResponse>();
+  const [currentComplete, setCurrentComplete] = useState(true);
+  const [comparisonComplete, setComparisonComplete] = useState(false);
+  const [comparisonAvailable, setComparisonAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [cardError, setCardError] = useState<string>();
 
-  const previousRange = useMemo((): [Dayjs, Dayjs] => {
-    const periodLengthDays = range[1].startOf("day").diff(range[0].startOf("day"), "day") + 1;
-    return [
-      range[0].subtract(periodLengthDays, "day").startOf("day"),
-      range[0].subtract(1, "day").endOf("day"),
-    ];
-  }, [range]);
+  const effectiveEnd = useMemo(
+    () => getEffectiveRangeEnd(range[1]),
+    [range],
+  );
+  const previousRange = useMemo(
+    () => getPreviousRange(range[0], effectiveEnd),
+    [effectiveEnd, range],
+  );
 
-  const load = useCallback(
-    async (from: Dayjs, to: Dayjs) => {
-      setLoading(true);
-      setError(undefined);
+  useEffect(() => {
+    const sequence = requestSequence.current + 1;
+    requestSequence.current = sequence;
+    setLoading(true);
+    setError(undefined);
+    setCardError(undefined);
+    setPreviousExpenses([]);
+    setComparisonAvailable(false);
+    setCardBreakdown(undefined);
 
+    void (async () => {
       const profile = await getUserMeAction();
+      if (sequence !== requestSequence.current) return;
       if (profile.error || !profile.data?.user?.isActive) {
         router.push("/user-login");
         return;
       }
 
-      const { expenses: collected, error: fetchError } = await fetchExpensesInRange(from, to);
-      if (fetchError) {
-        setError(frontendError(fetchError, t, "requestFailedGeneric"));
+      setConfiguredCurrency(profile.data.user.currency);
+      if (range[0].startOf("day").isAfter(effectiveEnd.startOf("day"))) {
+        setExpenses([]);
+        setCurrentComplete(false);
+        setComparisonComplete(false);
         setLoading(false);
         return;
       }
 
-      setExpenses(collected);
+      const cardQuery = new URLSearchParams({
+        from: range[0].format("YYYY-MM-DD"),
+        to: effectiveEnd.format("YYYY-MM-DD"),
+      });
+      const [currentResult, previousResult, cardResult] = await Promise.all([
+        fetchExpensesInRange(range[0], effectiveEnd),
+        fetchExpensesInRange(previousRange[0], previousRange[1]),
+        getCardExpenseBreakdownAction(cardQuery.toString()),
+      ]);
+      if (sequence !== requestSequence.current) return;
+
+      if (currentResult.error) {
+        setExpenses([]);
+        setCurrentComplete(false);
+        setError(
+          frontendError(currentResult.error, t, "requestFailedGeneric"),
+        );
+      } else {
+        setExpenses(currentResult.expenses);
+        setCurrentComplete(currentResult.complete);
+      }
+
+      if (previousResult.error) {
+        setPreviousExpenses([]);
+        setComparisonAvailable(false);
+        setComparisonComplete(false);
+      } else {
+        setPreviousExpenses(previousResult.expenses);
+        setComparisonAvailable(true);
+        setComparisonComplete(previousResult.complete);
+      }
+
+      if (cardResult.error || !cardResult.data) {
+        setCardError(
+          frontendError(cardResult.error, t, "requestFailedGeneric"),
+        );
+      } else {
+        setCardBreakdown(cardResult.data);
+      }
       setLoading(false);
-    },
-    [router, t],
+    })();
+  }, [effectiveEnd, previousRange, range, router, t]);
+
+  const currentBucketResult = useMemo(
+    () => buildReportBuckets(range[0], effectiveEnd, granularity, expenses),
+    [effectiveEnd, expenses, granularity, range],
   );
-
-  useEffect(() => {
-    void load(range[0], range[1]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range]);
-
-  useEffect(() => {
-    let cancelled = false;
-    // Previous-period comparison is a supplementary trend signal — if it
-    // fails to load, the KPI cards just fall back to no delta.
-    void fetchExpensesInRange(previousRange[0], previousRange[1]).then(({ expenses: collected, error: fetchError }) => {
-      if (!cancelled && !fetchError) setPreviousExpenses(collected);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [previousRange]);
-
-  const buckets = useMemo(() => {
-    const empty = buildEmptyBuckets(range[0], range[1], granularity).map((bucket) => ({
-      ...bucket,
-      label: formatDate(bucket.start.toDate(), granularity === "monthly" ? { month: "short", year: "numeric" } : { month: "short", day: "numeric" }),
-    }));
-    const byKey = new Map(empty.map((bucket) => [bucket.key, bucket]));
-
-    for (const expense of expenses) {
-      const calendarDate = toCalendarDate(expense.date);
-      if (!calendarDate) continue;
-      const { key } = bucketKeyFor(dayjs(calendarDate), granularity);
-      const bucket = byKey.get(key);
-      if (!bucket) continue;
-      const cost = typeof expense.cost === "string" ? parseFloat(expense.cost) : expense.cost;
-      if (Number.isNaN(cost)) continue;
-      bucket.totalsByCurrency[expense.currency] = (bucket.totalsByCurrency[expense.currency] ?? 0) + cost;
-      bucket.count += 1;
-    }
-
-    return Array.from(byKey.values());
-  }, [expenses, formatDate, granularity, range]);
-
+  const previousBucketResult = useMemo(
+    () =>
+      buildReportBuckets(
+        previousRange[0],
+        previousRange[1],
+        granularity,
+        previousExpenses,
+      ),
+    [granularity, previousExpenses, previousRange],
+  );
+  const cardIntegrityValid = cardBreakdown
+    ? isCardBreakdownReconciled(cardBreakdown)
+    : true;
+  const observedCurrencies = cardIntegrityValid && cardBreakdown
+    ? cardBreakdown.currencyBreakdown.map((item) => item.currency)
+    : expenses.map((expense) => expense.currency);
+  const primaryCurrency = resolvePrimaryCurrency(
+    configuredCurrency,
+    observedCurrencies,
+  );
+  const reportComplete =
+    currentComplete &&
+    currentBucketResult.complete &&
+    (!comparisonAvailable ||
+      (comparisonComplete && previousBucketResult.complete));
+  const buckets = currentBucketResult.buckets;
   const currencyTotals = useMemo(() => {
     const totals: Record<string, number> = {};
     for (const bucket of buckets) {
-      for (const [currency, amount] of Object.entries(bucket.totalsByCurrency)) {
+      for (const [currency, amount] of Object.entries(
+        bucket.totalsByCurrency,
+      )) {
         totals[currency] = (totals[currency] ?? 0) + amount;
       }
     }
     return totals;
   }, [buckets]);
-
-  const currencies = Object.keys(currencyTotals);
-  const primaryCurrency = currencies[0];
-  const grandTotal = primaryCurrency ? currencyTotals[primaryCurrency] : 0;
-  const bucketCount = buckets.length || 1;
-  const averagePerBucket = grandTotal / bucketCount;
-  const transactionCount = expenses.length;
-
-  const bucketTotalsSeries = useMemo(
-    () => buckets.map((bucket) => (primaryCurrency ? bucket.totalsByCurrency[primaryCurrency] ?? 0 : 0)),
-    [buckets, primaryCurrency],
-  );
-  const bucketCountsSeries = useMemo(() => buckets.map((bucket) => bucket.count), [buckets]);
-
-  const previousBucketCount = useMemo(
-    () => buildEmptyBuckets(previousRange[0], previousRange[1], granularity).length || 1,
-    [previousRange, granularity],
-  );
-
-  const previousGrandTotal = useMemo(() => {
-    if (!primaryCurrency) return 0;
-    return previousExpenses.reduce((sum, expense) => {
-      if (expense.currency !== primaryCurrency) return sum;
-      const cost = typeof expense.cost === "string" ? parseFloat(expense.cost) : expense.cost;
-      return Number.isNaN(cost) ? sum : sum + cost;
-    }, 0);
-  }, [previousExpenses, primaryCurrency]);
-
-  const previousAveragePerBucket = previousGrandTotal / previousBucketCount;
-  const previousTransactionCount = previousExpenses.length;
-
+  const currencies = Object.keys(currencyTotals).sort();
+  const grandTotal = primaryCurrency ? currencyTotals[primaryCurrency] ?? 0 : 0;
+  const averagePerBucket = grandTotal / Math.max(1, buckets.length);
+  const transactionCount = primaryCurrency
+    ? expenses.filter((expense) => expense.currency === primaryCurrency).length
+    : 0;
+  const previousGrandTotal = sumCurrency(previousExpenses, primaryCurrency);
+  const previousAveragePerBucket =
+    previousGrandTotal / Math.max(1, previousBucketResult.buckets.length);
+  const previousTransactionCount = primaryCurrency
+    ? previousExpenses.filter(
+        (expense) => expense.currency === primaryCurrency,
+      ).length
+    : 0;
   const totalSpentDelta = computeDelta(grandTotal, previousGrandTotal);
-  const averageDelta = computeDelta(averagePerBucket, previousAveragePerBucket);
-  const transactionsDelta = computeDelta(transactionCount, previousTransactionCount);
-
-  const maxBucketTotal = Math.max(
-    1,
-    ...buckets.map((bucket) => (primaryCurrency ? bucket.totalsByCurrency[primaryCurrency] ?? 0 : 0)),
+  const averageDelta = computeDelta(
+    averagePerBucket,
+    previousAveragePerBucket,
   );
-
+  const transactionsDelta = computeDelta(
+    transactionCount,
+    previousTransactionCount,
+  );
+  const bucketTotalsSeries = buckets.map((bucket) =>
+    primaryCurrency ? bucket.totalsByCurrency[primaryCurrency] ?? 0 : 0,
+  );
+  const bucketCountsSeries = buckets.map((bucket) =>
+    primaryCurrency ? bucket.countsByCurrency[primaryCurrency] ?? 0 : 0,
+  );
+  const maxBucketTotal = Math.max(1, ...bucketTotalsSeries);
   const showAllLabels = buckets.length <= 16;
   const labelStride = Math.max(1, Math.ceil(buckets.length / 10));
+  const canCompare = comparisonAvailable && reportComplete && primaryCurrency;
+  const cardCurrencyTotal =
+    cardBreakdown?.currencyBreakdown.find(
+      (item) => item.currency === primaryCurrency,
+    )?.total ?? 0;
+  const granularityOptions: { label: string; value: ReportGranularity }[] = [
+    { label: t("daily"), value: "daily" },
+    { label: t("weekly"), value: "weekly" },
+    { label: t("monthly"), value: "monthly" },
+  ];
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("spendingReports")}</h1>
+          <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">
+            {t("spendingReports")}
+          </h1>
           <p className="mt-0.5 text-sm text-[var(--text-3)]">
             {t("reportsDescription")}
           </p>
@@ -262,6 +316,15 @@ export function ReportsView() {
         </div>
       )}
 
+      {!loading && !reportComplete && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-4 py-3 text-sm text-[var(--text-2)]"
+        >
+          {t("reportIncompleteData")}
+        </div>
+      )}
+
       <Card className="!p-4 mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <DatePicker.RangePicker
@@ -269,13 +332,28 @@ export function ReportsView() {
             value={range}
             allowClear={false}
             presets={[
-              { label: t("today"), value: [dayjs().startOf("day"), dayjs().endOf("day")] },
-              { label: t("thisWeek"), value: [dayjs().startOf("week"), dayjs().endOf("week")] },
-              { label: t("thisMonthPreset"), value: [dayjs().startOf("month"), dayjs().endOf("month")] },
-              { label: t("last30Days"), value: [dayjs().subtract(29, "day").startOf("day"), dayjs().endOf("day")] },
+              {
+                label: t("today"),
+                value: [dayjs().startOf("day"), dayjs().endOf("day")],
+              },
+              {
+                label: t("thisWeek"),
+                value: [dayjs().startOf("week"), dayjs().endOf("week")],
+              },
+              {
+                label: t("thisMonthPreset"),
+                value: [dayjs().startOf("month"), dayjs().endOf("month")],
+              },
+              {
+                label: t("last30Days"),
+                value: [
+                  dayjs().subtract(29, "day").startOf("day"),
+                  dayjs().endOf("day"),
+                ],
+              },
             ]}
             onChange={(dates) => {
-              if (dates && dates[0] && dates[1]) {
+              if (dates?.[0] && dates[1]) {
                 setRange([dates[0].startOf("day"), dates[1].endOf("day")]);
               }
             }}
@@ -299,73 +377,176 @@ export function ReportsView() {
             tone="info"
             icon={<WalletOutlined />}
             label={t("totalSpent")}
-            unit={primaryCurrency || undefined}
-            value={primaryCurrency ? formatNumber(grandTotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
-            trend={primaryCurrency && <TrendBadge delta={totalSpentDelta} />}
-            sparkline={primaryCurrency && <Sparkline values={bucketTotalsSeries} favorable={totalSpentDelta.direction} />}
+            unit={reportComplete ? primaryCurrency ?? undefined : undefined}
+            value={
+              reportComplete && primaryCurrency
+                ? formatNumber(grandTotal, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+                : "—"
+            }
+            trend={canCompare && <TrendBadge delta={totalSpentDelta} />}
+            sparkline={
+              reportComplete && primaryCurrency ? (
+                <Sparkline
+                  values={bucketTotalsSeries}
+                  favorable={totalSpentDelta.direction}
+                />
+              ) : undefined
+            }
           />
           <StatCard
             tone="gold"
             icon={<BarChartOutlined />}
-            label={t("averagePer", { period: t(granularity === "daily" ? "dayPeriod" : granularity === "weekly" ? "weekPeriod" : "monthPeriod") })}
-            unit={primaryCurrency || undefined}
-            value={primaryCurrency ? formatNumber(averagePerBucket, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
-            trend={primaryCurrency && <TrendBadge delta={averageDelta} />}
-            sparkline={primaryCurrency && <Sparkline values={bucketTotalsSeries} favorable={averageDelta.direction} />}
+            label={t("averagePer", {
+              period: t(
+                granularity === "daily"
+                  ? "dayPeriod"
+                  : granularity === "weekly"
+                    ? "weekPeriod"
+                    : "monthPeriod",
+              ),
+            })}
+            unit={reportComplete ? primaryCurrency ?? undefined : undefined}
+            value={
+              reportComplete && primaryCurrency
+                ? formatNumber(averagePerBucket, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+                : "—"
+            }
+            trend={canCompare && <TrendBadge delta={averageDelta} />}
+            sparkline={
+              reportComplete && primaryCurrency ? (
+                <Sparkline
+                  values={bucketTotalsSeries}
+                  favorable={averageDelta.direction}
+                />
+              ) : undefined
+            }
           />
           <StatCard
             tone="emerald"
             icon={<SwapOutlined />}
             label={t("transactions")}
-            value={formatNumber(transactionCount)}
-            trend={<TrendBadge delta={transactionsDelta} />}
-            sparkline={<Sparkline values={bucketCountsSeries} favorable={transactionsDelta.direction} />}
+            value={
+              reportComplete && primaryCurrency
+                ? formatNumber(transactionCount)
+                : "—"
+            }
+            trend={canCompare && <TrendBadge delta={transactionsDelta} />}
+            sparkline={
+              reportComplete && primaryCurrency ? (
+                <Sparkline
+                  values={bucketCountsSeries}
+                  favorable={transactionsDelta.direction}
+                />
+              ) : undefined
+            }
           />
         </div>
       )}
 
-      {currencies.length > 1 && (
+      {!loading && reportComplete && !primaryCurrency && expenses.length > 0 && (
+        <div
+          role="status"
+          className="mb-4 rounded-xl border border-[var(--border-soft)] bg-[var(--surface-1)] px-4 py-3 text-sm text-[var(--text-2)]"
+        >
+          {t("reportPrimaryCurrencyUnavailable")}
+        </div>
+      )}
+
+      {!loading && reportComplete && currencies.length > 1 && (
         <Card className="!p-4 mb-4">
           <p className="mb-2 text-[11px] uppercase tracking-[0.04em] text-[var(--text-3)]">
-             {t("otherCurrencies")}
+            {t("otherCurrencies")}
           </p>
           <div className="flex flex-wrap gap-4">
-            {currencies.slice(1).map((currency) => (
-              <span key={currency} className="font-mono text-sm text-[var(--text-2)]">
-                 {formatNumber(currencyTotals[currency], { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
-              </span>
-            ))}
+            {currencies
+              .filter((currency) => currency !== primaryCurrency)
+              .map((currency) => (
+                <span
+                  key={currency}
+                  className="font-mono text-sm text-[var(--text-2)]"
+                >
+                  {formatNumber(currencyTotals[currency], {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{" "}
+                  {currency}
+                </span>
+              ))}
           </div>
         </Card>
       )}
 
-       <Card className="!p-4" title={t("spendingOverTime")}>
+      <Card className="!p-4 mb-4" title={t("spendingOverTime")}>
         {loading ? (
           <ChartSkeleton />
-        ) : buckets.length === 0 ? (
-           <p className="py-8 text-center text-sm text-[var(--text-3)]">{t("noDataRange")}</p>
+        ) : !reportComplete ? (
+          <p className="py-8 text-center text-sm text-[var(--text-3)]">
+            {t("reportIncompleteData")}
+          </p>
+        ) : expenses.length === 0 ? (
+          <p className="py-8 text-center text-sm text-[var(--text-3)]">
+            {t("noDataRange")}
+          </p>
+        ) : !primaryCurrency ? (
+          <p className="py-8 text-center text-sm text-[var(--text-3)]">
+            {t("reportPrimaryCurrencyUnavailable")}
+          </p>
         ) : (
           <div className="w-full overflow-x-auto">
             <svg
               role="img"
-               aria-label={t("spendingBarChart")}
+              aria-label={t("spendingBarChart")}
               viewBox={`0 0 ${Math.max(320, buckets.length * 40)} 220`}
               className="h-[220px] w-full min-w-[320px]"
               preserveAspectRatio="none"
             >
-              <line x1="0" y1="188" x2={Math.max(320, buckets.length * 40)} y2="188" stroke="var(--border-soft)" strokeWidth="1" />
+              <line
+                x1="0"
+                y1="188"
+                x2={Math.max(320, buckets.length * 40)}
+                y2="188"
+                stroke="var(--border-soft)"
+                strokeWidth="1"
+              />
               {buckets.map((bucket, index) => {
-                const barWidth = Math.max(320, buckets.length * 40) / buckets.length;
-                const value = primaryCurrency ? bucket.totalsByCurrency[primaryCurrency] ?? 0 : 0;
-                const barHeight = maxBucketTotal > 0 ? (value / maxBucketTotal) * 160 : 0;
+                const chartWidth = Math.max(320, buckets.length * 40);
+                const barWidth = chartWidth / buckets.length;
+                const value = bucket.totalsByCurrency[primaryCurrency] ?? 0;
+                const count = bucket.countsByCurrency[primaryCurrency] ?? 0;
+                const barHeight = (value / maxBucketTotal) * 160;
                 const x = index * barWidth + barWidth * 0.2;
                 const width = barWidth * 0.6;
                 const y = 188 - barHeight;
                 const showLabel = showAllLabels || index % labelStride === 0;
+                const label = formatDate(
+                  bucket.start.toDate(),
+                  granularity === "monthly"
+                    ? { month: "short", year: "numeric" }
+                    : { month: "short", day: "numeric" },
+                );
                 return (
                   <g key={bucket.key}>
                     <title>
-                       {t("chartTitle", { label: bucket.label, value: formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), currency: primaryCurrency ?? "", count: formatNumber(bucket.count), transactions: t(bucket.count === 1 ? "transactionWord" : "transactionsWord") })}
+                      {t("chartTitle", {
+                        label,
+                        value: formatNumber(value, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }),
+                        currency: primaryCurrency ?? "",
+                        count: formatNumber(count),
+                        transactions: t(
+                          count === 1
+                            ? "transactionWord"
+                            : "transactionsWord",
+                        ),
+                      })}
                     </title>
                     <rect
                       x={x}
@@ -384,13 +565,96 @@ export function ReportsView() {
                         fontSize="9"
                         fill="var(--text-3)"
                       >
-                        {bucket.label}
+                        {label}
                       </text>
                     )}
                   </g>
                 );
               })}
             </svg>
+          </div>
+        )}
+      </Card>
+
+      <Card className="!p-4" title={t("cardExpenseBreakdown")}>
+        <div className="mb-4 flex items-start gap-3">
+          <CreditCardOutlined className="mt-0.5 text-[var(--text-3)]" />
+          <p className="text-sm text-[var(--text-3)]">
+            {t("cardExpenseBreakdownDescription")}
+          </p>
+        </div>
+        {loading ? (
+          <ChartSkeleton />
+        ) : cardError ? (
+          <p role="alert" className="py-6 text-sm text-[var(--rose)]">
+            {cardError}
+          </p>
+        ) : !cardIntegrityValid ? (
+          <p role="alert" className="py-6 text-sm text-[var(--rose)]">
+            {t("cardMetricsIntegrityError")}
+          </p>
+        ) : !cardBreakdown?.groups.length ? (
+          <p className="py-6 text-center text-sm text-[var(--text-3)]">
+            {t("noDataRange")}
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {cardBreakdown.groups.map((group) => {
+              const primaryTotal = primaryCurrency
+                ? group.totalsByCurrency.find(
+                    (item) => item.currency === primaryCurrency,
+                  )?.total ?? 0
+                : 0;
+              const percentage =
+                primaryCurrency && cardCurrencyTotal > 0
+                  ? (primaryTotal / cardCurrencyTotal) * 100
+                  : null;
+              return (
+                <section
+                  key={group.creditCardId ?? "no-card"}
+                  className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-1)] p-4"
+                >
+                  <h3 className="font-medium text-[var(--text-1)]">
+                    {group.card
+                      ? t("cardEnding", {
+                          bank: group.card.bank,
+                          name: group.card.name,
+                          last4: group.card.last4,
+                        })
+                      : t("noCard")}
+                  </h3>
+                  <p className="mt-1 text-sm text-[var(--text-3)]">
+                    {t("expensesCount", {
+                      count: formatNumber(group.expenseCount),
+                    })}
+                  </p>
+                  <div className="mt-3 space-y-1.5">
+                    {group.totalsByCurrency.map((item) => (
+                      <p
+                        key={item.currency}
+                        className="font-mono text-sm text-[var(--text-2)]"
+                      >
+                        {formatNumber(item.total, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}{" "}
+                        {item.currency}
+                      </p>
+                    ))}
+                  </div>
+                  {percentage !== null && (
+                    <p className="mt-3 text-xs text-[var(--text-3)]">
+                      {t("currencySpendShare", {
+                        percent: formatNumber(percentage, {
+                          maximumFractionDigits: 1,
+                        }),
+                        currency: primaryCurrency ?? "",
+                      })}
+                    </p>
+                  )}
+                </section>
+              );
+            })}
           </div>
         )}
       </Card>

@@ -9,8 +9,6 @@ import {
 } from "./creditCardVisuals";
 import type { CreditCardOverviewItem } from "./credit-cards.types";
 
-// Credit cards don't carry their own currency (unlike expenses/subscriptions);
-// match the same "MXN" convention already used for statement reconciliation.
 function usageTone(card: CreditCardOverviewItem): "emerald" | "gold" | "rose" {
   if (card.flags.overLimit) return "rose";
   if (card.flags.highUtilization) return "gold";
@@ -34,8 +32,8 @@ export function CreditCardTile({
   onDeactivate: () => void;
   onReactivate: () => void;
 }) {
-  const { t, formatNumber } = useLocale();
-  const formatMoney = (value: number) => `MXN ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const { t, formatNumber, formatDate } = useLocale();
+  const formatMoney = (value: number) => `${card.currency} ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const background = creditCardBackground(card);
   const tone = usageTone(card);
 
@@ -82,7 +80,7 @@ export function CreditCardTile({
         {card.creditStatus.limit != null ? (
           <div>
             <div className="flex items-center justify-between text-xs text-[var(--text-3)]">
-               <span>{t("spendingThisCycle")}</span>
+               <span>{t("projectedDebt")}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${USAGE_BADGE_CLASS[tone]}`}
               >
@@ -90,11 +88,28 @@ export function CreditCardTile({
               </span>
             </div>
             <p className="mt-1 font-mono text-sm text-[var(--text-1)]">
-              {formatMoney(card.currentCycle.spend)} / {formatMoney(card.creditStatus.limit)}
+              {formatMoney(card.creditStatus.owedBalance)} / {formatMoney(card.creditStatus.limit)}
             </p>
           </div>
         ) : (
            <p className="text-xs text-[var(--text-3)]">{t("noCreditLimit")}</p>
+        )}
+
+        <div className="space-y-1.5 text-xs text-[var(--text-3)]">
+          <p>
+            {t("currentPaymentDue")}: <span className="font-mono text-[var(--text-1)]">{card.statementSummary.currentPaymentDue == null ? "—" : formatMoney(card.statementSummary.currentPaymentDue)}</span>
+            {card.statementSummary.dueDate && <> · {formatDate(card.statementSummary.dueDate, { dateStyle: "medium" })}</>}
+          </p>
+          <p>
+            {t("projectedNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.projectedNextCloseAmount)}</span>
+            {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
+          </p>
+        </div>
+
+        {card.flags.currencyMismatch && (
+          <p role="status" className="rounded-lg border border-[var(--gold)]/25 bg-[var(--gold-dim)] px-3 py-2 text-xs text-[var(--gold-text)]">
+            {t("currencyMismatchWarning", { count: formatNumber(card.currencyMismatchCount), currency: card.currency })}
+          </p>
         )}
 
         <div className="flex flex-wrap gap-2">
