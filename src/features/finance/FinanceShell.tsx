@@ -88,14 +88,6 @@ export function FinanceShell({
 }) {
   const router = useRouter();
   const { t } = useLocale();
-  const pageTitles: Record<string, string> = {
-    "/finance/expenses": t("expenses"),
-    "/finance/cards": t("myCards"),
-    "/finance/statements": t("cardStatements"),
-    "/finance/categories": t("categories"),
-    "/finance/subscriptions": t("subscriptions"),
-    "/finance/reports": t("reports"),
-  };
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
 
@@ -109,8 +101,6 @@ export function FinanceShell({
     <>
       <AppShell
         navItems={createNavItems(t)}
-        pageTitles={pageTitles}
-        defaultTitle="Budget Panel"
         user={user}
         onSignOut={() => setLogoutConfirmationOpen(true)}
         signingOut={loggingOut}

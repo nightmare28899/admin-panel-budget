@@ -245,8 +245,8 @@ export function AppShell({
   children,
 }: {
   navItems: AppShellNavItem[];
-  pageTitles: Record<string, string>;
-  defaultTitle: string;
+  pageTitles?: Record<string, string>;
+  defaultTitle?: string;
   user: AppShellUser;
   profileHref?: string;
   onSignOut?: () => void | Promise<void>;
@@ -265,7 +265,7 @@ export function AppShell({
     getSidebarCollapsedServerSnapshot,
   );
   const pathname = usePathname();
-  const title = pageTitles[pathname] || defaultTitle;
+  const title = pageTitles?.[pathname] || defaultTitle;
 
   const toggleCollapsed = () => setSidebarCollapsed(!collapsed);
 
@@ -320,7 +320,9 @@ export function AppShell({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <h1 className="font-serif text-xl font-semibold text-[var(--text-1)] sm:text-[22px]">{title}</h1>
+              {title ? (
+                <h1 className="font-serif text-xl font-semibold text-[var(--text-1)] sm:text-[22px]">{title}</h1>
+              ) : null}
             </div>
 
             <div className="flex items-center gap-x-3.5">
