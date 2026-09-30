@@ -42,6 +42,7 @@ export type CreditCardStatementSummary = {
   paidTotal: number;
   paymentStatus: "UNPAID" | "PARTIAL" | "PAID";
   remainingStatement: number;
+  deferredInstallmentBalance: number;
   noInterestTarget: number | null;
   currentPaymentDue: number | null;
   dueDate: string | null;
@@ -117,6 +118,7 @@ export type CreditCardPortfolioCurrency = {
   totalClosingBalance: number;
   totalPaid: number;
   totalStatementRemainder: number;
+  totalDeferredInstallmentBalance: number;
   totalCurrentPaymentDue: number;
   earliestPaymentDueDate: string | null;
   totalPostCloseSpend: number;

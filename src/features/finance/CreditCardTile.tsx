@@ -100,6 +100,11 @@ export function CreditCardTile({
             {t("currentPaymentDue")}: <span className="font-mono text-[var(--text-1)]">{card.statementSummary.currentPaymentDue == null ? "—" : formatMoney(card.statementSummary.currentPaymentDue)}</span>
             {card.statementSummary.dueDate && <> · {formatDate(card.statementSummary.dueDate, { dateStyle: "medium" })}</>}
           </p>
+          {card.statementSummary.deferredInstallmentBalance > 0 && (
+            <p>
+              {t("deferredInstallmentBalance")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.deferredInstallmentBalance)}</span>
+            </p>
+          )}
           <p>
             {t("projectedNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.projectedNextCloseAmount)}</span>
             {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
