@@ -1,3 +1,6 @@
+/* antd's reset must sit in a layer, or its unlayered rules (e.g. button
+   { color: inherit }) override every Tailwind utility. */
+@import "antd/dist/reset.css" layer(base);
 @import "tailwindcss";
 :root {
   color-scheme: dark;

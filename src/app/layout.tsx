@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
-import "antd/dist/reset.css";
 import "./globals.css";
 import { Providers } from "./providers";
 
