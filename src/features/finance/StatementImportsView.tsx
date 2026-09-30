@@ -312,7 +312,9 @@ export function StatementImportsView() {
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {statementImport.status === "CONFIRMED" && statementImport.paymentSummary.currency !== null && (
+                      {statementImport.status === "CONFIRMED" &&
+                        statementImport.paymentSummary.currency !== null &&
+                        statementImport.paymentStatus !== "PAID" && (
                         <Button
                           type="button"
                           variant="success"

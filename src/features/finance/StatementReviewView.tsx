@@ -1073,15 +1073,19 @@ export function StatementReviewView({
                 </p>
               )}
             </div>
-            <Button
-              type="button"
-              variant="success"
-              size="sm"
-              disabled={paymentLoading || statementImport.status !== "CONFIRMED" || !statementImport.paymentSummary.currency}
-              onClick={() => setPaymentModalOpen(true)}
-            >
-              {t("recordPayment")}
-            </Button>
+            {statementImport.paymentStatus === "PAID" ? (
+              <p className="max-w-[14rem] text-right text-xs text-[var(--text-3)]">{t("statementPaidUseHistory")}</p>
+            ) : (
+              <Button
+                type="button"
+                variant="success"
+                size="sm"
+                disabled={paymentLoading || statementImport.status !== "CONFIRMED" || !statementImport.paymentSummary.currency}
+                onClick={() => setPaymentModalOpen(true)}
+              >
+                {t("recordPayment")}
+              </Button>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs text-[var(--text-2)]">
             <p className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/30 px-3 py-2.5">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
