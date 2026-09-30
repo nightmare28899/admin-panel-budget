@@ -16,6 +16,8 @@ export function ConfirmModal({
   cancelLabel,
   confirmVariant = "danger",
   loading = false,
+  confirmDisabled = false,
+  children,
 }: {
   open: boolean;
   onClose: () => void;
@@ -27,6 +29,8 @@ export function ConfirmModal({
   cancelLabel?: string;
   confirmVariant?: ButtonVariant;
   loading?: boolean;
+  confirmDisabled?: boolean;
+  children?: ReactNode;
 }) {
   const { t } = useLocale();
   const closeIfIdle = () => {
@@ -36,6 +40,7 @@ export function ConfirmModal({
   return (
     <Modal open={open} onClose={closeIfIdle} title={title}>
       <p className="text-sm leading-6 text-[var(--text-2)]">{description}</p>
+      {children}
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={closeIfIdle} disabled={loading}>
           {cancelLabel ?? t("cancel")}
@@ -44,7 +49,7 @@ export function ConfirmModal({
           type="button"
           variant={confirmVariant}
           onClick={() => void onConfirm()}
-          disabled={loading}
+          disabled={loading || confirmDisabled}
           aria-busy={loading}
         >
           {loading ? (confirmingLabel ?? t("working")) : (confirmLabel ?? t("confirm"))}

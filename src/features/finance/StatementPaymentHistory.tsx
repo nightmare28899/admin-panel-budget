@@ -70,12 +70,6 @@ export function StatementPaymentHistory({
           })}
         </ul>
       )}
-      {voidTarget && (
-        <div className="mt-4">
-          <label htmlFor="void-payment-reason" className="mb-1 block text-xs text-[var(--text-3)]">{t("voidReason")}</label>
-          <textarea id="void-payment-reason" value={reason} maxLength={500} className="min-h-20 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-3)] p-2 text-sm" onChange={(event) => setReason(event.target.value)} />
-        </div>
-      )}
       <ConfirmModal
         open={Boolean(voidTarget)}
         onClose={() => { setVoidTarget(undefined); setReason(""); }}
@@ -90,7 +84,13 @@ export function StatementPaymentHistory({
         confirmLabel={t("voidPayment")}
         confirmVariant="danger"
         loading={loading}
-      />
+        confirmDisabled={!reason.trim()}
+      >
+        <div>
+          <label htmlFor="void-payment-reason" className="mb-1 block text-xs text-[var(--text-3)]">{t("voidReason")}</label>
+          <textarea id="void-payment-reason" autoFocus value={reason} maxLength={500} className="min-h-20 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-3)] p-2 text-sm" onChange={(event) => setReason(event.target.value)} />
+        </div>
+      </ConfirmModal>
     </Card>
   );
 }
