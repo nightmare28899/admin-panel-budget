@@ -1075,12 +1075,14 @@ export function StatementReviewView({
             </div>
             {statementImport.paymentStatus === "PAID" ? (
               <p className="max-w-[14rem] text-right text-xs text-[var(--text-3)]">{t("statementPaidUseHistory")}</p>
+            ) : statementImport.status !== "CONFIRMED" ? (
+              <p className="max-w-[14rem] text-right text-xs text-[var(--text-3)]">{t("confirmBeforePayment")}</p>
             ) : (
               <Button
                 type="button"
                 variant="success"
                 size="sm"
-                disabled={paymentLoading || statementImport.status !== "CONFIRMED" || !statementImport.paymentSummary.currency}
+                disabled={paymentLoading || !statementImport.paymentSummary.currency}
                 onClick={() => setPaymentModalOpen(true)}
               >
                 {t("recordPayment")}
