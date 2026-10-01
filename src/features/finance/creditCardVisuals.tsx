@@ -21,6 +21,53 @@ export function creditCardBackground(card: { id: string; color?: string | null }
   return FALLBACK_GRADIENTS[hash % FALLBACK_GRADIENTS.length];
 }
 
+const CARD_ARTWORK_BY_IDENTITY: Record<string, string> = {
+  "banamex oro": "/cards/banamex-oro.svg",
+  "banamex azul": "/cards/banamex-blue.svg",
+  banamex: "/cards/banamex-classic.svg",
+  "banamex clasica": "/cards/banamex-classic.svg",
+  "banamex classic": "/cards/banamex-classic.svg",
+  rappi: "/cards/rappicard.svg",
+  "rappi card": "/cards/rappicard.svg",
+  rappicard: "/cards/rappicard.svg",
+  bbva: "/cards/bbva.svg",
+};
+
+function normalizeCardIdentity(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\b(?:mastercard|visa)\b/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+export function creditCardArtworkBackground(card: {
+  id: string;
+  name: string;
+  bank: string;
+  color?: string | null;
+}): string {
+  const name = normalizeCardIdentity(card.name);
+  const bank = normalizeCardIdentity(card.bank);
+
+  if (name.startsWith("budget demo") || bank.startsWith("budget demo")) {
+    return creditCardBackground(card);
+  }
+
+  const combinedIdentity = normalizeCardIdentity(`${card.bank} ${card.name}`);
+  const artworkPath =
+    CARD_ARTWORK_BY_IDENTITY[combinedIdentity] ??
+    CARD_ARTWORK_BY_IDENTITY[name] ??
+    CARD_ARTWORK_BY_IDENTITY[bank];
+
+  return artworkPath
+    ? `url("${artworkPath}") center / cover no-repeat`
+    : creditCardBackground(card);
+}
+
 export function CreditCardChipIcon() {
   return (
     <div className="relative h-6 w-8 shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-yellow-200 to-yellow-500">

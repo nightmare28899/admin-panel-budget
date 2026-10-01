@@ -38,16 +38,46 @@ export function CreditCardManager({
   const [deactivateTarget, setDeactivateTarget] = useState<CreditCardOverviewItem>();
   const [deactivating, setDeactivating] = useState(false);
   const [filter, setFilter] = useState<FilterTab>("active");
+  const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(() => new Set());
   const [form] = Form.useForm<CreditCardWritePayload>();
 
   const { portfolio, cards } = overview;
   const totalTransactions = cards.reduce((sum, card) => sum + card.currentCycle.expenseCount, 0);
+  const currentStatementPaymentsByCurrency = Array.from(
+    cards.reduce<Map<string, number>>((totals, card) => {
+      const currentTotal = totals.get(card.currency) ?? 0;
+      totals.set(card.currency, currentTotal + (card.statementSummary.currentPaymentDue ?? 0));
+      return totals;
+    }, new Map()),
+  );
 
   const visibleCards = cards.filter((card) => {
     if (filter === "active") return card.isActive;
     if (filter === "inactive") return !card.isActive;
     return true;
   });
+  const allVisibleDetailsExpanded = visibleCards.length > 0
+    && visibleCards.every((card) => expandedCardIds.has(card.id));
+
+  const toggleCardDetails = (cardId: string) => {
+    setExpandedCardIds((current) => {
+      const next = new Set(current);
+      if (next.has(cardId)) next.delete(cardId);
+      else next.add(cardId);
+      return next;
+    });
+  };
+
+  const toggleAllVisibleDetails = () => {
+    setExpandedCardIds((current) => {
+      const next = new Set(current);
+      visibleCards.forEach((card) => {
+        if (allVisibleDetailsExpanded) next.delete(card.id);
+        else next.add(card.id);
+      });
+      return next;
+    });
+  };
 
   const closeModal = () => {
     setOpen(false);
@@ -93,6 +123,15 @@ export function CreditCardManager({
             extra={<span className="text-xs text-[var(--text-3)]">{t("availableCredit")}: {formatMoney(summary.totalAvailableCredit, summary.currency)}</span>}
           />
         ))}
+        {currentStatementPaymentsByCurrency.map(([currency, total]) => (
+          <StatCard
+            key={`statement-payments-${currency}`}
+            tone="emerald"
+            icon="🧾"
+            label={`${t("currentStatementPaymentsDue")} · ${currency}`}
+            value={formatMoney(total, currency)}
+          />
+        ))}
         <StatCard
           tone="rose"
           icon="⚡"
@@ -120,9 +159,16 @@ export function CreditCardManager({
             </button>
           ))}
         </div>
-        <Button type="button" variant="tinted" onClick={() => setOpen(true)}>
-          {t("addCard")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {visibleCards.length > 0 && (
+            <Button type="button" variant="outline" onClick={toggleAllVisibleDetails}>
+              {allVisibleDetailsExpanded ? t("hideAllDetails") : t("showAllDetails")}
+            </Button>
+          )}
+          <Button type="button" variant="tinted" onClick={() => setOpen(true)}>
+            {t("addCard")}
+          </Button>
+        </div>
       </div>
 
       {visibleCards.length === 0 ? (
@@ -138,6 +184,8 @@ export function CreditCardManager({
             <CreditCardTile
               key={card.id}
               card={card}
+              detailsExpanded={expandedCardIds.has(card.id)}
+              onToggleDetails={() => toggleCardDetails(card.id)}
               onEdit={() => {
                 setEditing(card);
                 form.setFieldsValue({

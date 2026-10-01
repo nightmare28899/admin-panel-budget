@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 856 540" role="presentation">
+  <defs>
+    <linearGradient id="gold-base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8f6b23"/>
+      <stop offset="0.48" stop-color="#d7b65f"/>
+      <stop offset="1" stop-color="#72501b"/>
+    </linearGradient>
+    <linearGradient id="gold-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f7e5a4" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#9b7428" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+  <rect width="856" height="540" fill="url(#gold-base)"/>
+  <rect x="-92" y="58" width="610" height="184" rx="92" fill="#f2d98c" fill-opacity="0.28" transform="rotate(-12 213 150)"/>
+  <rect x="276" y="-84" width="690" height="216" rx="108" fill="#6d4b18" fill-opacity="0.3" transform="rotate(18 621 24)"/>
+  <rect x="374" y="276" width="590" height="176" rx="88" fill="url(#gold-sheen)" transform="rotate(-16 669 364)"/>
+  <circle cx="744" cy="462" r="188" fill="#3e2b12" fill-opacity="0.13"/>
+</svg>

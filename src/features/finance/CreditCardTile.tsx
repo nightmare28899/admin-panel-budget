@@ -1,9 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { useId } from "react";
 import {
-  creditCardBackground,
+  creditCardArtworkBackground,
   CreditCardChipIcon,
   CreditCardContactlessIcon,
 } from "./creditCardVisuals";
@@ -23,19 +25,27 @@ const USAGE_BADGE_CLASS = {
 
 export function CreditCardTile({
   card,
+  detailsExpanded,
+  onToggleDetails,
   onEdit,
   onDeactivate,
   onReactivate,
 }: {
   card: CreditCardOverviewItem;
+  detailsExpanded: boolean;
+  onToggleDetails: () => void;
   onEdit: () => void;
   onDeactivate: () => void;
   onReactivate: () => void;
 }) {
   const { t, formatNumber, formatDate } = useLocale();
   const formatMoney = (value: number) => `${card.currency} ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const background = creditCardBackground(card);
+  const background = creditCardArtworkBackground(card);
   const tone = usageTone(card);
+  const statementPaymentStatus = card.statementSummary.paymentStatus;
+  const detailsId = useId();
+  const detailsToggleId = `credit-card-details-toggle-${detailsId}`;
+  const detailsRegionId = `credit-card-details-${detailsId}`;
 
   return (
     <div className={`overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-2)]/60 ${card.isActive ? "" : "opacity-60"}`}>
@@ -95,33 +105,75 @@ export function CreditCardTile({
            <p className="text-xs text-[var(--text-3)]">{t("noCreditLimit")}</p>
         )}
 
-        <div className="space-y-1.5 text-xs text-[var(--text-3)]">
-          <p>
-            {t("currentPaymentDue")}: <span className="font-mono text-[var(--text-1)]">{card.statementSummary.currentPaymentDue == null ? "—" : formatMoney(card.statementSummary.currentPaymentDue)}</span>
-            {card.statementSummary.dueDate && <> · {formatDate(card.statementSummary.dueDate, { dateStyle: "medium" })}</>}
-          </p>
-          {card.statementSummary.deferredInstallmentBalance > 0 && (
-            <p>
-              {t("deferredInstallmentBalance")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.deferredInstallmentBalance)}</span>
+        {card.statementSummary.statementImportId ? (
+          <div className="text-xs text-[var(--text-3)]">
+            <div className="flex items-center justify-between gap-2">
+              <span>{t("latestStatement")}</span>
+              <Badge variant={statementPaymentStatus === "PAID" ? "success" : statementPaymentStatus === "PARTIAL" ? "warning" : "neutral"}>
+                {statementPaymentStatus === "PAID" ? t("paid") : statementPaymentStatus === "PARTIAL" ? t("partial") : t("pending")}
+              </Badge>
+            </div>
+            <p className="mt-1 text-[var(--text-1)]">
+              {card.statementSummary.periodStart
+                ? formatDate(card.statementSummary.periodStart, { dateStyle: "medium" })
+                : "—"}
+              –
+              {card.statementSummary.periodEnd
+                ? formatDate(card.statementSummary.periodEnd, { dateStyle: "medium" })
+                : "—"}
             </p>
-          )}
-          <p>
-            {t("projectedNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.projectedNextCloseAmount)}</span>
-            {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
-          </p>
-          <p>
-            {t("nextClosePaymentEstimate")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.nextClosePaymentEstimate)}</span>
-            {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
-          </p>
-          <p>
-            {t("remainingAfterNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.estimatedRemainingAfterNextClose)}</span>
-          </p>
-        </div>
+          </div>
+        ) : (
+          <p className="text-xs text-[var(--text-3)]">{t("noStatementAvailable")}</p>
+        )}
 
-        {card.flags.currencyMismatch && (
-          <p role="status" className="rounded-lg border border-[var(--gold)]/25 bg-[var(--gold-dim)] px-3 py-2 text-xs text-[var(--gold-text)]">
-            {t("currencyMismatchWarning", { count: formatNumber(card.currencyMismatchCount), currency: card.currency })}
-          </p>
+        <p className="text-xs text-[var(--text-3)]">
+          {t("currentPaymentDue")}: <span className="font-mono text-[var(--text-1)]">{card.statementSummary.currentPaymentDue == null ? "—" : formatMoney(card.statementSummary.currentPaymentDue)}</span>
+          {card.statementSummary.dueDate && <> · {formatDate(card.statementSummary.dueDate, { dateStyle: "medium" })}</>}
+        </p>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          id={detailsToggleId}
+          aria-expanded={detailsExpanded}
+          aria-controls={detailsRegionId}
+          onClick={onToggleDetails}
+        >
+          {detailsExpanded ? t("hideDetails") : t("showDetails")}
+        </Button>
+
+        {detailsExpanded && (
+          <div
+            id={detailsRegionId}
+            role="region"
+            aria-labelledby={detailsToggleId}
+            className="space-y-1.5 text-xs text-[var(--text-3)]"
+          >
+            {card.statementSummary.deferredInstallmentBalance > 0 && (
+              <p>
+                {t("deferredInstallmentBalance")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.deferredInstallmentBalance)}</span>
+              </p>
+            )}
+            <p>
+              {t("projectedNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.projectedNextCloseAmount)}</span>
+              {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
+            </p>
+            <p>
+              {t("nextClosePaymentEstimate")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.nextClosePaymentEstimate)}</span>
+              {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
+            </p>
+            <p>
+              {t("remainingAfterNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.estimatedRemainingAfterNextClose)}</span>
+            </p>
+
+            {card.flags.currencyMismatch && (
+              <p role="status" className="rounded-lg border border-[var(--gold)]/25 bg-[var(--gold-dim)] px-3 py-2 text-xs text-[var(--gold-text)]">
+                {t("currencyMismatchWarning", { count: formatNumber(card.currencyMismatchCount), currency: card.currency })}
+              </p>
+            )}
+          </div>
         )}
 
         <div className="flex flex-wrap gap-2">

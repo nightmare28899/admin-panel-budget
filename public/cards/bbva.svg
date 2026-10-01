@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 856 540" role="presentation">
+  <defs>
+    <linearGradient id="navy-base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#061b4f"/>
+      <stop offset="0.55" stop-color="#075b9e"/>
+      <stop offset="1" stop-color="#31c9df"/>
+    </linearGradient>
+    <linearGradient id="cyan-plane" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8cf3ff" stop-opacity="0.68"/>
+      <stop offset="1" stop-color="#168ec5" stop-opacity="0.12"/>
+    </linearGradient>
+  </defs>
+  <rect width="856" height="540" fill="url(#navy-base)"/>
+  <path d="M-84 540L342-40H590L166 540Z" fill="#092d72" fill-opacity="0.76"/>
+  <path d="M202 540L662-38H914V118L570 540Z" fill="url(#cyan-plane)"/>
+  <path d="M544 540L914 188V540Z" fill="#86eff7" fill-opacity="0.24"/>
+  <path d="M-28 104L230-42H486L118 170Z" fill="#2b8dcc" fill-opacity="0.34"/>
+</svg>
