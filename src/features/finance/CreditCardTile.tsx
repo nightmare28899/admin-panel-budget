@@ -122,15 +122,11 @@ export function CreditCardTile({
     return t(key, { count: formatNumber(Math.abs(days)) });
   };
 
-  const menuItems: MenuProps["items"] = [
-    ...(statementId
-      ? [{ key: "statement", label: t("viewStatement") }]
-      : []),
-    { key: "details", label: detailsExpanded ? t("hideDetails") : t("showDetails") },
-  ];
+  const menuItems: MenuProps["items"] = statementId
+    ? [{ key: "statement", label: t("viewStatement") }]
+    : [];
   const onMenuClick: MenuProps["onClick"] = ({ key }) => {
     if (key === "statement" && statementId) router.push(`/finance/statements/${statementId}`);
-    if (key === "details") onToggleDetails();
   };
 
   return (
@@ -360,16 +356,18 @@ export function CreditCardTile({
             {t("reactivate")}
           </FooterButton>
         )}
-        <Dropdown menu={{ items: menuItems, onClick: onMenuClick }} trigger={["click"]} placement="topRight">
-          <button
-            type="button"
-            className="ml-auto cursor-pointer rounded-xl bg-slate-800/80 p-2 text-slate-400 transition hover:bg-slate-700 hover:text-white focus-visible:outline-2 focus-visible:outline-sky-400"
-            aria-label={t("moreActionsForCard", { card: `${card.bank} ${card.name}` })}
-            aria-haspopup="menu"
-          >
-            <span aria-hidden="true" className="block text-base leading-none">⋮</span>
-          </button>
-        </Dropdown>
+        {menuItems.length > 0 && (
+          <Dropdown menu={{ items: menuItems, onClick: onMenuClick }} trigger={["click"]} placement="topRight">
+            <button
+              type="button"
+              className="ml-auto cursor-pointer rounded-xl bg-slate-800/80 p-2 text-slate-400 transition hover:bg-slate-700 hover:text-white focus-visible:outline-2 focus-visible:outline-sky-400"
+              aria-label={t("moreActionsForCard", { card: `${card.bank} ${card.name}` })}
+              aria-haspopup="menu"
+            >
+              <span aria-hidden="true" className="block text-base leading-none">⋮</span>
+            </button>
+          </Dropdown>
+        )}
       </div>
     </div>
   );
