@@ -285,6 +285,9 @@ export function StatementReviewView({
   const pendingCount = rows.filter((row) => row.decision === "PENDING").length;
   const invalidIncludedRows = includedRows.filter((row) => !isIncludedRowValid(row, hasDefaultCard));
   const adjustedRows = rows.filter((row) => row.isAdjusted);
+  const alreadyRegisteredCount = rows.filter(
+    (row) => Boolean(row.matchedExpenseId) && row.decision === "INFO_ONLY",
+  ).length;
   const adjustedRowsMissingReason = adjustedRows.filter(
     (row) => !row.decisionNote?.trim(),
   );
@@ -807,7 +810,17 @@ export function StatementReviewView({
               })}
             </p>
           )}
-          {row.warningCodes?.map((warning) => (
+          {row.matchedExpense && row.decision === "INFO_ONLY" && (
+            <Badge variant="success">
+              {t("alreadyRegisteredChip", {
+                title: row.matchedExpense.title,
+                date: formatDate(row.matchedExpense.date, { dateStyle: "medium" }),
+              })}
+            </Badge>
+          )}
+          {row.warningCodes
+            ?.filter((warning) => warning !== "MATCHES_REGISTERED_EXPENSE")
+            .map((warning) => (
             <p key={warning} className="text-xs text-[var(--gold-text)]">{warningLabel(warning)}</p>
           ))}
         </div>
@@ -1095,6 +1108,9 @@ export function StatementReviewView({
             <p className="rounded-lg border border-[var(--gold)]/20 bg-[var(--gold-dim)] px-3 py-2.5 text-[var(--gold-text)]">{t("pendingDecisions", { count: formatNumber(pendingCount) })}</p>
             <p className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/30 px-3 py-2.5">{t("parserWarnings", { count: formatNumber(statementImport.warningCount) })}</p>
             <p className="rounded-lg border border-[var(--gold)]/20 bg-[var(--gold-dim)] px-3 py-2.5 text-[var(--gold-text)]">{t("reviewAdjustmentsCount", { count: formatNumber(adjustedRows.length) })}</p>
+            {alreadyRegisteredCount > 0 && (
+              <p className="rounded-lg border border-[var(--emerald)]/20 bg-[var(--emerald-dim)] px-3 py-2.5 text-[var(--emerald-text)]">{t("alreadyRegisteredCount", { count: formatNumber(alreadyRegisteredCount) })}</p>
+            )}
           </div>
           {editable && blockers.length > 0 && (
             <div className="mt-3 rounded-xl border border-[var(--gold)]/25 bg-[var(--gold-dim)] p-3">

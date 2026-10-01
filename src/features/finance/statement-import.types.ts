@@ -216,6 +216,13 @@ export type StatementRow = {
   category?: Category | null;
   linkedCreditCard?: LinkedCreditCardSummary | null;
   expense?: { id: string } | null;
+  matchedExpenseId?: string | null;
+  matchedExpense?: {
+    id: string;
+    title: string;
+    cost: MoneyValue;
+    date: string;
+  } | null;
 };
 
 export type StatementImportDetail = StatementImportListItem & {
