@@ -1,5 +1,5 @@
 import { request } from "./api";
-import type { CardExpenseBreakdownResponse, Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
+import type { BudgetWritePayload, CardExpenseBreakdownResponse, Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
 import type {
   CreditCardOverviewResponse,
   CreditCardWritePayload,
@@ -31,6 +31,7 @@ export const userApi = {
   me: (token: string) => request<{ user: UserAccount }>("/users/me", { method: "GET" }, token),
   refresh: (token: string) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/refresh", { method: "POST", body: JSON.stringify({ refreshToken: token }) }),
   logout: (token: string) => request<{ message: string }>("/auth/logout", { method: "POST" }, token),
+  updateBudget: (token: string, body: BudgetWritePayload) => request<{ user: UserAccount }>("/users/me", { method: "PATCH", body: JSON.stringify(body) }, token),
   summary: (token: string) => request<Summary>("/expenses/today", { method: "GET" }, token),
   expenses: (token: string, query: string) => request<ExpenseListResponse>(`/expenses?${query}`, { method: "GET" }, token),
   expense: (token: string, id: string) => request<Expense>(`/expenses/${id}`, { method: "GET" }, token),

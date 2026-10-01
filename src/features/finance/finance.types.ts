@@ -11,7 +11,16 @@ export type Expense = { id: string; title: string; cost: number | string; curren
 export type ExpenseWritePayload = { title: string; cost: string; currency: string; date?: string; categoryId: string; note?: string; merchantName?: string; locationLabel?: string; paymentMethod?: string; creditCardId?: string; isInstallment?: boolean; installmentCount?: number; installmentFrequency?: "MONTHLY"; installmentPurchaseDate?: string; installmentFirstPaymentDate?: string };
 export type CategoryWritePayload = { name: string; icon?: string; color?: string; budgetAmount?: number };
 export type ExpenseListResponse = { expenses: Expense[]; total: number; currencyBreakdown?: Array<{ currency: string; total: number }>; pagination: { page: number; limit: number; totalCount: number; totalPages: number; hasNext: boolean; hasPrev: boolean } };
-export type Summary = { total: number; currency?: string | null; currencyBreakdown?: Array<{ currency: string; total: number }>; budgetAmount?: number; spentInBudgetPeriod?: number; remaining?: number; percentage?: number; expenses?: Expense[] };
+export type Summary = { total: number; currency?: string | null; currencyBreakdown?: Array<{ currency: string; total: number }>; budgetAmount?: number; budgetPeriod?: BudgetPeriod; budgetPeriodStart?: string | null; budgetPeriodEnd?: string | null; spentInBudgetPeriod?: number; remaining?: number; percentage?: number; expenses?: Expense[] };
+export const BUDGET_PERIODS = ["daily", "weekly", "monthly", "annual", "period"] as const;
+export type BudgetPeriod = (typeof BUDGET_PERIODS)[number];
+/** Subset of PATCH /users/me; dates (YYYY-MM-DD) are only valid with budgetPeriod "period". */
+export type BudgetWritePayload = {
+  budgetAmount: number;
+  budgetPeriod?: BudgetPeriod;
+  budgetPeriodStart?: string;
+  budgetPeriodEnd?: string;
+};
 export type CurrencyTotal = { currency: string; total: number };
 export type CardExpenseBreakdownGroup = {
   creditCardId: string | null;

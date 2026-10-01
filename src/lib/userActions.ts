@@ -1,6 +1,7 @@
 "use server";
 
 import type {
+  BudgetWritePayload,
   CategoryWritePayload,
   Expense,
   ExpenseWritePayload,
@@ -364,6 +365,10 @@ async function withFreshUser<T>(
   return token
     ? withUser(operation)
     : { error: USER_SESSION_EXPIRED, sessionExpired: true };
+}
+
+export async function updateBudgetAction(body: BudgetWritePayload) {
+  return withFreshUser((token) => userApi.updateBudget(token, body));
 }
 
 export async function deleteExpenseAction(id: string) {

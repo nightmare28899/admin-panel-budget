@@ -13,8 +13,12 @@ import type {
   ExpenseListResponse,
   ExpensePaymentStatus,
   ExpenseWritePayload,
+  BudgetWritePayload,
   Summary,
 } from "./finance.types";
+import { toCalendarDate } from "./finance.types";
+import { BudgetSettingsModal } from "./BudgetSettingsModal";
+import { resolvePrimaryCurrency } from "./reportMetrics";
 import {
   createExpenseAction,
   deleteExpenseAction,
@@ -24,6 +28,7 @@ import {
   getFinanceSummaryAction,
   getUserMeAction,
   seedTestDataAction,
+  updateBudgetAction,
   updateExpenseAction,
 } from "@/lib/userActions";
 import { Button } from "@/components/ui/Button";
@@ -37,6 +42,29 @@ import { SubscriptionDueBanner } from "./SubscriptionDueBanner";
 import { useCreditCards } from "./hooks/useCreditCards";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+
+const PERIOD_LABEL_KEYS = {
+  daily: "daily",
+  weekly: "weekly",
+  monthly: "monthly",
+  annual: "yearly",
+  period: "budgetCustomRange",
+} as const;
+
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+// Calendar month of the viewer's local clock, as YYYY-MM-DD bounds.
+function currentMonthRange(now = new Date()) {
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const last = new Date(year, month + 1, 0).getDate();
+  return {
+    from: `${year}-${pad2(month + 1)}-01`,
+    to: `${year}-${pad2(month + 1)}-${pad2(last)}`,
+  };
+}
 
 const TEST_DATA_ENABLED =
   process.env.NEXT_PUBLIC_TEST_DATA_ENABLED === "true";
@@ -56,8 +84,13 @@ function safeReceiptUrl(value: string | undefined) {
 
 export function ExpensesView() {
   const router = useRouter();
-  const { t, formatNumber } = useLocale();
+  const { t, formatNumber, formatDate } = useLocale();
   const [summary, setSummary] = useState<Summary>();
+  const [monthTotals, setMonthTotals] = useState<Array<{ currency: string; total: number }>>();
+  const [userCurrency, setUserCurrency] = useState<string>();
+  const [budgetModalOpen, setBudgetModalOpen] = useState(false);
+  const [budgetSaving, setBudgetSaving] = useState(false);
+  const [budgetError, setBudgetError] = useState<string>();
   const [list, setList] = useState<ExpenseListResponse>();
   const [rows, setRows] = useState<Expense[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -118,10 +151,13 @@ export function ExpensesView() {
         if (value) params.set(key, value);
       });
 
-      const [sum, cats, expenses] = await Promise.all([
+      const month = currentMonthRange();
+      const [sum, cats, expenses, monthExpenses] = await Promise.all([
         getFinanceSummaryAction(),
         getCategoriesAction(),
         getExpensesAction(params.toString()),
+        // Month spend per currency (limit=1: only the aggregate breakdown is used).
+        getExpensesAction(new URLSearchParams({ ...month, page: "1", limit: "1" }).toString()),
       ]);
       setActiveUserLoadCompleted(true);
 
@@ -129,6 +165,8 @@ export function ExpensesView() {
         setError(frontendError(sum.error ?? cats.error ?? expenses.error, t, "requestFailedGeneric"));
       } else {
         setSummary(sum.data);
+        setUserCurrency(profile.data.user.currency);
+        setMonthTotals(monthExpenses.error ? undefined : monthExpenses.data?.currencyBreakdown ?? []);
         setCategories(cats.data ?? []);
         setList(expenses.data);
         setRows(expenses.data?.expenses ?? []);
@@ -315,9 +353,60 @@ export function ExpensesView() {
     return () => window.clearTimeout(timer);
   }, [activeUserLoadCompleted, generateTestData]);
 
-  const hasBudgetPeriod = summary?.budgetAmount != null;
+  const saveBudget = async (payload: BudgetWritePayload) => {
+    if (budgetSaving) return;
+    setBudgetSaving(true);
+    setBudgetError(undefined);
+    try {
+      const result = await updateBudgetAction(payload);
+      if (result.sessionExpired) {
+        router.push("/user-login");
+        return;
+      }
+      if (result.error) {
+        setBudgetError(frontendError(result.error, t, "requestFailedGeneric"));
+        return;
+      }
+      setNotice(t(payload.budgetAmount > 0 ? "budgetSaved" : "budgetRemoved"));
+      setBudgetModalOpen(false);
+      await reload(page);
+    } finally {
+      setBudgetSaving(false);
+    }
+  };
+
+  const openBudgetModal = () => {
+    setBudgetError(undefined);
+    setBudgetModalOpen(true);
+  };
+
+  const hasBudgetPeriod = (summary?.budgetAmount ?? 0) > 0;
   const currencyLabel = summary?.currency || "MXN";
-  const spentLabel = t("spentThisPeriod");
+  const spentLabel = t(hasBudgetPeriod ? "spentThisPeriod" : "spentThisMonth");
+  const moneyOptions = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+  const monthCurrency = monthTotals
+    ? resolvePrimaryCurrency(userCurrency, monthTotals.map((item) => item.currency)) ??
+      [...monthTotals].sort((a, b) => b.total - a.total)[0]?.currency
+    : undefined;
+  const monthTotal = monthTotals?.find((item) => item.currency === monthCurrency)?.total ?? 0;
+  const otherMonthTotals = (monthTotals ?? []).filter((item) => item.currency !== monthCurrency && item.total > 0);
+  const calendarDay = (value: string | null | undefined) => {
+    const [year, month, day] = toCalendarDate(value).split("-").map(Number);
+    return year ? new Date(year, month - 1, day) : null;
+  };
+  const periodStart = calendarDay(summary?.budgetPeriodStart);
+  const periodEnd = calendarDay(summary?.budgetPeriodEnd);
+  const shortDate = (date: Date) => formatDate(date, { day: "numeric", month: "short" });
+  const periodLabel = summary?.budgetPeriod
+    ? [
+        t(PERIOD_LABEL_KEYS[summary.budgetPeriod]),
+        periodStart && periodEnd
+          ? summary.budgetPeriod === "daily"
+            ? shortDate(periodStart)
+            : `${shortDate(periodStart)} – ${shortDate(periodEnd)}`
+          : null,
+      ].filter(Boolean).join(" · ")
+    : "";
   const initialLoading = loading && !list;
 
   return (
@@ -413,17 +502,66 @@ export function ExpensesView() {
               tone="rose"
               icon={<WalletOutlined />}
               label={spentLabel}
-              unit={hasBudgetPeriod ? currencyLabel : undefined}
-              value={hasBudgetPeriod ? formatNumber(summary?.spentInBudgetPeriod ?? 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
+              unit={hasBudgetPeriod ? currencyLabel : monthCurrency}
+              value={
+                hasBudgetPeriod
+                  ? formatNumber(summary?.spentInBudgetPeriod ?? 0, moneyOptions)
+                  : monthTotals && monthCurrency
+                    ? formatNumber(monthTotal, moneyOptions)
+                    : monthTotals ? formatNumber(0, moneyOptions) : "—"
+              }
+              extraPlacement="below"
+              extra={
+                hasBudgetPeriod ? (
+                  <div className="flex flex-wrap items-center gap-x-2 text-xs text-[var(--text-3)]">
+                    <span>{periodLabel}</span>
+                    <button
+                      type="button"
+                      onClick={openBudgetModal}
+                      className="cursor-pointer text-[var(--emerald-text)] hover:underline"
+                    >
+                      {t("editBudget")}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-xs text-[var(--text-3)]">
+                    <span className="inline-block first-letter:uppercase">{formatDate(new Date(), { month: "long", year: "numeric" })}</span>
+                    {otherMonthTotals.map((item) => (
+                      <span key={item.currency}>
+                        {" · "}
+                        {item.currency} {formatNumber(item.total, moneyOptions)}
+                      </span>
+                    ))}
+                  </div>
+                )
+              }
             />
-            <StatCard
-              tone="emerald"
-              icon={<SafetyOutlined />}
-              label={t("budgetRemaining")}
-              unit={hasBudgetPeriod ? currencyLabel : undefined}
-              value={hasBudgetPeriod ? formatNumber(summary?.remaining ?? 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
-              extra={hasBudgetPeriod ? <BudgetRing percentage={summary?.percentage ?? 0} /> : undefined}
-            />
+            {hasBudgetPeriod ? (
+              <StatCard
+                tone="emerald"
+                icon={<SafetyOutlined />}
+                label={t("budgetRemaining")}
+                unit={currencyLabel}
+                value={formatNumber(summary?.remaining ?? 0, moneyOptions)}
+                extra={<BudgetRing percentage={summary?.percentage ?? 0} />}
+              />
+            ) : (
+              <StatCard
+                tone="emerald"
+                icon={<SafetyOutlined />}
+                label={t("noBudgetConfigured")}
+                value="—"
+                extraPlacement="below"
+                extra={
+                  <div className="space-y-2">
+                    <p className="text-xs text-[var(--text-3)]">{t("noBudgetHint")}</p>
+                    <Button type="button" variant="tinted" size="sm" onClick={openBudgetModal}>
+                      {t("configureBudget")}
+                    </Button>
+                  </div>
+                }
+              />
+            )}
           </div>
         )}
 
@@ -545,6 +683,20 @@ export function ExpensesView() {
           />
         </div>
       </Modal>
+
+      <BudgetSettingsModal
+        open={budgetModalOpen}
+        initial={{
+          amount: summary?.budgetAmount,
+          period: summary?.budgetPeriod,
+          start: summary?.budgetPeriodStart,
+          end: summary?.budgetPeriodEnd,
+        }}
+        loading={budgetSaving}
+        error={budgetError}
+        onClose={() => setBudgetModalOpen(false)}
+        onSave={saveBudget}
+      />
 
       {TEST_DATA_ENABLED && (
         <ConfirmModal
