@@ -3,14 +3,24 @@
 import { Input, InputNumber, Select, Table, type TableColumnsType, type TableProps } from "antd";
 import { cloneElement, useCallback, useEffect, useMemo, useRef, useState, type AriaAttributes, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { TableSkeleton } from "@/components/ui/ContentSkeleton";
 import { MarkStatementPaidModal } from "./MarkStatementPaidModal";
 import type { StatementPaymentFormValue } from "./MarkStatementPaidModal";
 import { StatementPaymentHistory } from "./StatementPaymentHistory";
+import {
+  paymentStatusTone,
+  STATEMENT_BACKDROP_CLASS,
+  STATEMENT_ERROR_BANNER_CLASS,
+  STATEMENT_FIELD_SCOPE,
+  STATEMENT_NOTICE_BANNER_CLASS,
+  StatementBadge,
+  StatementButton,
+  StatementCountChip,
+  StatementSectionCard,
+  StatementTile,
+  toneFromVariant,
+} from "./StatementUi";
 import {
   confirmStatementImportAction,
   correctStatementPaymentAction,
@@ -28,6 +38,7 @@ import type {
   StatementImportDetail,
   StatementImportStatus,
   StatementPayment,
+  StatementPaymentTarget,
   StatementReconciliationStatus,
   StatementRow,
   StatementRowDecision,
@@ -121,11 +132,11 @@ function isIncludedRowValid(row: StatementRow, hasDefaultCard: boolean) {
 function rowTint(row: StatementRow, hasDefaultCard: boolean): string | undefined {
   if (row.decision === "INCLUDE_EXPENSE") {
     return isIncludedRowValid(row, hasDefaultCard)
-      ? "color-mix(in oklch, var(--emerald) 7%, transparent)"
-      : "color-mix(in oklch, var(--rose) 9%, transparent)";
+      ? "rgba(16, 185, 129, 0.07)"
+      : "rgba(244, 63, 94, 0.09)";
   }
   if (row.decision === "PENDING") {
-    return "color-mix(in oklch, var(--gold) 7%, transparent)";
+    return "rgba(245, 158, 11, 0.07)";
   }
   return undefined;
 }
@@ -144,6 +155,13 @@ export function StatementReviewView({
   const formatMoney = (value: number | string, currency: string) => {
     const amount = Number(value);
     return Number.isFinite(amount) ? `$${formatNumber(amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}` : `$— ${currency}`;
+  };
+  // Parsers store English labels; show the localized name by target kind.
+  const paymentTargetLabel = (target: StatementPaymentTarget) => {
+    if (target.kind === "NO_INTEREST") return t("paymentTargetNoInterest");
+    if (target.kind === "MINIMUM_PLUS_INSTALLMENTS") return t("paymentTargetMinimumPlusInstallments");
+    if (target.kind === "MINIMUM") return t("paymentTargetMinimum");
+    return target.label;
   };
   const decisionOptions: Array<{ value: StatementRowDecision; label: string }> = [
     { value: "PENDING", label: t("pending") },
@@ -702,7 +720,7 @@ export function StatementReviewView({
         return (
           <div className="space-y-3">
             <div>
-              <label htmlFor={dateId} className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("transactionDate")}</label>
+              <label htmlFor={dateId} className="mb-1 block text-xs font-medium text-slate-400">{t("transactionDate")}</label>
               <Input
                 id={dateId}
                 type="date"
@@ -716,7 +734,7 @@ export function StatementReviewView({
                 }}
               />
               {!sameInstant(row.transactionDate, row.parsedTransactionDate) && (
-                <p className="mt-1 text-xs text-[var(--gold-text)]">
+                <p className="mt-1 text-xs text-amber-300">
                   {t("originalReviewedValue", {
                     original: toCalendarDate(row.parsedTransactionDate) || "—",
                     reviewed: toCalendarDate(row.transactionDate) || "—",
@@ -725,7 +743,7 @@ export function StatementReviewView({
               )}
             </div>
             <div>
-              <label htmlFor={descriptionId} className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("statementDescription")}</label>
+              <label htmlFor={descriptionId} className="mb-1 block text-xs font-medium text-slate-400">{t("statementDescription")}</label>
               <Input
                 id={descriptionId}
                 value={row.description}
@@ -736,14 +754,14 @@ export function StatementReviewView({
             </div>
             <div>
               {showMerchantInput ? (
-                <label htmlFor={merchantId} className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("normalizedMerchant")}</label>
+                <label htmlFor={merchantId} className="mb-1 block text-xs font-medium text-slate-400">{t("normalizedMerchant")}</label>
               ) : (
-                <span className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("normalizedMerchant")}</span>
+                <span className="mb-1 block text-xs font-medium text-slate-400">{t("normalizedMerchant")}</span>
               )}
               <div
                 className={showMerchantInput
                   ? "flex items-center gap-2"
-                  : "flex min-h-8 items-center justify-between gap-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/40 px-3 py-1.5"}
+                  : "flex min-h-8 items-center justify-between gap-2 rounded-lg border border-slate-800 bg-[#0A0F19] px-3 py-1.5"}
               >
                 <div id={merchantRegionId} className="min-w-0 flex-1">
                   {showMerchantInput ? (
@@ -757,7 +775,7 @@ export function StatementReviewView({
                       onChange={(event) => patchRow(row.id, { merchantName: event.target.value || null })}
                     />
                   ) : (
-                    <span className="text-xs text-[var(--text-3)]">
+                    <span className="text-xs text-slate-400">
                       {merchantMatchesDescription
                         ? t("sameAsDescription")
                         : normalizedMerchant
@@ -767,10 +785,8 @@ export function StatementReviewView({
                   )}
                 </div>
                 {editable && (
-                  <Button
-                    type="button"
+                  <StatementButton
                     variant="ghost"
-                    size="sm"
                     className="shrink-0 !h-7 !px-2"
                     aria-label={showMerchantInput
                       ? t("hideMerchantForRow", { row: row.position + 1 })
@@ -785,7 +801,7 @@ export function StatementReviewView({
                     })}
                   >
                     {showMerchantInput ? t("hideMerchant") : t("editMerchant")}
-                  </Button>
+                  </StatementButton>
                 )}
               </div>
             </div>
@@ -798,12 +814,12 @@ export function StatementReviewView({
       width: 155,
       render: (_, row) => (
         <div className="space-y-2">
-          <Badge variant={canIncludeAsExpense(row) ? "info" : "neutral"}>
+          <StatementBadge tone={canIncludeAsExpense(row) ? "sky" : "slate"} dot={false}>
             {rowKindLabel(row.kind)}
-          </Badge>
-          <p className="text-xs text-[var(--text-3)]">{sectionLabel(row.section)}</p>
+          </StatementBadge>
+          <p className="text-xs text-slate-400">{sectionLabel(row.section)}</p>
           {row.kind !== row.parsedKind && (
-            <p className="text-xs text-[var(--gold-text)]">
+            <p className="text-xs text-amber-300">
               {t("originalReviewedValue", {
                 original: rowKindLabel(row.parsedKind),
                 reviewed: rowKindLabel(row.kind),
@@ -811,17 +827,17 @@ export function StatementReviewView({
             </p>
           )}
           {row.matchedExpense && row.decision === "INFO_ONLY" && (
-            <Badge variant="success">
+            <StatementBadge tone="emerald" className="whitespace-normal text-left">
               {t("alreadyRegisteredChip", {
                 title: row.matchedExpense.title,
                 date: formatDate(row.matchedExpense.date, { dateStyle: "medium" }),
               })}
-            </Badge>
+            </StatementBadge>
           )}
           {row.warningCodes
             ?.filter((warning) => warning !== "MATCHES_REGISTERED_EXPENSE")
             .map((warning) => (
-            <p key={warning} className="text-xs text-[var(--gold-text)]">{warningLabel(warning)}</p>
+            <p key={warning} className="text-xs text-amber-300">{warningLabel(warning)}</p>
           ))}
         </div>
       ),
@@ -854,7 +870,7 @@ export function StatementReviewView({
             />
           </div>
           {(!sameMoney(row.amount, row.parsedAmount) || row.currency !== row.parsedCurrency) && (
-            <p className="mt-1 text-xs text-[var(--gold-text)]">
+            <p className="mt-1 text-xs text-amber-300">
               {t("originalReviewedValue", {
                 original: formatMoney(row.parsedAmount, row.parsedCurrency),
                 reviewed: formatMoney(row.amount, row.currency),
@@ -919,7 +935,7 @@ export function StatementReviewView({
 
   if (loading && !statementImport) {
     return (
-      <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+      <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6 [&_.animate-pulse]:!bg-slate-800/80`}>
         <TableSkeleton rows={7} columns={6} />
       </div>
     );
@@ -927,11 +943,11 @@ export function StatementReviewView({
 
   if (!statementImport) {
     return (
-      <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
-        <Card>
-          <p role="alert" className="text-sm text-[var(--rose)]">{error ?? t("statementNotFound")}</p>
-          <Button type="button" variant="outline" className="mt-4" onClick={() => router.push("/finance/statements")}>{t("backToStatements")}</Button>
-        </Card>
+      <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6`}>
+        <StatementSectionCard>
+          <p role="alert" className="text-sm text-rose-300">{error ?? t("statementNotFound")}</p>
+          <StatementButton className="mt-4" onClick={() => router.push("/finance/statements")}>{t("backToStatements")}</StatementButton>
+        </StatementSectionCard>
       </div>
     );
   }
@@ -939,192 +955,175 @@ export function StatementReviewView({
   const status = STATUS_META[statementImport.status];
   const reconciliationDifferenceTone = statementImport.reconciliation?.status === "PASSED"
     ? {
-        surface: "border-[var(--emerald)]/30 bg-[var(--emerald-dim)]",
-        text: "text-[var(--emerald-text)]",
+        surface: "border-emerald-500/30 bg-emerald-500/10",
+        text: "text-emerald-400",
       }
     : statementImport.reconciliation?.status === "PENDING"
       ? {
-          surface: "border-[var(--gold)]/30 bg-[var(--gold-dim)]",
-          text: "text-[var(--gold-text)]",
+          surface: "border-amber-500/30 bg-amber-500/10",
+          text: "text-amber-400",
         }
       : {
-          surface: "border-[var(--rose)]/30 bg-[var(--rose)]/10",
-          text: "text-[var(--rose)]",
+          surface: "border-rose-500/30 bg-rose-500/10",
+          text: "text-rose-400",
         };
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] p-3 sm:p-5 lg:p-6">
+    <div className={`${STATEMENT_BACKDROP_CLASS} max-w-[1600px] p-3 sm:p-5 lg:p-6 ${STATEMENT_FIELD_SCOPE}`}>
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
-          <Button type="button" variant="ghost" size="sm" className="mb-2 !px-2" onClick={() => router.push("/finance/statements")}>
+          <StatementButton variant="ghost" className="mb-2 !px-2" onClick={() => router.push("/finance/statements")}>
             ← {t("backToStatements")}
-          </Button>
+          </StatementButton>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="min-w-0 break-words font-serif text-2xl font-semibold leading-tight text-[var(--text-1)] sm:text-3xl">
+            <h1 className="min-w-0 break-words font-serif text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
               {statementImport.sourceFileName || t("statementReview")}
             </h1>
-            <Badge variant={status.variant}>{statusLabels[statementImport.status]}</Badge>
+            <StatementBadge tone={toneFromVariant(status.variant)}>{statusLabels[statementImport.status]}</StatementBadge>
           </div>
-          <p className="mt-1.5 text-xs text-[var(--text-3)] sm:text-sm">
+          <p className="mt-1.5 text-xs text-slate-400 sm:text-sm">
             {t("versionUploaded", { version: statementImport.version, date: formatDate(statementImport.createdAt, { dateStyle: "medium", timeStyle: "short" }) })}
           </p>
         </div>
 
         <div className="flex w-full flex-wrap gap-2 lg:w-auto lg:justify-end">
-          <Button type="button" variant="outline" size="sm" onClick={requestReload} disabled={loading}>
+          <StatementButton variant="secondary" onClick={requestReload} disabled={loading}>
             {t("reload")}
-          </Button>
+          </StatementButton>
           {editable && (
             <>
-              <Button type="button" variant="tinted" size="sm" loading={saving} disabled={changedRows.length === 0} onClick={() => void saveRows()}>
+              <StatementButton variant="secondary" loading={saving} disabled={changedRows.length === 0} onClick={() => void saveRows()}>
                 {t("saveReview")}
-              </Button>
-              <Button type="button" variant="tinted" size="sm" disabled={!canConfirm} onClick={() => setConfirmOpen(true)}>
+              </StatementButton>
+              <StatementButton variant="primary" disabled={!canConfirm} onClick={() => setConfirmOpen(true)}>
                 {t("confirmExpenses")}
-              </Button>
+              </StatementButton>
             </>
           )}
           {statementImport.status === "CONFIRMED" && (
-            <Button type="button" variant="danger" size="sm" onClick={() => setRevertOpen(true)}>
+            <StatementButton variant="danger" onClick={() => setRevertOpen(true)}>
               {t("revertImport")}
-            </Button>
+            </StatementButton>
           )}
           {statementImport.status === "REVERTED" && (
-            <Button type="button" variant="tinted" size="sm" loading={resuming} onClick={() => void resumeImport()}>
+            <StatementButton variant="primary" loading={resuming} onClick={() => void resumeImport()}>
               {t("resumeImport")}
-            </Button>
+            </StatementButton>
           )}
         </div>
       </div>
 
       {error && (
-        <div role="alert" className="mb-4 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]">
+        <div role="alert" className={`mb-4 ${STATEMENT_ERROR_BANNER_CLASS}`}>
           {error}
         </div>
       )}
       {notice && (
-        <div role="status" className="mb-4 rounded-xl border border-[var(--emerald)]/40 bg-[var(--emerald-dim)] px-4 py-3 text-sm text-[var(--emerald-text)]">
+        <div role="status" className={`mb-4 ${STATEMENT_NOTICE_BANNER_CLASS}`}>
           {notice}
         </div>
       )}
       {statementImport.failureMessage && (
-        <div role="alert" className="mb-4 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]">
+        <div role="alert" className={`mb-4 ${STATEMENT_ERROR_BANNER_CLASS}`}>
           {statementImport.failureMessage}
         </div>
       )}
 
       <div className="mb-4 grid gap-4 xl:grid-cols-3">
-        <Card className="!p-4 sm:!p-5 xl:col-span-2">
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border-soft)] pb-4">
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--text-1)]">{t("bankReconciliation")}</h2>
-              {statementImport.reconciliation?.message && (
-                <p className="mt-1 max-w-2xl text-xs text-[var(--text-3)]">
-                  {statementImport.reconciliation.message}
-                </p>
-              )}
-            </div>
-            {statementImport.reconciliation && (
-              <Badge
-                variant={statementImport.reconciliation.status === "PASSED"
-                  ? "success"
-                  : statementImport.reconciliation.status === "FAILED"
-                    ? "danger"
-                    : "warning"}
-              >
-                {reconciliationStatusLabel(statementImport.reconciliation.status)}
-              </Badge>
-            )}
-          </div>
+        <StatementSectionCard
+          className="xl:col-span-2"
+          title={t("bankReconciliation")}
+          aside={statementImport.reconciliation ? (
+            <StatementBadge
+              tone={statementImport.reconciliation.status === "PASSED"
+                ? "emerald"
+                : statementImport.reconciliation.status === "FAILED"
+                  ? "rose"
+                  : "amber"}
+            >
+              {reconciliationStatusLabel(statementImport.reconciliation.status)}
+            </StatementBadge>
+          ) : undefined}
+        >
+          {statementImport.reconciliation?.message && (
+            <p className="mb-4 max-w-2xl text-xs text-slate-400">
+              {statementImport.reconciliation.message}
+            </p>
+          )}
           {statementImport.reconciliation ? (
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/45 p-3 sm:p-4">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-3)]">{t("openingBalance")}</p>
-                <p className="mt-2 break-words font-mono text-sm font-semibold text-[var(--text-1)] sm:text-base">{formatMoney(statementImport.reconciliation.openingBalance, statementImport.reconciliation.currency)}</p>
-              </div>
-              <div className="rounded-xl border border-[var(--rose)]/20 bg-[var(--rose)]/5 p-3 sm:p-4">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--rose)]">{t("charges")}</p>
-                <p className="mt-2 break-words font-mono text-sm font-semibold text-[var(--text-1)] sm:text-base">{formatMoney(statementImport.reconciliation.chargesTotal, statementImport.reconciliation.currency)}</p>
-              </div>
-              <div className="rounded-xl border border-[var(--emerald)]/20 bg-[var(--emerald-dim)] p-3 sm:p-4">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--emerald-text)]">{t("payments")}</p>
-                <p className="mt-2 break-words font-mono text-sm font-semibold text-[var(--text-1)] sm:text-base">{formatMoney(statementImport.reconciliation.paymentsTotal, statementImport.reconciliation.currency)}</p>
-              </div>
-              <div className="rounded-xl border border-[var(--gold)]/20 bg-[var(--gold-dim)] p-3 sm:p-4">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--gold-text)]">{t("credits")}</p>
-                <p className="mt-2 break-words font-mono text-sm font-semibold text-[var(--text-1)] sm:text-base">{formatMoney(statementImport.reconciliation.creditsTotal, statementImport.reconciliation.currency)}</p>
-              </div>
-              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/45 p-3 sm:p-4">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-3)]">{t("closingBalance")}</p>
-                <p className="mt-2 break-words font-mono text-sm font-semibold text-[var(--text-1)] sm:text-base">{formatMoney(statementImport.reconciliation.closingBalance, statementImport.reconciliation.currency)}</p>
-              </div>
-              <div className={`rounded-xl border p-3 sm:p-4 ${reconciliationDifferenceTone.surface}`}>
-                <p className={`text-[11px] font-medium uppercase tracking-wide ${reconciliationDifferenceTone.text}`}>{t("difference")}</p>
-                <p className={`mt-2 break-words font-mono text-sm font-semibold sm:text-base ${reconciliationDifferenceTone.text}`}>{formatMoney(statementImport.reconciliation.difference, statementImport.reconciliation.currency)}</p>
-              </div>
+              <StatementTile accent="slate" label={t("openingBalance")} value={formatMoney(statementImport.reconciliation.openingBalance, statementImport.reconciliation.currency)} />
+              <StatementTile accent="rose" label={t("charges")} value={formatMoney(statementImport.reconciliation.chargesTotal, statementImport.reconciliation.currency)} />
+              <StatementTile accent="emerald" label={t("payments")} value={formatMoney(statementImport.reconciliation.paymentsTotal, statementImport.reconciliation.currency)} />
+              <StatementTile accent="amber" label={t("credits")} value={formatMoney(statementImport.reconciliation.creditsTotal, statementImport.reconciliation.currency)} />
+              <StatementTile accent="indigo" label={t("closingBalance")} value={formatMoney(statementImport.reconciliation.closingBalance, statementImport.reconciliation.currency)} />
+              <StatementTile
+                accent={statementImport.reconciliation.status === "PASSED" ? "emerald" : statementImport.reconciliation.status === "PENDING" ? "amber" : "rose"}
+                label={t("difference")}
+                value={formatMoney(statementImport.reconciliation.difference, statementImport.reconciliation.currency)}
+                valueClassName={reconciliationDifferenceTone.text}
+                surfaceClassName={reconciliationDifferenceTone.surface}
+              />
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-3)]/30 px-4 py-8 text-center text-sm text-[var(--text-3)]">
+            <div className="rounded-xl border border-dashed border-slate-800 px-4 py-8 text-center text-sm text-slate-400">
               {t("reconciliationUnavailable")}
             </div>
           )}
-        </Card>
+        </StatementSectionCard>
 
-        <Card className="!p-4 sm:!p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-soft)] pb-4">
-            <h2 className="text-sm font-semibold text-[var(--text-1)]">{t("reviewAdjustments")}</h2>
-            <Badge variant={status.variant}>{statusLabels[statementImport.status]}</Badge>
-          </div>
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/45 px-3 py-2.5">
+        <StatementSectionCard
+          title={t("reviewAdjustments")}
+          aside={<StatementBadge tone={toneFromVariant(status.variant)}>{statusLabels[statementImport.status]}</StatementBadge>}
+        >
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2.5">
             <div>
-              <Badge variant={statementImport.paymentStatus === "PAID" ? "success" : statementImport.paymentStatus === "PARTIAL" ? "warning" : "neutral"}>
+              <StatementBadge tone={paymentStatusTone(statementImport.paymentStatus)}>
                 {statementImport.paymentStatus === "PAID" ? t("paid") : statementImport.paymentStatus === "PARTIAL" ? t("partial") : t("unpaid")}
-              </Badge>
+              </StatementBadge>
               {statementImport.paidAt && (
-                <p className="mt-1 text-xs text-[var(--text-3)]">
+                <p className="mt-1 text-xs text-slate-400">
                   {t("paidAt", { date: formatDate(statementImport.paidAt, { dateStyle: "medium", timeStyle: "short" }) })}
                 </p>
               )}
             </div>
             {statementImport.paymentStatus === "PAID" ? (
-              <p className="max-w-[14rem] text-right text-xs text-[var(--text-3)]">{t("statementPaidUseHistory")}</p>
+              <p className="max-w-[14rem] text-right text-xs text-slate-400">{t("statementPaidUseHistory")}</p>
             ) : statementImport.status !== "CONFIRMED" ? (
-              <p className="max-w-[14rem] text-right text-xs text-[var(--text-3)]">{t("confirmBeforePayment")}</p>
+              <p className="max-w-[14rem] text-right text-xs text-slate-400">{t("confirmBeforePayment")}</p>
             ) : (
-              <Button
-                type="button"
-                variant="success"
-                size="sm"
+              <StatementButton
+                variant="pay"
                 disabled={paymentLoading || !statementImport.paymentSummary.currency}
                 onClick={() => setPaymentModalOpen(true)}
               >
                 {t("recordPayment")}
-              </Button>
+              </StatementButton>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-2 text-xs text-[var(--text-2)]">
-            <p className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/30 px-3 py-2.5">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
-            <p className="rounded-lg border border-[var(--emerald)]/20 bg-[var(--emerald-dim)] px-3 py-2.5 text-[var(--emerald-text)]">{t("expensesSelected", { count: formatNumber(includedRows.length) })}</p>
-            <p className="rounded-lg border border-[var(--gold)]/20 bg-[var(--gold-dim)] px-3 py-2.5 text-[var(--gold-text)]">{t("pendingDecisions", { count: formatNumber(pendingCount) })}</p>
-            <p className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/30 px-3 py-2.5">{t("parserWarnings", { count: formatNumber(statementImport.warningCount) })}</p>
-            <p className="rounded-lg border border-[var(--gold)]/20 bg-[var(--gold-dim)] px-3 py-2.5 text-[var(--gold-text)]">{t("reviewAdjustmentsCount", { count: formatNumber(adjustedRows.length) })}</p>
+          <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
+            <p className="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
+            <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-emerald-400">{t("expensesSelected", { count: formatNumber(includedRows.length) })}</p>
+            <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-amber-400">{t("pendingDecisions", { count: formatNumber(pendingCount) })}</p>
+            <p className="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5">{t("parserWarnings", { count: formatNumber(statementImport.warningCount) })}</p>
+            <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-amber-400">{t("reviewAdjustmentsCount", { count: formatNumber(adjustedRows.length) })}</p>
             {alreadyRegisteredCount > 0 && (
-              <p className="rounded-lg border border-[var(--emerald)]/20 bg-[var(--emerald-dim)] px-3 py-2.5 text-[var(--emerald-text)]">{t("alreadyRegisteredCount", { count: formatNumber(alreadyRegisteredCount) })}</p>
+              <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-emerald-400">{t("alreadyRegisteredCount", { count: formatNumber(alreadyRegisteredCount) })}</p>
             )}
           </div>
           {editable && blockers.length > 0 && (
-            <div className="mt-3 rounded-xl border border-[var(--gold)]/25 bg-[var(--gold-dim)] p-3">
-              <ul className="space-y-1.5 text-xs leading-relaxed text-[var(--gold-text)]">
+            <div className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
+              <ul className="space-y-1.5 text-xs leading-relaxed text-amber-300">
                 {blockers.map((blocker) => <li key={blocker}>• {blocker}</li>)}
               </ul>
             </div>
           )}
           {editable && blockers.length === 0 && (
-            <div className="mt-3 rounded-xl border border-[var(--emerald)]/25 bg-[var(--emerald-dim)] px-3 py-2.5 text-xs text-[var(--emerald-text)]">
+            <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5 text-xs text-emerald-300">
               {t("readyToConfirm")}
             </div>
           )}
-        </Card>
+        </StatementSectionCard>
       </div>
 
       <StatementPaymentHistory
@@ -1135,47 +1134,38 @@ export function StatementReviewView({
       />
 
       {statementImport.paymentTargets.length > 0 && (
-        <Card className="mb-4 !p-4 sm:!p-5">
-          <div className="mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-soft)] pb-4">
-            <h2 className="text-sm font-semibold text-[var(--text-1)]">{t("paymentTargets")}</h2>
-            <Badge ring>{formatNumber(statementImport.paymentTargets.length)}</Badge>
-          </div>
+        <StatementSectionCard
+          className="mb-4"
+          title={t("paymentTargets")}
+          aside={<StatementCountChip>{formatNumber(statementImport.paymentTargets.length)}</StatementCountChip>}
+        >
           <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
             {statementImport.paymentTargets.map((target) => (
-              <div key={target.id} className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/45 p-3">
-                <p className="truncate text-xs font-medium text-[var(--text-2)]" title={target.label}>{target.label}</p>
-                <p className="mt-1.5 break-words font-mono text-sm font-semibold text-[var(--text-1)]">{formatMoney(target.amount, target.currency)}</p>
-                {target.dueDate && <p className="mt-1 text-[11px] text-[var(--text-3)]">{t("dueDate", { date: formatDate(target.dueDate, { dateStyle: "medium" }) })}</p>}
+              <div key={target.id} className="rounded-xl border border-slate-800/80 bg-[#0A0F19] p-3">
+                <p className="truncate text-xs font-medium text-slate-300" title={target.label}>{paymentTargetLabel(target)}</p>
+                <p className="mt-1.5 break-words font-mono text-sm font-bold text-white">{formatMoney(target.amount, target.currency)}</p>
+                {target.dueDate && <p className="mt-1 text-[11px] text-slate-400">{t("dueDate", { date: formatDate(target.dueDate, { dateStyle: "medium" }) })}</p>}
               </div>
             ))}
           </div>
-        </Card>
+        </StatementSectionCard>
       )}
 
-      <Card className="!p-3 sm:!p-4">
-        <div className="mb-3 flex flex-col gap-3 border-b border-[var(--border-soft)] pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <StatementSectionCard bodyClassName="p-3 sm:p-4">
+        <div className="mb-3 flex flex-col gap-3 border-b border-slate-800/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-[var(--text-1)]">{t("statementRows")}</h2>
-            <p className="mt-1 text-xs text-[var(--text-3)]">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
+            <h2 className="text-sm font-bold tracking-tight text-white">{t("statementRows")}</h2>
+            <p className="mt-1 text-xs text-slate-400">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--emerald)]/20 bg-[var(--emerald-dim)] px-2.5 py-1 text-[var(--emerald-text)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--emerald)]" aria-hidden="true" />
-              {t("readyToConfirm")}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/20 bg-[var(--gold-dim)] px-2.5 py-1 text-[var(--gold-text)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" aria-hidden="true" />
-              {t("pendingDecision")}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--rose)]/20 bg-[var(--rose)]/10 px-2.5 py-1 text-[var(--rose)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--rose)]" aria-hidden="true" />
-              {t("missingRequiredData")}
-            </span>
+            <StatementBadge tone="emerald">{t("readyToConfirm")}</StatementBadge>
+            <StatementBadge tone="amber">{t("pendingDecision")}</StatementBadge>
+            <StatementBadge tone="rose">{t("missingRequiredData")}</StatementBadge>
           </div>
         </div>
-        <div className="mb-3 flex flex-col gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/30 p-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="mb-3 flex flex-col gap-3 rounded-xl border border-slate-800 bg-[#0A0F19] p-3 sm:flex-row sm:flex-wrap sm:items-end">
           <div className="min-w-0 sm:w-56">
-            <label htmlFor="statement-row-filter" className="mb-1 block text-xs font-medium text-[var(--text-3)]">
+            <label htmlFor="statement-row-filter" className="mb-1 block text-xs font-medium text-slate-400">
               {t("filterStatementRows")}
             </label>
             <Select<StatementRowFilter>
@@ -1196,7 +1186,7 @@ export function StatementReviewView({
               }}
             />
           </div>
-          <p role="status" aria-live="polite" className="text-xs text-[var(--text-3)] sm:mr-auto sm:pb-2">
+          <p role="status" aria-live="polite" className="text-xs text-slate-400 sm:mr-auto sm:pb-2">
             {t("filteredStatementRowsCount", {
               filtered: formatNumber(filteredRows.length),
               total: formatNumber(rows.length),
@@ -1204,45 +1194,39 @@ export function StatementReviewView({
           </p>
           {editable && (
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="tinted"
+              <StatementButton
+                variant="tint"
                 loading={categorizing}
                 onClick={() => void autoCategorizeRows()}
               >
                 {t("autoCategorize")}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
+              </StatementButton>
+              <StatementButton
+                variant="secondary"
                 disabled={filteredRows.length === 0}
                 aria-label={t("selectAllFilteredStatementRows", { count: formatNumber(filteredRows.length) })}
                 onClick={() => setSelectedRowIds(filteredRows.map((row) => row.id))}
               >
                 {t("selectAllFilteredStatementRows", { count: formatNumber(filteredRows.length) })}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
+              </StatementButton>
+              <StatementButton
                 variant="ghost"
                 disabled={selectedRows.length === 0}
                 aria-label={t("clearSelection")}
                 onClick={() => setSelectedRowIds([])}
               >
                 {t("clearSelection")}
-              </Button>
+              </StatementButton>
             </div>
           )}
         </div>
         {editable && (
-          <div className="mb-3 flex flex-col gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)]/95 p-3 shadow-sm backdrop-blur md:flex-row md:items-center">
+          <div className="mb-3 flex flex-col gap-3 rounded-xl border border-slate-800 bg-[#0A0F19]/95 p-3 shadow-sm backdrop-blur md:flex-row md:items-center">
             <div className="md:mr-auto">
-              <p role="status" aria-live="polite" className="text-xs font-medium text-[var(--text-2)] md:text-sm">
+              <p role="status" aria-live="polite" className="text-xs font-medium text-slate-200 md:text-sm">
                 {t("statementRowsSelected", { count: formatNumber(selectedRows.length) })}
               </p>
-              <p className="mt-1 text-xs text-[var(--text-3)]">
+              <p className="mt-1 text-xs text-slate-400">
                 {t("bulkCategorizationEligibility", {
                   eligible: formatNumber(selectedIncludableRows.length),
                   selected: formatNumber(selectedRows.length),
@@ -1269,28 +1253,26 @@ export function StatementReviewView({
                   onChange={(value) => setBulkCategoryId(value)}
                 />
               </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="success"
+              <StatementButton
+                variant="primary"
                 disabled={selectedIncludableRows.length === 0 || !bulkCategoryId}
                 onClick={includeAndCategorizeSelectedRows}
               >
                 {t("includeAndCategorizeRows", { count: formatNumber(selectedIncludableRows.length) })}
-              </Button>
-              <Button type="button" size="sm" variant="tinted" disabled={selectedIncludableRows.length === 0} onClick={() => applyBulkDecision("INCLUDE_EXPENSE")}>
+              </StatementButton>
+              <StatementButton variant="tint" disabled={selectedIncludableRows.length === 0} onClick={() => applyBulkDecision("INCLUDE_EXPENSE")}>
                 {t("includeExpense")}
-              </Button>
-              <Button type="button" size="sm" variant="outline" disabled={selectedRows.length === 0} onClick={() => applyBulkDecision("EXCLUDE")}>
+              </StatementButton>
+              <StatementButton variant="secondary" disabled={selectedRows.length === 0} onClick={() => applyBulkDecision("EXCLUDE")}>
                 {t("exclude")}
-              </Button>
-              <Button type="button" size="sm" variant="outline" disabled={selectedRows.length === 0} onClick={() => applyBulkDecision("INFO_ONLY")}>
+              </StatementButton>
+              <StatementButton variant="secondary" disabled={selectedRows.length === 0} onClick={() => applyBulkDecision("INFO_ONLY")}>
                 {t("informationOnly")}
-              </Button>
+              </StatementButton>
             </div>
           </div>
         )}
-        <div className="min-w-0 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)]/50">
+        <div className="min-w-0 overflow-hidden rounded-xl border border-slate-800 bg-[#0A0F19]/60">
           <Table<StatementRow>
             rowKey="id"
             dataSource={filteredRows}
@@ -1304,13 +1286,13 @@ export function StatementReviewView({
             }}
             scroll={{ x: 1050, y: STATEMENT_ROWS_SCROLL_HEIGHT }}
             size="small"
-            className="[&_.ant-table]:!bg-transparent [&_.ant-table-container]:!border-0 [&_.ant-table-row-selected>td]:!bg-transparent [&_.ant-table-row-selected>td]:shadow-[inset_0_1px_0_color-mix(in_oklch,var(--emerald)_55%,transparent),inset_0_-1px_0_color-mix(in_oklch,var(--emerald)_55%,transparent)] [&_.ant-table-thead>tr>th]:!text-[11px] [&_.ant-table-thead>tr>th]:!uppercase [&_.ant-table-thead>tr>th]:!tracking-wide"
+            className="[&_.ant-table]:!bg-transparent [&_.ant-table-container]:!border-0 [&_.ant-table-row-selected>td]:!bg-transparent [&_.ant-table-row-selected>td]:shadow-[inset_0_1px_0_rgba(16,185,129,0.55),inset_0_-1px_0_rgba(16,185,129,0.55)] [&_.ant-table-thead>tr>th]:!border-slate-800 [&_.ant-table-thead>tr>th]:!text-[11px] [&_.ant-table-thead>tr>th]:!uppercase [&_.ant-table-thead>tr>th]:!tracking-wider [&_.ant-table-thead>tr>th]:!text-slate-400 [&_.ant-table-tbody>tr>td]:!border-slate-800/60 [&_.ant-table-pagination]:!px-3"
             onRow={(row) => ({
               style: { backgroundColor: rowTint(row, hasDefaultCard) },
             })}
           />
         </div>
-      </Card>
+      </StatementSectionCard>
 
       <ConfirmModal
         open={reloadConfirmOpen}

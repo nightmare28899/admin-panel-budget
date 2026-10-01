@@ -3,7 +3,7 @@
 import type { CreditCardSummary } from "./statement-import.types";
 import { useLocale } from "@/i18n/LocaleProvider";
 import {
-  creditCardBackground,
+  creditCardTheme,
   CreditCardChipIcon,
   CreditCardContactlessIcon,
 } from "./creditCardVisuals";
@@ -58,7 +58,9 @@ export function CreditCardPicker({
 
       {cards.map((card) => {
         const selected = card.id === selectedCardId;
-        const background = creditCardBackground(card);
+        // Same per-bank artwork as the cards page so every picker matches it.
+        const theme = creditCardTheme(card);
+        const background = theme.background;
         return (
           <button
             key={card.id}
@@ -69,9 +71,7 @@ export function CreditCardPicker({
             onClick={() => onSelect(card.id)}
             style={{
               background,
-              boxShadow: selected
-                ? `0 18px 34px -12px ${background}, 0 0 0 2px var(--emerald)`
-                : `0 12px 24px -14px ${background}`,
+              boxShadow: selected ? `${theme.glow}, 0 0 0 2px var(--emerald)` : theme.glow,
             }}
             className="group relative flex h-40 w-56 shrink-0 cursor-pointer flex-col justify-between overflow-hidden! rounded-[28px] p-4 text-left transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-1)]"
           >

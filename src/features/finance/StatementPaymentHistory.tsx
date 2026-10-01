@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { StatementBadge, StatementButton, StatementSectionCard } from "./StatementUi";
 import type { StatementPayment } from "./statement-import.types";
 
 export function StatementPaymentHistory({
@@ -29,11 +27,11 @@ export function StatementPaymentHistory({
   );
 
   return (
-    <Card title={t("paymentHistory")} className="mb-4 !p-5">
+    <StatementSectionCard title={t("paymentHistory")} className="mb-4">
       {payments.length === 0 ? (
-        <p className="text-sm text-[var(--text-3)]">{t("noPaymentsRecorded")}</p>
+        <p className="text-sm text-slate-400">{t("noPaymentsRecorded")}</p>
       ) : (
-        <ul className="divide-y divide-[var(--border-soft)]">
+        <ul className="divide-y divide-slate-800/60">
           {payments.map((payment) => {
             const historyStatus = correctedPaymentIds.has(payment.id)
               ? "corrected"
@@ -44,25 +42,25 @@ export function StatementPaymentHistory({
             <li key={payment.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-sm font-semibold text-[var(--text-1)]">
+                  <span className="font-mono text-sm font-bold text-white">
                     {payment.currency} {formatNumber(Number(payment.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
-                  <Badge variant={historyStatus === "active" ? "success" : historyStatus === "corrected" ? "info" : "neutral"}>
+                  <StatementBadge tone={historyStatus === "active" ? "emerald" : historyStatus === "corrected" ? "sky" : "slate"}>
                     {t(historyStatus)}
-                  </Badge>
+                  </StatementBadge>
                 </div>
-                <p className="mt-1 text-xs text-[var(--text-3)]">{formatDate(payment.paidAt, { dateStyle: "medium" })}</p>
-                {payment.note && <p className="mt-1 text-xs text-[var(--text-2)]">{payment.note}</p>}
-                {payment.voidReason && <p className="mt-1 text-xs text-[var(--text-3)]">{t("voidReasonLabel", { reason: payment.voidReason })}</p>}
+                <p className="mt-1 text-xs text-slate-400">{formatDate(payment.paidAt, { dateStyle: "medium" })}</p>
+                {payment.note && <p className="mt-1 text-xs text-slate-300">{payment.note}</p>}
+                {payment.voidReason && <p className="mt-1 text-xs text-slate-400">{t("voidReasonLabel", { reason: payment.voidReason })}</p>}
               </div>
               {!payment.voidedAt && (
                 <div className="flex gap-2">
-                  <Button type="button" size="sm" variant="outline" disabled={loading} onClick={() => onCorrect(payment)}>
+                  <StatementButton variant="secondary" disabled={loading} onClick={() => onCorrect(payment)}>
                     {t("correct")}
-                  </Button>
-                  <Button type="button" size="sm" variant="danger" disabled={loading} onClick={() => setVoidTarget(payment)}>
+                  </StatementButton>
+                  <StatementButton variant="danger" disabled={loading} onClick={() => setVoidTarget(payment)}>
                     {t("voidPayment")}
-                  </Button>
+                  </StatementButton>
                 </div>
               )}
             </li>
@@ -87,10 +85,10 @@ export function StatementPaymentHistory({
         confirmDisabled={!reason.trim()}
       >
         <div>
-          <label htmlFor="void-payment-reason" className="mb-1 block text-xs text-[var(--text-3)]">{t("voidReason")}</label>
-          <textarea id="void-payment-reason" autoFocus value={reason} maxLength={500} className="min-h-20 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-3)] p-2 text-sm" onChange={(event) => setReason(event.target.value)} />
+          <label htmlFor="void-payment-reason" className="mb-1 block text-xs text-slate-400">{t("voidReason")}</label>
+          <textarea id="void-payment-reason" autoFocus value={reason} maxLength={500} className="min-h-20 w-full rounded-xl border border-slate-800 bg-[#0A0F19] p-2 text-sm text-slate-200 outline-none focus-visible:border-emerald-500/60" onChange={(event) => setReason(event.target.value)} />
         </div>
       </ConfirmModal>
-    </Card>
+    </StatementSectionCard>
   );
 }

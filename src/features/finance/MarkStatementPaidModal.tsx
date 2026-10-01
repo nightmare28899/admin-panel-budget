@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Input, InputNumber, Space } from "antd";
-import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { StatementButton, STATEMENT_FIELD_SCOPE } from "./StatementUi";
 
 export type StatementPaymentFormValue = {
   amount: number;
@@ -106,10 +106,10 @@ function OpenStatementPaymentModal({
 
   return (
     <Modal open onClose={closeIfIdle} title={t(correction ? "correctPayment" : "recordPayment")}>
-      <p className="text-sm leading-6 text-[var(--text-2)]">{t("recordPaymentPrompt")}</p>
-      <div className="space-y-3">
+      <p className="text-sm leading-6 text-slate-300">{t("recordPaymentPrompt")}</p>
+      <div className={`space-y-3 ${STATEMENT_FIELD_SCOPE}`}>
         <div>
-          <label htmlFor="statement-payment-amount" className="mb-1 block text-xs text-[var(--text-3)]">
+          <label htmlFor="statement-payment-amount" className="mb-1 block text-xs text-slate-400">
             {t("paymentAmount")}
           </label>
           <Space.Compact block className="min-w-0 max-w-full">
@@ -148,20 +148,20 @@ function OpenStatementPaymentModal({
           </Space.Compact>
         </div>
         <div>
-          <label htmlFor="statement-payment-date" className="mb-1 block text-xs text-[var(--text-3)]">
+          <label htmlFor="statement-payment-date" className="mb-1 block text-xs text-slate-400">
             {t("paymentDate")}
           </label>
           <Input id="statement-payment-date" type="date" max={today()} value={paidAt} onChange={(event) => setPaidAt(event.target.value)} />
         </div>
         <div>
-          <label htmlFor="statement-payment-note" className="mb-1 block text-xs text-[var(--text-3)]">
+          <label htmlFor="statement-payment-note" className="mb-1 block text-xs text-slate-400">
             {t("paymentNote")}
           </label>
           <Input.TextArea id="statement-payment-note" value={note} maxLength={500} rows={2} onChange={(event) => setNote(event.target.value)} />
         </div>
         {correction && (
           <div>
-            <label htmlFor="statement-payment-reason" className="mb-1 block text-xs text-[var(--text-3)]">
+            <label htmlFor="statement-payment-reason" className="mb-1 block text-xs text-slate-400">
               {t("correctionReason")}
             </label>
             <Input.TextArea id="statement-payment-reason" value={reason} maxLength={500} rows={2} required onChange={(event) => setReason(event.target.value)} />
@@ -169,13 +169,13 @@ function OpenStatementPaymentModal({
         )}
       </div>
       <div className="flex min-w-0 flex-wrap justify-end gap-2 pt-2">
-        <Button type="button" variant="ghost" onClick={closeIfIdle} disabled={loading}>
+        <StatementButton variant="ghost" size="md" onClick={closeIfIdle} disabled={loading}>
           {t("cancel")}
-        </Button>
-        <Button
-          type="button"
-          variant="success"
-          className="!h-auto min-h-10 min-w-0 max-w-full !whitespace-normal break-words px-4 py-2 text-center leading-tight"
+        </StatementButton>
+        <StatementButton
+          variant="pay"
+          size="md"
+          className="!h-auto min-h-10 min-w-0 max-w-full !whitespace-normal break-words py-2 text-center leading-tight"
           onClick={() =>
             isValid &&
             void onConfirm({
@@ -190,7 +190,7 @@ function OpenStatementPaymentModal({
           aria-busy={loading}
         >
           {loading ? t("working") : t(correction ? "correctPayment" : "recordPayment")}
-        </Button>
+        </StatementButton>
       </div>
     </Modal>
   );
