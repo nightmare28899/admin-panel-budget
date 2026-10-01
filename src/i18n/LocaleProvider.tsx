@@ -7,6 +7,19 @@ import { isLocale, type Locale, type MessageValues } from "./types";
 const LOCALE_STORAGE_KEY = "budget-panel-locale";
 const listeners = new Set<() => void>();
 
+// `new Date("2026-10-15")` is UTC midnight, which renders as the previous day
+// west of UTC (e.g. Mexico). Date-only strings are calendar days, so build
+// them in local time instead.
+function toDisplayDate(input: Date | string | number) {
+  if (typeof input === "string") {
+    const dateOnly = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnly) {
+      return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+    }
+  }
+  return new Date(input);
+}
+
 function browserLocale(): Locale {
   const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
   if (isLocale(stored)) return stored;
@@ -77,7 +90,7 @@ export function LocaleProvider({ children }: PropsWithChildren) {
       setLocale: persistLocale,
       t,
       formatDate: (input, options) =>
-        new Intl.DateTimeFormat(locale, options).format(new Date(input)),
+        new Intl.DateTimeFormat(locale, options).format(toDisplayDate(input)),
       formatNumber: (input, options) => new Intl.NumberFormat(locale, options).format(input),
     }),
     [locale, t],
