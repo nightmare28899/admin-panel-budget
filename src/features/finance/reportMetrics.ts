@@ -5,7 +5,7 @@ import type {
 } from "./finance.types";
 import { toCalendarDate } from "./finance.types";
 
-export type ReportGranularity = "daily" | "weekly" | "monthly";
+export type ReportGranularity = "daily" | "weekly" | "monthly" | "quarterly";
 
 export type ReportBucket = {
   key: string;
@@ -39,13 +39,24 @@ export function getPreviousRange(
 function bucketStart(date: Dayjs, granularity: ReportGranularity) {
   if (granularity === "daily") return date.startOf("day");
   if (granularity === "weekly") return date.startOf("week");
+  if (granularity === "quarterly") {
+    // Calendar quarters (Jan/Apr/Jul/Oct); avoids the quarterOfYear plugin.
+    return date.month(Math.floor(date.month() / 3) * 3).startOf("month");
+  }
   return date.startOf("month");
+}
+
+export function getQuarter(date: Dayjs) {
+  return Math.floor(date.month() / 3) + 1;
 }
 
 function bucketKey(date: Dayjs, granularity: ReportGranularity) {
   const start = bucketStart(date, granularity);
   return {
-    key: start.format(granularity === "monthly" ? "YYYY-MM" : "YYYY-MM-DD"),
+    key:
+      granularity === "quarterly"
+        ? `${start.format("YYYY")}-Q${getQuarter(start)}`
+        : start.format(granularity === "monthly" ? "YYYY-MM" : "YYYY-MM-DD"),
     start,
   };
 }
@@ -73,14 +84,17 @@ export function buildReportBuckets(
       countsByCurrency: {},
     });
     if (key === lastKey) break;
-    cursor = cursor.add(
-      1,
-      granularity === "daily"
-        ? "day"
-        : granularity === "weekly"
-          ? "week"
-          : "month",
-    );
+    cursor =
+      granularity === "quarterly"
+        ? cursor.add(3, "month")
+        : cursor.add(
+            1,
+            granularity === "daily"
+              ? "day"
+              : granularity === "weekly"
+                ? "week"
+                : "month",
+          );
   }
 
   const complete = buckets.at(-1)?.key === lastKey;
