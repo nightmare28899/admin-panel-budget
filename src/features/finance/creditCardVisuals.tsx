@@ -21,16 +21,11 @@ export function creditCardBackground(card: { id: string; color?: string | null }
   return FALLBACK_GRADIENTS[hash % FALLBACK_GRADIENTS.length];
 }
 
+// Banamex Oro / Azul variants keep their dedicated artwork; everything else is
+// themed with CSS gradients (see CARD_THEMES) or falls back to the card colour.
 const CARD_ARTWORK_BY_IDENTITY: Record<string, string> = {
   "banamex oro": "/cards/banamex-oro.svg",
   "banamex azul": "/cards/banamex-blue.svg",
-  banamex: "/cards/banamex-classic.svg",
-  "banamex clasica": "/cards/banamex-classic.svg",
-  "banamex classic": "/cards/banamex-classic.svg",
-  rappi: "/cards/rappicard.svg",
-  "rappi card": "/cards/rappicard.svg",
-  rappicard: "/cards/rappicard.svg",
-  bbva: "/cards/bbva.svg",
 };
 
 function normalizeCardIdentity(value: string): string {
@@ -44,28 +39,89 @@ function normalizeCardIdentity(value: string): string {
     .replace(/\s+/g, " ");
 }
 
-export function creditCardArtworkBackground(card: {
-  id: string;
-  name: string;
-  bank: string;
-  color?: string | null;
-}): string {
-  const name = normalizeCardIdentity(card.name);
-  const bank = normalizeCardIdentity(card.bank);
+export type CardThemeKey = "banamex" | "bbva" | "rappi" | "default";
 
-  if (name.startsWith("budget demo") || bank.startsWith("budget demo")) {
-    return creditCardBackground(card);
-  }
+export type CardTheme = {
+  key: CardThemeKey;
+  /** CSS `background` for the card face. */
+  background: string;
+  /** Tailwind border classes of the card face. */
+  borderClass: string;
+  /** Soft coloured glow under the card face. */
+  glow: string;
+  /** Tailwind gradient classes for the utilization bar fill. */
+  barClass: string;
+  /** Tailwind classes for the "% used" badge in its normal (non-warning) state. */
+  badgeClass: string;
+};
 
-  const combinedIdentity = normalizeCardIdentity(`${card.bank} ${card.name}`);
-  const artworkPath =
-    CARD_ARTWORK_BY_IDENTITY[combinedIdentity] ??
-    CARD_ARTWORK_BY_IDENTITY[name] ??
-    CARD_ARTWORK_BY_IDENTITY[bank];
+const EMERALD_BADGE = "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
 
-  return artworkPath
-    ? `url("${artworkPath}") center / cover no-repeat`
-    : creditCardBackground(card);
+const CARD_THEMES: Record<CardThemeKey, CardTheme> = {
+  banamex: {
+    key: "banamex",
+    background: "linear-gradient(135deg, #E11D48 0%, #BE123C 50%, #881337 100%)",
+    borderClass: "border-white/20",
+    glow: "0 14px 35px -10px rgba(225, 29, 72, 0.35)",
+    barClass: "bg-gradient-to-r from-emerald-500 to-teal-400",
+    badgeClass: EMERALD_BADGE,
+  },
+  bbva: {
+    key: "bbva",
+    background: "linear-gradient(135deg, #0284C7 0%, #0369A1 50%, #075985 100%)",
+    borderClass: "border-cyan-400/30",
+    glow: "0 14px 35px -10px rgba(14, 116, 144, 0.4)",
+    barClass: "bg-gradient-to-r from-sky-400 to-cyan-300",
+    badgeClass: "border-cyan-500/20 bg-cyan-500/10 text-cyan-400",
+  },
+  rappi: {
+    key: "rappi",
+    background: "linear-gradient(135deg, #0b0f19 0%, #161f30 50%, #1e1b4b 100%)",
+    borderClass: "border-violet-500/30",
+    glow: "0 14px 35px -10px rgba(147, 51, 234, 0.3)",
+    barClass: "bg-gradient-to-r from-violet-500 to-indigo-400",
+    badgeClass: EMERALD_BADGE,
+  },
+  default: {
+    key: "default",
+    background: "",
+    borderClass: "border-white/10",
+    glow: "0 14px 35px -10px rgba(0, 0, 0, 0.45)",
+    barClass: "bg-gradient-to-r from-emerald-500 to-teal-400",
+    badgeClass: EMERALD_BADGE,
+  },
+};
+
+type CardIdentity = { id: string; name: string; bank: string; color?: string | null };
+
+function isBudgetDemo(card: CardIdentity): boolean {
+  return normalizeCardIdentity(card.name).startsWith("budget demo")
+    || normalizeCardIdentity(card.bank).startsWith("budget demo");
+}
+
+function themeKeyFor(card: CardIdentity): CardThemeKey {
+  if (isBudgetDemo(card)) return "default";
+  const identity = normalizeCardIdentity(`${card.bank} ${card.name}`);
+  if (/\bbanamex\b/.test(identity)) return "banamex";
+  if (/\bbbva\b/.test(identity)) return "bbva";
+  if (/\brappi(?:card)?\b/.test(identity)) return "rappi";
+  return "default";
+}
+
+/** Visual theme (face gradient, border, glow, bar and badge colours) for a card. */
+export function creditCardTheme(card: CardIdentity): CardTheme {
+  const theme = CARD_THEMES[themeKeyFor(card)];
+  return theme.key === "default"
+    ? { ...theme, background: creditCardBackground(card) }
+    : theme;
+}
+
+/** Banamex Oro / Azul keep their SVG artwork; returns null for every other card. */
+export function creditCardArtworkImage(card: CardIdentity): string | null {
+  if (isBudgetDemo(card)) return null;
+  const combined = normalizeCardIdentity(`${card.bank} ${card.name}`);
+  const path = CARD_ARTWORK_BY_IDENTITY[combined];
+  return path ? `url("${path}") center / cover no-repeat` : null;
 }
 
 export function CreditCardChipIcon() {
@@ -75,6 +131,20 @@ export function CreditCardChipIcon() {
       <div className="absolute inset-x-1 top-[11px] h-px bg-yellow-800/40" />
       <div className="absolute inset-x-1 top-[17px] h-px bg-yellow-800/40" />
       <div className="absolute inset-y-1 left-1/2 w-px -translate-x-1/2 bg-yellow-800/40" />
+    </div>
+  );
+}
+
+/** EMV chip with the gold-to-pink gradient used on the card faces of the cards page. */
+export function CreditCardEmvChip() {
+  return (
+    <div
+      aria-hidden="true"
+      className="relative flex h-7 w-10 shrink-0 items-center justify-center rounded-md shadow-inner"
+      style={{ background: "linear-gradient(135deg, #fce043 0%, #fb7ba2 100%)" }}
+    >
+      <div className="pointer-events-none absolute inset-0.5 rounded-[4px] border border-black/30" />
+      <div className="h-4 w-6 border-y border-black/30" />
     </div>
   );
 }

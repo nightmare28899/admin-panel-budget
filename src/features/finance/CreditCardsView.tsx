@@ -67,12 +67,14 @@ export function CreditCardsView() {
         </div>
   ) : null;
 
+  // Full-bleed #080C14 backdrop for this page only: the box-shadow spreads the
+  // colour sideways past the max-w column, clip-path trims it vertically.
   return (
-    <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+    <div className="mx-auto min-h-full w-full max-w-7xl bg-[#080C14] p-4 shadow-[0_0_0_100vmax_#080C14] [clip-path:inset(0_-100vmax)] sm:p-6">
       {!overview && (
         <div className="mb-4">
-          <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("myCards")}</h1>
-          <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("trackCardsDescription")}</p>
+          <h1 className="font-serif text-2xl font-semibold text-white">{t("myCards")}</h1>
+          <p className="mt-0.5 text-sm text-slate-400">{t("trackCardsDescription")}</p>
         </div>
       )}
 
