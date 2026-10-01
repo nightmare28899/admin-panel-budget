@@ -51,6 +51,9 @@ export type CreditCardStatementSummary = {
   projectedNextCloseDate: string | null;
   projectedNextCloseAmount: number;
   projectedTotalDebt: number;
+  nextPlanInstallments: number;
+  nextClosePaymentEstimate: number;
+  estimatedRemainingAfterNextClose: number;
   overpaid: number;
   integrityFlags: {
     missingReconciliation: boolean;
@@ -126,6 +129,8 @@ export type CreditCardPortfolioCurrency = {
   totalProjectedNextCloseAmount: number;
   earliestProjectedNextCloseDate: string | null;
   totalProjectedDebt: number;
+  totalNextClosePaymentEstimate: number;
+  totalEstimatedRemainingAfterNextClose: number;
   utilizationPercent: number | null;
   monthlyRecurringSpend: number;
 };

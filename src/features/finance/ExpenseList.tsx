@@ -30,6 +30,7 @@ function TransactionRow({
   const displayDate = calendarDate
     ? formatDate(`${calendarDate}T12:00:00`, { year: "numeric", month: "short", day: "numeric" })
     : "—";
+  const isInstallmentRow = expense.isInstallment === true && (expense.installmentCount ?? 0) > 1;
   const isDeleting = deletingExpenseId === expense.id;
   const deletionPending = deletingExpenseId !== undefined;
 
@@ -59,8 +60,11 @@ function TransactionRow({
               </>
             )}
           </p>
-          {(expense.creditCard || expense.statementRow) && (
+          {(expense.creditCard || expense.statementRow || isInstallmentRow) && (
             <p className="mt-1 flex flex-wrap items-center gap-1.5">
+              {isInstallmentRow && (
+                <Badge variant="neutral">{t("installmentBadge", { index: formatNumber(expense.installmentIndex ?? 1), count: formatNumber(expense.installmentCount ?? 0) })}</Badge>
+              )}
               {expense.creditCard && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-[var(--bg-3)]/60 px-2 py-0.5 text-[11px] text-[var(--text-3)]">
                   <CreditCardOutlined /> {expense.creditCard.name} •••• {expense.creditCard.last4}

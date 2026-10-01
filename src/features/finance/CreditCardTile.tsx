@@ -109,6 +109,13 @@ export function CreditCardTile({
             {t("projectedNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.projectedNextCloseAmount)}</span>
             {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
           </p>
+          <p>
+            {t("nextClosePaymentEstimate")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.nextClosePaymentEstimate)}</span>
+            {card.statementSummary.projectedNextCloseDate && <> · {formatDate(card.statementSummary.projectedNextCloseDate, { dateStyle: "medium" })}</>}
+          </p>
+          <p>
+            {t("remainingAfterNextClose")}: <span className="font-mono text-[var(--text-1)]">{formatMoney(card.statementSummary.estimatedRemainingAfterNextClose)}</span>
+          </p>
         </div>
 
         {card.flags.currencyMismatch && (

@@ -31,6 +31,8 @@ export function StatementDebtSummary({
                 <div className="flex justify-between gap-3"><dt>{t("currentPaymentDue")}</dt><dd>{money(summary.totalCurrentPaymentDue, summary.currency)}</dd></div>
                 <div className="flex justify-between gap-3"><dt>{t("postCloseSpend")}</dt><dd>{money(summary.totalPostCloseSpend, summary.currency)}</dd></div>
                 <div className="flex justify-between gap-3"><dt>{t("projectedNextClose")}</dt><dd>{money(summary.totalProjectedNextCloseAmount, summary.currency)}</dd></div>
+                <div className="flex justify-between gap-3"><dt>{t("nextClosePaymentEstimate")}</dt><dd>{money(summary.totalNextClosePaymentEstimate, summary.currency)}</dd></div>
+                <div className="flex justify-between gap-3"><dt>{t("remainingAfterNextClose")}</dt><dd>{money(summary.totalEstimatedRemainingAfterNextClose, summary.currency)}</dd></div>
                 <div className="flex justify-between gap-3 font-semibold text-[var(--text-1)]"><dt>{t("projectedTotalDebt")}</dt><dd>{money(summary.totalProjectedDebt, summary.currency)}</dd></div>
                 <div className="flex justify-between gap-3"><dt>{t("creditLimit")}</dt><dd>{money(summary.totalCreditLimit, summary.currency)}</dd></div>
                 <div className="flex justify-between gap-3"><dt>{t("availableCredit")}</dt><dd>{money(summary.totalAvailableCredit, summary.currency)}</dd></div>
@@ -58,6 +60,8 @@ export function StatementDebtSummary({
     [t("currentPaymentDue"), summary.currentPaymentDue],
     [t("postCloseSpend"), summary.postCloseSpend],
     [t("projectedNextClose"), summary.projectedNextCloseAmount],
+    [t("nextClosePaymentEstimate"), summary.nextClosePaymentEstimate],
+    [t("remainingAfterNextClose"), summary.estimatedRemainingAfterNextClose],
     [t("projectedTotalDebt"), summary.projectedTotalDebt],
     [t("creditLimit"), card.creditStatus.limit],
     [t("availableCredit"), card.creditStatus.availableCredit],

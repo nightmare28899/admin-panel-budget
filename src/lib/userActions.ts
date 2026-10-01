@@ -69,7 +69,7 @@ function testDataGenerationEnabled() {
 
 function addExpenseFields(form: FormData, body: ExpenseWritePayload) {
   Object.entries(body).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") form.append(key, value);
+    if (value !== undefined && value !== "") form.append(key, String(value));
   });
 }
 
