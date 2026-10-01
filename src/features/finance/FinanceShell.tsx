@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { userLogoutAction } from "@/lib/userActions";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { getCreditCardsAction, userLogoutAction } from "@/lib/userActions";
 import { AppShell, type AppShellNavItem } from "@/components/layout/AppShell";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SubscriptionAlertsBell } from "./SubscriptionAlertsBell";
@@ -13,7 +13,10 @@ type FinanceUser = {
   email?: string;
 };
 
-function createNavItems(t: ReturnType<typeof useLocale>["t"]): AppShellNavItem[] {
+function createNavItems(
+  t: ReturnType<typeof useLocale>["t"],
+  activeCardCount: number | null,
+): AppShellNavItem[] {
   return [
   {
     label: t("expenses"),
@@ -29,6 +32,7 @@ function createNavItems(t: ReturnType<typeof useLocale>["t"]): AppShellNavItem[]
   {
     label: t("myCards"),
     href: "/finance/cards",
+    badge: activeCardCount ?? undefined,
     icon: (
       <>
         <path d="M3 6h18v12H3zM3 10h18M7 15h3" />
@@ -90,6 +94,20 @@ export function FinanceShell({
   const { t } = useLocale();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
+  const pathname = usePathname();
+  const [activeCardCount, setActiveCardCount] = useState<number | null>(null);
+
+  // Refreshed on navigation so the sidebar count follows cards added or deactivated.
+  useEffect(() => {
+    let cancelled = false;
+    void getCreditCardsAction().then((result) => {
+      if (cancelled || result.error || !result.data) return;
+      setActiveCardCount(result.data.filter((card) => card.isActive).length);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -100,7 +118,7 @@ export function FinanceShell({
   return (
     <>
       <AppShell
-        navItems={createNavItems(t)}
+        navItems={createNavItems(t, activeCardCount)}
         user={user}
         onSignOut={() => setLogoutConfirmationOpen(true)}
         signingOut={loggingOut}

@@ -63,6 +63,8 @@ export type AppShellNavItem = {
   label: string;
   href: string | null;
   soon?: boolean;
+  /** Small count shown next to the label (e.g. number of active cards). */
+  badge?: number;
   icon: ReactNode;
 };
 
@@ -130,6 +132,18 @@ function SidebarContent({
               >
                 {item.label}
               </span>
+              {item.badge != null && (
+                <span
+                  className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
+                    active
+                      ? "bg-[var(--emerald)] text-[var(--bg-0)]"
+                      : "bg-[var(--bg-3)] text-[var(--text-2)]"
+                  }`}
+                  aria-label={String(item.badge)}
+                >
+                  {item.badge}
+                </span>
+              )}
               {item.soon && (
                 <span className="whitespace-nowrap rounded-full border border-[var(--border)] px-1.5 py-0.5 text-[9.5px] tracking-[0.04em] text-[var(--text-3)]">
                   {t("soon")}
