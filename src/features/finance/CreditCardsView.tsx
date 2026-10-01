@@ -50,16 +50,7 @@ export function CreditCardsView() {
     else await load();
   };
 
-  return (
-    <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
-      <div className="mb-4">
-        <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("myCards")}</h1>
-        <p className="mt-0.5 text-sm text-[var(--text-3)]">
-          {t("trackCardsDescription")}
-        </p>
-      </div>
-
-      {error && (
+  const errorAlert = error ? (
         <div
           role="alert"
           className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]"
@@ -74,7 +65,18 @@ export function CreditCardsView() {
             ✕
           </button>
         </div>
+  ) : null;
+
+  return (
+    <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+      {!overview && (
+        <div className="mb-4">
+          <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("myCards")}</h1>
+          <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("trackCardsDescription")}</p>
+        </div>
       )}
+
+      {!overview && errorAlert}
 
       {loading && !overview ? (
         <Card className="!p-4">
@@ -83,6 +85,7 @@ export function CreditCardsView() {
       ) : overview ? (
         <CreditCardManager
           overview={overview}
+          notice={errorAlert}
           onCreate={async (body: CreditCardWritePayload) =>
             refreshAfter(await createCreditCardAction(body))
           }

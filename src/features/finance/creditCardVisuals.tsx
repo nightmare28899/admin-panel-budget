@@ -91,3 +91,35 @@ export function CreditCardContactlessIcon() {
     </svg>
   );
 }
+
+/**
+ * Network mark for the card face, derived only from the stored brand text:
+ * VISA wordmark, Mastercard circles, otherwise the brand text itself.
+ */
+export function CreditCardBrandMark({ brand }: { brand: string }) {
+  const normalized = brand.trim().toLowerCase().replace(/\s+/g, "");
+  if (!normalized) return null;
+
+  if (normalized.includes("visa")) {
+    return (
+      <span className="relative shrink-0 text-lg font-extrabold italic leading-none tracking-tight text-white drop-shadow-sm">
+        VISA
+      </span>
+    );
+  }
+
+  if (normalized.includes("mastercard")) {
+    return (
+      <span role="img" aria-label="Mastercard" className="relative flex shrink-0 items-center">
+        <span className="h-6 w-6 rounded-full bg-red-500/90" />
+        <span className="-ml-2.5 h-6 w-6 rounded-full bg-amber-400/90 mix-blend-screen" />
+      </span>
+    );
+  }
+
+  return (
+    <span className="relative shrink-0 rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/85">
+      {brand}
+    </span>
+  );
+}

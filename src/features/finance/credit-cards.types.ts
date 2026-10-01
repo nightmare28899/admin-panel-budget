@@ -45,6 +45,8 @@ export type CreditCardStatementSummary = {
   deferredInstallmentBalance: number;
   noInterestTarget: number | null;
   currentPaymentDue: number | null;
+  /** MINIMUM payment target of the latest statement, same currency as the card. */
+  minimumPayment: number | null;
   dueDate: string | null;
   postCloseSpend: number;
   postCloseExpenseCount: number;

@@ -1,7 +1,7 @@
 "use client";
 
 import { Form, Input, InputNumber } from "antd";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { StatCard } from "@/components/ui/StatCard";
@@ -13,6 +13,9 @@ import type {
   CreditCardWritePayload,
 } from "./credit-cards.types";
 import { useLocale } from "@/i18n/LocaleProvider";
+import type { MessageKey } from "@/i18n/messages";
+import { listPendingPayments } from "./cardPaymentSchedule";
+import { PaymentReminderBanner } from "./PaymentReminderBanner";
 
 type FilterTab = "all" | "active" | "inactive";
 
@@ -22,14 +25,17 @@ export function CreditCardManager({
   onUpdate,
   onDeactivate,
   onReactivate,
+  notice,
 }: {
   overview: CreditCardOverviewResponse;
   onCreate: (body: CreditCardWritePayload) => Promise<void>;
   onUpdate: (id: string, body: Partial<CreditCardWritePayload>) => Promise<void>;
   onDeactivate: (id: string) => Promise<void>;
   onReactivate: (id: string) => Promise<void>;
+  /** Rendered between the page header and the KPI row (e.g. an error alert). */
+  notice?: ReactNode;
 }) {
-  const { t, formatNumber } = useLocale();
+  const { t, formatNumber, formatDate } = useLocale();
   const formatMoney = (value: number, currency: string) => `${currency} ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const filterLabels: Record<FilterTab, string> = { all: t("all"), active: t("active"), inactive: t("inactive") };
   const [open, setOpen] = useState(false);
@@ -42,14 +48,14 @@ export function CreditCardManager({
   const [form] = Form.useForm<CreditCardWritePayload>();
 
   const { portfolio, cards } = overview;
-  const totalTransactions = cards.reduce((sum, card) => sum + card.currentCycle.expenseCount, 0);
-  const currentStatementPaymentsByCurrency = Array.from(
-    cards.reduce<Map<string, number>>((totals, card) => {
-      const currentTotal = totals.get(card.currency) ?? 0;
-      totals.set(card.currency, currentTotal + (card.statementSummary.currentPaymentDue ?? 0));
-      return totals;
-    }, new Map()),
-  );
+  const activeCards = cards.filter((card) => card.isActive);
+  const inactiveCount = cards.length - activeCards.length;
+  const filterCounts: Record<FilterTab, number> = { all: cards.length, active: activeCards.length, inactive: inactiveCount };
+  const totalTransactions = activeCards.reduce((sum, card) => sum + card.currentCycle.expenseCount, 0);
+  const pendingPayments = listPendingPayments(cards);
+  const activePercent = portfolio.trackedCards > 0
+    ? Math.round((portfolio.activeCards / portfolio.trackedCards) * 100)
+    : null;
 
   const visibleCards = cards.filter((card) => {
     if (filter === "active") return card.isActive;
@@ -101,67 +107,44 @@ export function CreditCardManager({
     setDeactivateTarget(undefined);
   };
 
+  const sectionTitle: Record<FilterTab, MessageKey> = {
+    active: "cardsSectionActive",
+    all: "cardsSectionAll",
+    inactive: "cardsSectionInactive",
+  };
+
   return (
     <section>
-      <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          tone="info"
-          icon="💳"
-          label={t("totalCards")}
-          value={String(portfolio.activeCards)}
-          extraPlacement="below"
-          extra={<span className="text-xs text-[var(--text-3)]">{t("trackedCards", { count: formatNumber(portfolio.trackedCards) })}</span>}
-        />
-        {portfolio.byCurrency.map((summary) => (
-          <StatCard
-            key={summary.currency}
-            tone="gold"
-            icon="📈"
-            label={`${t("spentThisCycle")} · ${summary.currency}`}
-            value={formatMoney(summary.totalCurrentCycleSpend, summary.currency)}
-            extraPlacement="below"
-            extra={<span className="text-xs text-[var(--text-3)]">{t("availableCredit")}: {formatMoney(summary.totalAvailableCredit, summary.currency)}</span>}
-          />
-        ))}
-        {currentStatementPaymentsByCurrency.map(([currency, total]) => (
-          <StatCard
-            key={`statement-payments-${currency}`}
-            tone="emerald"
-            icon="🧾"
-            label={`${t("currentStatementPaymentsDue")} · ${currency}`}
-            value={formatMoney(total, currency)}
-          />
-        ))}
-        <StatCard
-          tone="rose"
-          icon="⚡"
-          label={t("transactions")}
-          value={String(totalTransactions)}
-          extraPlacement="below"
-          extra={<span className="text-xs text-[var(--text-3)]">{t("thisCycle")}</span>}
-        />
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2 rounded-full border border-[var(--border-soft)] p-1">
-          {(["active", "all", "inactive"] as FilterTab[]).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setFilter(tab)}
-              className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                filter === tab
-                  ? "border-[var(--emerald)]/30 bg-[var(--emerald-dim)] text-[var(--emerald-text)] hover:border-[var(--emerald)]/50 hover:bg-[var(--emerald)]/25 active:bg-[var(--emerald)]/35"
-                  : "border-transparent text-[var(--text-3)] hover:border-[var(--emerald)]/30 hover:bg-[var(--emerald-dim)] hover:text-[var(--emerald-text)]"
-              }`}
-            >
-              {filterLabels[tab]}
-            </button>
-          ))}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("myCards")}</h1>
+            <span className="rounded-full border border-[var(--border-soft)] bg-[var(--bg-3)] px-2.5 py-0.5 text-xs text-[var(--text-2)]">
+              {t("activeCardsCount", { count: formatNumber(activeCards.length) })}
+            </span>
+          </div>
+          <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("trackCardsDescription")}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div role="group" aria-label={t("myCards")} className="flex gap-1 rounded-full border border-[var(--border-soft)] p-1">
+            {(["active", "all", "inactive"] as FilterTab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                aria-pressed={filter === tab}
+                onClick={() => setFilter(tab)}
+                className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  filter === tab
+                    ? "border-[var(--emerald)]/30 bg-[var(--emerald-dim)] text-[var(--emerald-text)] hover:border-[var(--emerald)]/50 hover:bg-[var(--emerald)]/25 active:bg-[var(--emerald)]/35"
+                    : "border-transparent text-[var(--text-3)] hover:border-[var(--emerald)]/30 hover:bg-[var(--emerald-dim)] hover:text-[var(--emerald-text)]"
+                }`}
+              >
+                {filterLabels[tab]} ({formatNumber(filterCounts[tab])})
+              </button>
+            ))}
+          </div>
           {visibleCards.length > 0 && (
-            <Button type="button" variant="outline" onClick={toggleAllVisibleDetails}>
+            <Button type="button" variant="outline" aria-pressed={allVisibleDetailsExpanded} onClick={toggleAllVisibleDetails}>
               {allVisibleDetailsExpanded ? t("hideAllDetails") : t("showAllDetails")}
             </Button>
           )}
@@ -169,6 +152,109 @@ export function CreditCardManager({
             {t("addCard")}
           </Button>
         </div>
+      </div>
+
+      {notice}
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          tone="info"
+          icon="💳"
+          label={t("totalCards")}
+          value={String(portfolio.activeCards)}
+          extraPlacement="below"
+          extra={
+            <div className="space-y-1 text-xs text-[var(--text-3)]">
+              <p>
+                {activePercent !== null && <span className="text-[var(--emerald-text)]">{t("activePercent", { percent: formatNumber(activePercent) })} · </span>}
+                {t("trackedCards", { count: formatNumber(portfolio.trackedCards) })}
+              </p>
+              {portfolio.byCurrency.filter((summary) => summary.totalCreditLimit > 0).map((summary) => (
+                <p key={summary.currency} className="flex justify-between gap-2 border-t border-[var(--border-soft)] pt-1">
+                  <span>{t("totalCapacity")}</span>
+                  <span className="font-mono text-[var(--text-1)]">{formatMoney(summary.totalCreditLimit, summary.currency)}</span>
+                </p>
+              ))}
+            </div>
+          }
+        />
+        {portfolio.byCurrency.map((summary) => (
+          <StatCard
+            key={summary.currency}
+            tone="gold"
+            icon="📈"
+            label={t("spentThisCycle")}
+            unit={summary.currency}
+            value={formatNumber(summary.totalCurrentCycleSpend, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            extraPlacement="below"
+            extra={
+              <div className="space-y-1.5 text-xs text-[var(--text-3)]">
+                <p className="flex justify-between gap-2 border-t border-[var(--border-soft)] pt-1.5">
+                  <span>{t("availableCredit")}</span>
+                  <span className="font-mono text-[var(--text-1)]">{formatMoney(summary.totalAvailableCredit, summary.currency)}</span>
+                </p>
+                {summary.utilizationPercent !== null && (
+                  <div
+                    role="progressbar"
+                    aria-label={`${t("utilization")} ${summary.currency}`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(Math.min(100, Math.max(0, summary.utilizationPercent)))}
+                    className="h-1.5 overflow-hidden rounded-full bg-[var(--bg-3)]"
+                  >
+                    <div className="h-full rounded-full bg-[var(--gold)]" style={{ width: `${Math.min(100, Math.max(0, summary.utilizationPercent))}%` }} />
+                  </div>
+                )}
+              </div>
+            }
+          />
+        ))}
+        {portfolio.byCurrency.map((summary) => {
+          const items = pendingPayments.filter((item) => item.card.currency === summary.currency);
+          const total = items.reduce((sum, item) => sum + (item.card.statementSummary.currentPaymentDue ?? 0), 0);
+          const nearest = items.find((item) => item.dueDate !== null)?.dueDate ?? null;
+          return (
+            <StatCard
+              key={`statement-payments-${summary.currency}`}
+              tone="rose"
+              icon="🧾"
+              label={t("pendingStatementPayments")}
+              unit={summary.currency}
+              value={formatNumber(total, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              extraPlacement="below"
+              extra={
+                items.length > 0 ? (
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-soft)] pt-1.5 text-xs text-[var(--text-3)]">
+                    <span>{nearest ? t("nextPaymentOn", { date: formatDate(nearest, { dateStyle: "medium" }) }) : ""}</span>
+                    <span className="rounded-md bg-[var(--rose-dim)] px-2 py-0.5 text-[var(--rose-text)]">
+                      {t("paymentsToSettle", { count: formatNumber(items.length) })}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs text-[var(--text-3)]">{t("noPendingPayments")}</span>
+                )
+              }
+            />
+          );
+        })}
+        <StatCard
+          tone="emerald"
+          icon="⚡"
+          label={t("transactions")}
+          value={String(totalTransactions)}
+          extraPlacement="below"
+          extra={<span className="text-xs text-[var(--text-3)]">{t("thisCycle")} · {t("activeCycle")}</span>}
+        />
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-base font-semibold text-[var(--text-1)]">
+          {t(sectionTitle[filter])}{" "}
+          <span className="font-mono text-xs font-normal text-[var(--text-3)]">
+            ({visibleCards.length === 1 ? t("cardUnitsOne") : t("cardUnits", { count: formatNumber(visibleCards.length) })})
+          </span>
+        </h2>
+        <p className="text-xs text-[var(--text-3)]">{t("projectedFiguresNote")}</p>
       </div>
 
       {visibleCards.length === 0 ? (
@@ -207,6 +293,8 @@ export function CreditCardManager({
           ))}
         </div>
       )}
+
+      <PaymentReminderBanner cards={cards} />
 
       <Modal open={open} onClose={closeModal} title={editing ? t("editCard") : t("addCard")}>
         <Form form={form} layout="vertical" initialValues={{ currency: "MXN" }} onFinish={(values) => void submit(values)}>
