@@ -80,6 +80,7 @@ export function CreditCardTile({
   onEdit,
   onDeactivate,
   onReactivate,
+  onDeletePermanently,
 }: {
   card: CreditCardOverviewItem;
   detailsExpanded: boolean;
@@ -87,6 +88,7 @@ export function CreditCardTile({
   onEdit: () => void;
   onDeactivate: () => void;
   onReactivate: () => void;
+  onDeletePermanently: () => void;
 }) {
   const router = useRouter();
   const { t, formatNumber, formatDate } = useLocale();
@@ -122,11 +124,14 @@ export function CreditCardTile({
     return t(key, { count: formatNumber(Math.abs(days)) });
   };
 
-  const menuItems: MenuProps["items"] = statementId
-    ? [{ key: "statement", label: t("viewStatement") }]
-    : [];
+  const menuItems: MenuProps["items"] = [
+    ...(statementId ? [{ key: "statement", label: t("viewStatement") }] : []),
+    ...(statementId ? [{ type: "divider" as const }] : []),
+    { key: "deletePermanently", label: t("deleteCardPermanently"), danger: true },
+  ];
   const onMenuClick: MenuProps["onClick"] = ({ key }) => {
     if (key === "statement" && statementId) router.push(`/finance/statements/${statementId}`);
+    if (key === "deletePermanently") onDeletePermanently();
   };
 
   return (

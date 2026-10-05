@@ -6,6 +6,7 @@ import { getCreditCardsAction, userLogoutAction } from "@/lib/userActions";
 import { AppShell, type AppShellNavItem } from "@/components/layout/AppShell";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SubscriptionAlertsBell } from "./SubscriptionAlertsBell";
+import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
 import { useLocale } from "@/i18n/LocaleProvider";
 
 type FinanceUser = {
@@ -97,15 +98,21 @@ export function FinanceShell({
   const pathname = usePathname();
   const [activeCardCount, setActiveCardCount] = useState<number | null>(null);
 
-  // Refreshed on navigation so the sidebar count follows cards added or deactivated.
+  // Refreshed on navigation and on card changes so the sidebar count follows
+  // cards added, deactivated or permanently deleted.
   useEffect(() => {
     let cancelled = false;
-    void getCreditCardsAction().then((result) => {
-      if (cancelled || result.error || !result.data) return;
-      setActiveCardCount(result.data.filter((card) => card.isActive).length);
-    });
+    const refresh = () => {
+      void getCreditCardsAction().then((result) => {
+        if (cancelled || result.error || !result.data) return;
+        setActiveCardCount(result.data.filter((card) => card.isActive).length);
+      });
+    };
+    refresh();
+    window.addEventListener(CREDIT_CARDS_CHANGED_EVENT, refresh);
     return () => {
       cancelled = true;
+      window.removeEventListener(CREDIT_CARDS_CHANGED_EVENT, refresh);
     };
   }, [pathname]);
 

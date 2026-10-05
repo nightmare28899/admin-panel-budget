@@ -3,6 +3,7 @@ import type { BudgetWritePayload, CardExpenseBreakdownResponse, Category, Catego
 import type {
   CreditCardOverviewResponse,
   CreditCardWritePayload,
+  DeleteCreditCardPermanentlyResponse,
 } from "@/features/finance/credit-cards.types";
 import type {
   CreditCardSummary,
@@ -53,6 +54,8 @@ export const userApi = {
     request<CreditCardSummary>(`/credit-cards/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
   deactivateCreditCard: (token: string, id: string) =>
     request<unknown>(`/credit-cards/${id}`, { method: "DELETE" }, token),
+  deleteCreditCardPermanently: (token: string, id: string) =>
+    request<DeleteCreditCardPermanentlyResponse>(`/credit-cards/${id}/permanent`, { method: "DELETE" }, token),
   statementImports: (token: string, query: string) =>
     request<StatementImportListResponse>(`/statement-imports?${query}`, { method: "GET" }, token),
   statementImport: (token: string, id: string) =>

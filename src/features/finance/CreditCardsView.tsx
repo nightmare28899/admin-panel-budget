@@ -9,11 +9,13 @@ import type { CreditCardOverviewResponse, CreditCardWritePayload } from "./credi
 import {
   createCreditCardAction,
   deactivateCreditCardAction,
+  deleteCreditCardPermanentlyAction,
   getCreditCardsOverviewAction,
   updateCreditCardAction,
 } from "@/lib/userActions";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
 
 export function CreditCardsView() {
   const router = useRouter();
@@ -21,6 +23,7 @@ export function CreditCardsView() {
   const [overview, setOverview] = useState<CreditCardOverviewResponse>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [success, setSuccess] = useState<string>();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,6 +52,49 @@ export function CreditCardsView() {
     if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
     else await load();
   };
+
+  const deletePermanently = async (id: string) => {
+    setError(undefined);
+    setSuccess(undefined);
+    const result = await deleteCreditCardPermanentlyAction(id);
+    if (result.sessionExpired) {
+      router.push("/user-login");
+      return;
+    }
+    if (result.error || !result.data) {
+      setError(
+        result.errorCode === "CREDIT_CARD_HAS_STATEMENTS"
+          ? t("creditCardHasStatements", { count: result.statementCount ?? 0 })
+          : frontendError(result.error, t, "requestFailedGeneric"),
+      );
+      return;
+    }
+    setSuccess(
+      t("cardDeletedUnlinked", {
+        expenses: result.data.unlinkedExpenses,
+        subscriptions: result.data.unlinkedSubscriptions,
+      }),
+    );
+    window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
+    await load();
+  };
+
+  const successAlert = success ? (
+    <div
+      role="status"
+      className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300"
+    >
+      <span>{success}</span>
+      <button
+        type="button"
+        onClick={() => setSuccess(undefined)}
+        aria-label={t("dismissError")}
+        className="shrink-0 cursor-pointer text-emerald-300/70 transition-colors hover:text-emerald-300"
+      >
+        ✕
+      </button>
+    </div>
+  ) : null;
 
   const errorAlert = error ? (
         <div
@@ -79,6 +125,7 @@ export function CreditCardsView() {
       )}
 
       {!overview && errorAlert}
+      {!overview && successAlert}
 
       {loading && !overview ? (
         <Card className="!p-4">
@@ -87,12 +134,13 @@ export function CreditCardsView() {
       ) : overview ? (
         <CreditCardManager
           overview={overview}
-          notice={errorAlert}
+          notice={<>{errorAlert}{successAlert}</>}
           onCreate={async (body: CreditCardWritePayload) =>
             refreshAfter(await createCreditCardAction(body))
           }
           onUpdate={async (id, body) => refreshAfter(await updateCreditCardAction(id, body))}
           onDeactivate={async (id) => refreshAfter(await deactivateCreditCardAction(id))}
+          onDeletePermanently={deletePermanently}
           onReactivate={async (id) =>
             refreshAfter(await updateCreditCardAction(id, { isActive: true }))
           }

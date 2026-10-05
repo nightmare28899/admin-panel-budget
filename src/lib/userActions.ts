@@ -36,6 +36,10 @@ import {
 type Result<T = undefined> = {
   data?: T;
   error?: string;
+  /** Machine-readable backend error code, when the API error body carries one. */
+  errorCode?: string;
+  /** Extra count carried by some API error bodies (e.g. CREDIT_CARD_HAS_STATEMENTS). */
+  statementCount?: number;
   sessionExpired?: boolean;
 };
 
@@ -228,7 +232,13 @@ function isUnauthorizedError(error: unknown): error is ApiError {
 function userErrorResult<T>(error: unknown): Result<T> {
   return isUnauthorizedError(error)
     ? { error: USER_SESSION_EXPIRED, sessionExpired: true }
-    : { error: errorText(error) };
+    : {
+        error: errorText(error),
+        ...(error instanceof ApiError && error.body?.code ? { errorCode: error.body.code } : {}),
+        ...(error instanceof ApiError && error.body?.statementCount !== undefined
+          ? { statementCount: error.body.statementCount }
+          : {}),
+      };
 }
 
 async function refreshUserSession(): Promise<Result> {
@@ -371,6 +381,10 @@ export async function updateCreditCardAction(
 
 export async function deactivateCreditCardAction(id: string) {
   return withFreshUser((token) => userApi.deactivateCreditCard(token, id));
+}
+
+export async function deleteCreditCardPermanentlyAction(id: string) {
+  return withFreshUser((token) => userApi.deleteCreditCardPermanently(token, id));
 }
 
 export async function getStatementImportsAction(query: string) {

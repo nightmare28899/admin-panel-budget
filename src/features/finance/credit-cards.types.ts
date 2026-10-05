@@ -152,3 +152,10 @@ export type CreditCardOverviewResponse = {
   portfolio: CreditCardPortfolio;
   cards: CreditCardOverviewItem[];
 };
+
+export type DeleteCreditCardPermanentlyResponse = {
+  id: string;
+  deleted: true;
+  unlinkedExpenses: number;
+  unlinkedSubscriptions: number;
+};

@@ -55,6 +55,7 @@ export class ApiError extends Error {
     constructor(
         public readonly status: number,
         message: string,
+        public readonly body?: { code?: string; statementCount?: number },
     ) {
         super(message);
         this.name = "ApiError";
@@ -86,6 +87,18 @@ function parseApiErrorMessage(raw: string, status: number): string {
     return raw;
 }
 
+function parseApiErrorBody(raw: string): ApiError["body"] {
+    try {
+        const parsed = JSON.parse(raw) as { code?: unknown; statementCount?: unknown };
+        return {
+            code: typeof parsed?.code === "string" ? parsed.code : undefined,
+            statementCount: typeof parsed?.statementCount === "number" ? parsed.statementCount : undefined,
+        };
+    } catch {
+        return undefined;
+    }
+}
+
 export async function request<T>(
     path: string,
     init: RequestInit = {},
@@ -103,7 +116,7 @@ export async function request<T>(
 
     if (!res.ok) {
         const text = await res.text();
-        throw new ApiError(res.status, parseApiErrorMessage(text, res.status));
+        throw new ApiError(res.status, parseApiErrorMessage(text, res.status), parseApiErrorBody(text));
     }
 
     return res.json() as Promise<T>;

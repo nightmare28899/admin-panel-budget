@@ -25,6 +25,7 @@ export function CreditCardManager({
   onUpdate,
   onDeactivate,
   onReactivate,
+  onDeletePermanently,
   notice,
 }: {
   overview: CreditCardOverviewResponse;
@@ -32,6 +33,7 @@ export function CreditCardManager({
   onUpdate: (id: string, body: Partial<CreditCardWritePayload>) => Promise<void>;
   onDeactivate: (id: string) => Promise<void>;
   onReactivate: (id: string) => Promise<void>;
+  onDeletePermanently: (id: string) => Promise<void>;
   /** Rendered between the page header and the KPI row (e.g. an error alert). */
   notice?: ReactNode;
 }) {
@@ -43,6 +45,8 @@ export function CreditCardManager({
   const [saving, setSaving] = useState(false);
   const [deactivateTarget, setDeactivateTarget] = useState<CreditCardOverviewItem>();
   const [deactivating, setDeactivating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<CreditCardOverviewItem>();
+  const [deleting, setDeleting] = useState(false);
   const [filter, setFilter] = useState<FilterTab>("active");
   const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(() => new Set());
   const [form] = Form.useForm<CreditCardWritePayload>();
@@ -105,6 +109,14 @@ export function CreditCardManager({
     await onDeactivate(deactivateTarget.id);
     setDeactivating(false);
     setDeactivateTarget(undefined);
+  };
+
+  const confirmDeletePermanently = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    await onDeletePermanently(deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(undefined);
   };
 
   const sectionTitle: Record<FilterTab, MessageKey> = {
@@ -296,6 +308,7 @@ export function CreditCardManager({
               }}
               onDeactivate={() => setDeactivateTarget(card)}
               onReactivate={() => void onReactivate(card.id)}
+              onDeletePermanently={() => setDeleteTarget(card)}
             />
           ))}
         </div>
@@ -375,6 +388,22 @@ export function CreditCardManager({
         confirmingLabel={t("deactivating")}
         confirmVariant="danger"
         loading={deactivating}
+      />
+
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(undefined)}
+        onConfirm={confirmDeletePermanently}
+        title={t("deleteCardPermanentlyQuestion")}
+        description={
+          deleteTarget
+            ? t("deleteCardPermanentlyDescription", { bank: deleteTarget.bank, name: deleteTarget.name })
+            : undefined
+        }
+        confirmLabel={t("deletePermanently")}
+        confirmingLabel={t("deletingPermanently")}
+        confirmVariant="danger"
+        loading={deleting}
       />
     </section>
   );
