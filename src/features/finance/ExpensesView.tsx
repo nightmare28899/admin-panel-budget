@@ -22,11 +22,9 @@ import { resolvePrimaryCurrency } from "./reportMetrics";
 import {
   createExpenseAction,
   deleteExpenseAction,
-  getCategoriesAction,
   getExpenseAction,
   getExpensesAction,
-  getFinanceSummaryAction,
-  getUserMeAction,
+  getExpensesPageAction,
   seedTestDataAction,
   updateBudgetAction,
   updateExpenseAction,
@@ -154,17 +152,6 @@ export function ExpensesView() {
       const requestId = ++latestRequestRef.current;
       setLoading(true);
 
-      let currency: string | undefined;
-      if (!quiet) {
-        const profile = await getUserMeAction();
-        if (requestId !== latestRequestRef.current) return;
-        if (profile.error || !profile.data?.user?.isActive) {
-          router.push("/user-login");
-          return;
-        }
-        currency = profile.data.user.currency;
-      }
-
       const params = new URLSearchParams({
         page: String(nextPage),
         limit: String(pageSize),
@@ -173,38 +160,40 @@ export function ExpensesView() {
         if (value) params.set(key, value);
       });
 
-      const month = currentMonthRange();
-      const [sum, cats, expenses, monthExpenses, latest] = await Promise.all([
-        getFinanceSummaryAction(),
-        quiet ? Promise.resolve(undefined) : getCategoriesAction(),
-        getExpensesAction(params.toString()),
-        // Month spend per currency (limit=1: only the aggregate breakdown is used).
-        getExpensesAction(new URLSearchParams({ ...month, page: "1", limit: "1" }).toString()),
-        // Baseline for background change detection (see checkForChanges).
-        getExpensesAction(CHANGE_PROBE_QUERY),
-      ]);
+      // One server action → one browser request; the API calls run in parallel server-side.
+      const result = await getExpensesPageAction(
+        {
+          list: params.toString(),
+          // Month spend per currency (limit=1: only the aggregate breakdown is used).
+          month: new URLSearchParams({ ...currentMonthRange(), page: "1", limit: "1" }).toString(),
+          // Baseline for background change detection (see checkForChanges).
+          probe: CHANGE_PROBE_QUERY,
+        },
+        { includeProfile: !quiet, includeCategories: !quiet },
+      );
       if (requestId !== latestRequestRef.current) return;
 
-      if ([sum, expenses].some((result) => result.sessionExpired)) {
+      const profile = result.data?.profile;
+      if (result.sessionExpired || (!quiet && result.data && !profile?.user?.isActive)) {
         router.push("/user-login");
         return;
       }
+
       setActiveUserLoadCompleted(true);
 
-      if (sum.error || cats?.error || expenses.error) {
-        if (!quiet) {
-          setError(frontendError(sum.error ?? cats?.error ?? expenses.error, t, "requestFailedGeneric"));
-        }
+      if (result.error || !result.data) {
+        if (!quiet) setError(frontendError(result.error, t, "requestFailedGeneric"));
       } else {
-        setSummary(sum.data);
-        if (currency) setUserCurrency(currency);
-        setMonthTotals(monthExpenses.error ? undefined : monthExpenses.data?.currencyBreakdown ?? []);
-        if (cats) setCategories(cats.data ?? []);
-        setList(expenses.data);
-        setRows(expenses.data?.expenses ?? []);
+        const { summary, categories, expenses, month, probe } = result.data;
+        setSummary(summary);
+        if (profile) setUserCurrency(profile.user.currency);
+        setMonthTotals(month ? month.currencyBreakdown ?? [] : undefined);
+        if (categories) setCategories(categories);
+        setList(expenses);
+        setRows(expenses.expenses ?? []);
         setPage(nextPage);
         setLastUpdated(new Date());
-        fingerprintRef.current = latest.data ? expensesFingerprint(latest.data) : undefined;
+        fingerprintRef.current = probe ? expensesFingerprint(probe) : undefined;
       }
       setLoading(false);
     },

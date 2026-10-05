@@ -299,6 +299,34 @@ export async function getFinanceSummaryAction() {
   return withUser((token) => userApi.summary(token), true);
 }
 
+/**
+ * Everything the expenses page needs in ONE server action: the browser sends a
+ * single request (server actions run one at a time on the client) and the API
+ * calls run in parallel here. Summary and the list are required; the other
+ * parts are optional and come back undefined on a non-auth failure.
+ */
+export async function getExpensesPageAction(
+  queries: { list: string; month: string; probe: string },
+  { includeProfile, includeCategories }: { includeProfile: boolean; includeCategories: boolean },
+) {
+  return withUser(async (token) => {
+    const optional = <T>(request: Promise<T>) =>
+      request.catch((error: unknown) => {
+        if (isUnauthorizedError(error)) throw error;
+        return undefined;
+      });
+    const [profile, summary, categories, expenses, month, probe] = await Promise.all([
+      includeProfile ? userApi.me(token) : undefined,
+      userApi.summary(token),
+      includeCategories ? optional(userApi.categories(token)) : undefined,
+      userApi.expenses(token, queries.list),
+      optional(userApi.expenses(token, queries.month)),
+      optional(userApi.expenses(token, queries.probe)),
+    ]);
+    return { profile, summary, categories, expenses, month, probe };
+  }, true);
+}
+
 export async function seedTestDataAction(): Promise<
   Result<SeedTestDataSummary>
 > {
