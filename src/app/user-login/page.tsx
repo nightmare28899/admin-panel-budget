@@ -12,6 +12,26 @@ import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
 
+const POST_LOGIN_PATH = "/finance/expenses";
+
+function PostLoginLoader() {
+  const { t } = useLocale();
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[var(--bg-0)]/90 backdrop-blur-sm"
+    >
+      <span
+        aria-hidden="true"
+        className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--border-soft)] border-t-[var(--emerald)]"
+      />
+      <p className="text-sm font-medium text-[var(--text-2)]">{t("loadingYourPanel")}</p>
+    </div>
+  );
+}
+
 function SessionExpiredNotice() {
   const searchParams = useSearchParams();
   const { t } = useLocale();
@@ -35,18 +55,24 @@ export default function UserLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+
+  function enterPanel() {
+    setRedirecting(true);
+    router.replace(POST_LOGIN_PATH);
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError(null);
     setLoading(true);
     const result = await userLoginAction(email.trim(), password);
-    setLoading(false);
     if (result.error) {
+      setLoading(false);
       setError(frontendError(result.error, t, "loginFailed"));
       return;
     }
-    router.push("/finance");
+    enterPanel();
   }
 
   async function googleLogin() {
@@ -56,7 +82,7 @@ export default function UserLoginPage() {
       const token = await signInWithGoogle();
       const result = await userGoogleLoginAction(token);
       if (result.error) setError(frontendError(result.error, t, "googleFailed"));
-      else router.push("/finance");
+      else enterPanel();
     } catch (reason) {
       const code = typeof reason === "object" && reason !== null && "code" in reason ? String(reason.code) : "";
       setError(
@@ -72,6 +98,7 @@ export default function UserLoginPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] p-6">
       <AmbientBackground variant="auth" />
+      {redirecting && <PostLoginLoader />}
 
       <div className="absolute top-6 right-6 z-20">
         <LanguageSwitcher />
@@ -133,7 +160,7 @@ export default function UserLoginPage() {
               className="input"
             />
           </div>
-          <Button type="submit" variant="primary" disabled={loading} className="w-full">
+          <Button type="submit" variant="primary" disabled={loading || redirecting} className="w-full">
             {loading ? t("signingIn") : t("signIn")}
           </Button>
         </form>
@@ -147,7 +174,7 @@ export default function UserLoginPage() {
         <Button
           type="button"
           variant="outline"
-          disabled={googleLoading}
+          disabled={googleLoading || redirecting}
           onClick={googleLogin}
           aria-label={t("continueWithGoogle")}
           className="w-full"
