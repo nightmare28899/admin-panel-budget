@@ -67,6 +67,14 @@ function currentMonthRange(now = new Date()) {
   };
 }
 
+// Unfiltered newest expense plus aggregates: enough to notice adds, deletes and amount edits.
+const CHANGE_PROBE_QUERY = new URLSearchParams({ page: "1", limit: "1" }).toString();
+
+function expensesFingerprint(data: ExpenseListResponse) {
+  const newest = data.expenses[0] as (ExpenseListResponse["expenses"][number] & { updatedAt?: string }) | undefined;
+  return [data.pagination.totalCount, data.total, newest?.id ?? "", newest?.updatedAt ?? ""].join("|");
+}
+
 const TEST_DATA_ENABLED =
   process.env.NEXT_PUBLIC_TEST_DATA_ENABLED === "true";
 
@@ -134,21 +142,27 @@ export function ExpensesView() {
   const [lastUpdated, setLastUpdated] = useState<Date>();
   const autoSeedAttemptedRef = useRef(false);
   const latestRequestRef = useRef(0);
+  const fingerprintRef = useRef<string>(undefined);
   const { cards: creditCards } = useCreditCards();
 
   const reload = useCallback(
-    // `quiet` is for background refreshes: transient failures are ignored
-    // instead of surfacing an error banner or logging the user out.
+    // `quiet` is for background refreshes: it skips the profile and category
+    // requests (rarely change; an expired session still surfaces through the
+    // expense requests) and ignores transient failures instead of showing an
+    // error banner.
     async (nextPage = 1, { quiet = false }: { quiet?: boolean } = {}) => {
       const requestId = ++latestRequestRef.current;
       setLoading(true);
-      const profile = await getUserMeAction();
-      if (requestId !== latestRequestRef.current) return;
 
-      if (profile.error || !profile.data?.user?.isActive) {
-        if (quiet && !profile.sessionExpired) return;
-        router.push("/user-login");
-        return;
+      let currency: string | undefined;
+      if (!quiet) {
+        const profile = await getUserMeAction();
+        if (requestId !== latestRequestRef.current) return;
+        if (profile.error || !profile.data?.user?.isActive) {
+          router.push("/user-login");
+          return;
+        }
+        currency = profile.data.user.currency;
       }
 
       const params = new URLSearchParams({
@@ -160,34 +174,58 @@ export function ExpensesView() {
       });
 
       const month = currentMonthRange();
-      const [sum, cats, expenses, monthExpenses] = await Promise.all([
+      const [sum, cats, expenses, monthExpenses, latest] = await Promise.all([
         getFinanceSummaryAction(),
-        getCategoriesAction(),
+        quiet ? Promise.resolve(undefined) : getCategoriesAction(),
         getExpensesAction(params.toString()),
         // Month spend per currency (limit=1: only the aggregate breakdown is used).
         getExpensesAction(new URLSearchParams({ ...month, page: "1", limit: "1" }).toString()),
+        // Baseline for background change detection (see checkForChanges).
+        getExpensesAction(CHANGE_PROBE_QUERY),
       ]);
       if (requestId !== latestRequestRef.current) return;
+
+      if ([sum, expenses].some((result) => result.sessionExpired)) {
+        router.push("/user-login");
+        return;
+      }
       setActiveUserLoadCompleted(true);
 
-      if (sum.error || cats.error || expenses.error) {
+      if (sum.error || cats?.error || expenses.error) {
         if (!quiet) {
-          setError(frontendError(sum.error ?? cats.error ?? expenses.error, t, "requestFailedGeneric"));
+          setError(frontendError(sum.error ?? cats?.error ?? expenses.error, t, "requestFailedGeneric"));
         }
       } else {
         setSummary(sum.data);
-        setUserCurrency(profile.data.user.currency);
+        if (currency) setUserCurrency(currency);
         setMonthTotals(monthExpenses.error ? undefined : monthExpenses.data?.currencyBreakdown ?? []);
-        setCategories(cats.data ?? []);
+        if (cats) setCategories(cats.data ?? []);
         setList(expenses.data);
         setRows(expenses.data?.expenses ?? []);
         setPage(nextPage);
         setLastUpdated(new Date());
+        fingerprintRef.current = latest.data ? expensesFingerprint(latest.data) : undefined;
       }
       setLoading(false);
     },
     [filters, pageSize, router, t],
   );
+
+  // Background check: one lightweight request; the full reload only runs when
+  // the user's expenses actually changed since the last load.
+  const checkForChanges = useCallback(async () => {
+    const latest = await getExpensesAction(CHANGE_PROBE_QUERY);
+    if (latest.sessionExpired) {
+      router.push("/user-login");
+      return;
+    }
+    if (latest.error || !latest.data) return;
+    if (expensesFingerprint(latest.data) === fingerprintRef.current) {
+      setLastUpdated(new Date());
+      return;
+    }
+    await reload(page, { quiet: true });
+  }, [page, reload, router]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void reload(), 0);
@@ -204,10 +242,22 @@ export function ExpensesView() {
 
   // Refetch the current page with the active filters; never touches filter,
   // pagination or dialog state. Pauses while a dialog/form is open or a write is running.
-  const { refresh: refreshNow, refreshing } = useAutoRefresh(
-    () => reload(page, { quiet: true }),
-    { enabled: !dialogOpen && !mutationPending },
-  );
+  const { refreshing: checking } = useAutoRefresh(checkForChanges, {
+    enabled: !dialogOpen && !mutationPending,
+  });
+
+  // The Refresh button always does a full reload (profile, categories included).
+  const [manualRefreshing, setManualRefreshing] = useState(false);
+  const refreshNow = async () => {
+    if (manualRefreshing) return;
+    setManualRefreshing(true);
+    try {
+      await reload(page);
+    } finally {
+      setManualRefreshing(false);
+    }
+  };
+  const refreshing = checking || manualRefreshing;
 
   const loadMore = async () => {
     if (loadingMore) return;
