@@ -15,6 +15,7 @@ import {
 } from "./creditCardVisuals";
 import { daysUntilDueDate, hasPaymentPending } from "./cardPaymentSchedule";
 import type { CreditCardOverviewItem } from "./credit-cards.types";
+import { CreditCardInstallmentPlans } from "./CreditCardInstallmentPlans";
 
 type Tone = "emerald" | "gold" | "rose";
 
@@ -299,6 +300,8 @@ export function CreditCardTile({
             {summary.currentPaymentDue == null ? "—" : formatMoney(summary.currentPaymentDue)}
           </Row>
         )}
+
+        <CreditCardInstallmentPlans plans={card.installmentPlans ?? []} currency={card.currency} />
 
         <button
           type="button"

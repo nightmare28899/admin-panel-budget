@@ -89,7 +89,23 @@ export type CreditCardFlags = {
   currencyMismatch: boolean;
 };
 
+export type CreditCardInstallmentPlan = {
+  id: string;
+  type: "NO_INTEREST" | "INTEREST_BEARING" | "REFINANCED";
+  merchantName: string | null;
+  purchaseDate: string | null;
+  originalAmount: number | null;
+  installmentNumber: number | null;
+  installmentCount: number | null;
+  installmentAmount: number | null;
+  remainingAmount: number | null;
+  currency: string;
+  statementPeriodEnd: string | null;
+  isFinalInstallment: boolean;
+};
+
 export type CreditCardOverviewItem = {
+  installmentPlans?: CreditCardInstallmentPlan[];
   id: string;
   name: string;
   bank: string;
