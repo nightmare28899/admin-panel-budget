@@ -5,6 +5,7 @@ import { DownOutlined } from "@ant-design/icons";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { InstallmentPlanBadge } from "./InstallmentPlanBadge";
 import { ExpenseForm } from "./ExpenseForm";
 import type { Category, Expense, ExpenseWritePayload } from "./finance.types";
 import { toCalendarDate } from "./finance.types";
@@ -136,6 +137,7 @@ export function ChargeGroupDetail({
             >
               <span className="text-[var(--text-3)]">{displayDate(charge.date)}</span>
               <span className="min-w-0 flex-1 truncate text-[var(--text-2)]">{charge.title}</span>
+              <InstallmentPlanBadge expense={charge} />
               <span className="font-mono text-[var(--text-1)]">
                 {charge.currency} {formatNumber(Number(charge.cost), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>

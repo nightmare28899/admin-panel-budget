@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Category, Expense, ExpenseWritePayload } from "./finance.types";
 import { toCalendarDate } from "./finance.types";
 import type { CreditCardSummary } from "./statement-import.types";
+import { InstallmentPlanDetails } from "./InstallmentPlanBadge";
 import { Button } from "@/components/ui/Button";
 import { useLocale } from "@/i18n/LocaleProvider";
 
@@ -80,6 +81,7 @@ export function ExpenseForm({ categories, creditCards = [], expense, loading, er
         </Form.Item>
       )}
     </div>
+    {expense && !editingInstallment && <InstallmentPlanDetails expense={expense} />}
     {editingInstallment && <p role="note" className="mb-4 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/40 px-3 py-2 text-xs text-[var(--text-3)]">{t("installmentEditNote", { index: expense.installmentIndex ?? 1, count: expense.installmentCount ?? 0 })}</p>}
     {!expense && watchedPaymentMethod === "CREDIT_CARD" && (
       <div className="mb-4 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/40 p-3">
