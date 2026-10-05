@@ -1,7 +1,7 @@
 "use client";
 
 import { DatePicker, Input, Select, Spin } from "antd";
-import { SafetyOutlined, WalletOutlined } from "@ant-design/icons";
+import { ReloadOutlined, SafetyOutlined, WalletOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -39,6 +39,7 @@ import { MetricCardsSkeleton, TableSkeleton } from "@/components/ui/ContentSkele
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Modal } from "@/components/ui/Modal";
 import { SubscriptionDueBanner } from "./SubscriptionDueBanner";
+import { useAutoRefresh } from "./hooks/useAutoRefresh";
 import { useCreditCards } from "./hooks/useCreditCards";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
@@ -130,15 +131,22 @@ export function ExpensesView() {
     message: string;
   }>();
   const [activeUserLoadCompleted, setActiveUserLoadCompleted] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>();
   const autoSeedAttemptedRef = useRef(false);
+  const latestRequestRef = useRef(0);
   const { cards: creditCards } = useCreditCards();
 
   const reload = useCallback(
-    async (nextPage = 1) => {
+    // `quiet` is for background refreshes: transient failures are ignored
+    // instead of surfacing an error banner or logging the user out.
+    async (nextPage = 1, { quiet = false }: { quiet?: boolean } = {}) => {
+      const requestId = ++latestRequestRef.current;
       setLoading(true);
       const profile = await getUserMeAction();
+      if (requestId !== latestRequestRef.current) return;
 
       if (profile.error || !profile.data?.user?.isActive) {
+        if (quiet && !profile.sessionExpired) return;
         router.push("/user-login");
         return;
       }
@@ -159,10 +167,13 @@ export function ExpensesView() {
         // Month spend per currency (limit=1: only the aggregate breakdown is used).
         getExpensesAction(new URLSearchParams({ ...month, page: "1", limit: "1" }).toString()),
       ]);
+      if (requestId !== latestRequestRef.current) return;
       setActiveUserLoadCompleted(true);
 
       if (sum.error || cats.error || expenses.error) {
-        setError(frontendError(sum.error ?? cats.error ?? expenses.error, t, "requestFailedGeneric"));
+        if (!quiet) {
+          setError(frontendError(sum.error ?? cats.error ?? expenses.error, t, "requestFailedGeneric"));
+        }
       } else {
         setSummary(sum.data);
         setUserCurrency(profile.data.user.currency);
@@ -171,6 +182,7 @@ export function ExpensesView() {
         setList(expenses.data);
         setRows(expenses.data?.expenses ?? []);
         setPage(nextPage);
+        setLastUpdated(new Date());
       }
       setLoading(false);
     },
@@ -181,6 +193,21 @@ export function ExpensesView() {
     const timer = window.setTimeout(() => void reload(), 0);
     return () => window.clearTimeout(timer);
   }, [reload]);
+
+  const dialogOpen =
+    drawer ||
+    budgetModalOpen ||
+    testDataConfirmationOpen ||
+    Boolean(receiptUrl || receiptLoading || receiptError);
+  const mutationPending =
+    saving || budgetSaving || testDataPending || loadingMore || Boolean(deletingExpenseId);
+
+  // Refetch the current page with the active filters; never touches filter,
+  // pagination or dialog state. Pauses while a dialog/form is open or a write is running.
+  const { refresh: refreshNow, refreshing } = useAutoRefresh(
+    () => reload(page, { quiet: true }),
+    { enabled: !dialogOpen && !mutationPending },
+  );
 
   const loadMore = async () => {
     if (loadingMore) return;
@@ -417,7 +444,24 @@ export function ExpensesView() {
             <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("yourExpenses")}</h1>
             <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("expensesDescription")}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {lastUpdated && (
+              <span className="text-xs text-[var(--text-3)]" aria-live="off">
+                {t("updatedAt", {
+                  time: formatDate(lastUpdated, { hour: "2-digit", minute: "2-digit" }),
+                })}
+              </span>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={refreshing || dialogOpen}
+              aria-busy={refreshing}
+              onClick={() => void refreshNow()}
+            >
+              <ReloadOutlined spin={refreshing} aria-hidden="true" />
+              {t("refresh")}
+            </Button>
             {TEST_DATA_ENABLED && (
               <Button
                 type="button"
