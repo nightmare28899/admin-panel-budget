@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/Card";
-import { ListSkeleton } from "@/components/ui/ContentSkeleton";
+import { CreditCardsPageSkeleton } from "./CreditCardsPageSkeleton";
 import { CreditCardManager } from "./CreditCardManager";
 import type { CreditCardOverviewResponse, CreditCardWritePayload } from "./credit-cards.types";
 import {
@@ -117,7 +116,7 @@ export function CreditCardsView() {
   // colour sideways past the max-w column, clip-path trims it vertically.
   return (
     <div className="mx-auto min-h-full w-full max-w-7xl bg-[#080C14] p-4 shadow-[0_0_0_100vmax_#080C14] [clip-path:inset(0_-100vmax)] sm:p-6">
-      {!overview && (
+      {!overview && !loading && (
         <div className="mb-4">
           <h1 className="font-serif text-2xl font-semibold text-white">{t("myCards")}</h1>
           <p className="mt-0.5 text-sm text-slate-400">{t("trackCardsDescription")}</p>
@@ -128,9 +127,7 @@ export function CreditCardsView() {
       {!overview && successAlert}
 
       {loading && !overview ? (
-        <Card className="!p-4">
-          <ListSkeleton />
-        </Card>
+        <CreditCardsPageSkeleton />
       ) : overview ? (
         <CreditCardManager
           overview={overview}
