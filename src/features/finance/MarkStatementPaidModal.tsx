@@ -5,6 +5,7 @@ import { Input, InputNumber, Space } from "antd";
 import { Modal } from "@/components/ui/Modal";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { parseMoneyInput } from "./moneyInput";
+import { EARLIEST_PAYMENT_DATE, isOverpayment, localToday, validatePaymentDraft } from "./statementPaymentRules";
 import { StatementButton, STATEMENT_FIELD_SCOPE } from "./StatementUi";
 
 export type StatementPaymentFormValue = {
@@ -25,16 +26,13 @@ type MarkStatementPaidModalProps = {
   defaultNote?: string | null;
   correction?: boolean;
   loading?: boolean;
+  /** Preset amounts offered as chips (remaining, minimum, no-interest...). */
+  quickAmounts?: Array<{ key: string; label: string; amount: number }>;
+  /** Pending amount of the statement; when set, paying more asks for an explicit confirmation. */
+  remaining?: number | null;
+  /** Server-side failure to show inside the dialog. */
+  errorMessage?: string;
 };
-
-// The viewer's calendar day; toISOString() would jump to tomorrow in the
-// evening for negative UTC offsets (e.g. Mexico).
-function today() {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${now.getFullYear()}-${month}-${day}`;
-}
 
 export function MarkStatementPaidModal({
   open,
@@ -59,20 +57,28 @@ function OpenStatementPaymentModal({
   defaultNote,
   correction = false,
   loading = false,
+  quickAmounts = [],
+  remaining,
+  errorMessage,
 }: Omit<MarkStatementPaidModalProps, "open">) {
   const { t, formatNumber } = useLocale();
+  const today = localToday();
   const [amount, setAmount] = useState<number | null>(defaultAmount ?? null);
   const currency = defaultCurrency ?? "";
-  const [paidAt, setPaidAt] = useState(defaultPaidAt?.slice(0, 10) ?? today());
+  const [paidAt, setPaidAt] = useState(defaultPaidAt?.slice(0, 10) ?? today);
   const [note, setNote] = useState(defaultNote ?? "");
   const [reason, setReason] = useState("");
-  const isValid =
-    amount != null &&
-    Number.isFinite(amount) &&
-    amount >= 0.01 &&
-    /^[A-Z]{3}$/.test(currency) &&
-    Boolean(paidAt) &&
-    (!correction || Boolean(reason.trim()));
+  const [overpayAcknowledged, setOverpayAcknowledged] = useState(false);
+  const validationKey = validatePaymentDraft({ amount, paidAt, currency, statementCurrency: currency }, today);
+  const isValid = validationKey === null && (!correction || Boolean(reason.trim()));
+  const overpaying = amount != null && validationKey === null && isOverpayment(amount, remaining);
+  const awaitingOverpayConfirm = overpaying && overpayAcknowledged;
+  const formatPlain = (value: number) =>
+    formatNumber(value, { useGrouping: true, minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const changeAmount = (value: number | null) => {
+    setAmount(value);
+    setOverpayAcknowledged(false);
+  };
 
   const closeIfIdle = () => {
     if (!loading) onClose();
@@ -99,7 +105,7 @@ function OpenStatementPaymentModal({
               inputMode="decimal"
               placeholder="0.00"
               value={amount}
-              onChange={setAmount}
+              onChange={changeAmount}
               formatter={(value, info) =>
                 info.userTyping
                   ? info.input
@@ -120,12 +126,31 @@ function OpenStatementPaymentModal({
               autoFocus
             />
           </Space.Compact>
+          {quickAmounts.length > 0 && (
+            <div role="group" aria-label={t("cardAbonoQuickAmounts")} className="mt-2 flex flex-wrap gap-1.5">
+              {quickAmounts.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => changeAmount(chip.amount)}
+                  className={`cursor-pointer rounded-full border px-2.5 py-1 text-[11px] font-semibold transition focus-visible:outline-2 focus-visible:outline-sky-400 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    amount === chip.amount
+                      ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
+                      : "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                  }`}
+                >
+                  {chip.label} · <span className="font-mono">{formatPlain(chip.amount)}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div>
           <label htmlFor="statement-payment-date" className="mb-1 block text-xs text-slate-400">
             {t("paymentDate")}
           </label>
-          <Input id="statement-payment-date" type="date" max={today()} value={paidAt} onChange={(event) => setPaidAt(event.target.value)} />
+          <Input id="statement-payment-date" type="date" min={EARLIEST_PAYMENT_DATE} max={today} value={paidAt} onChange={(event) => setPaidAt(event.target.value)} />
         </div>
         <div>
           <label htmlFor="statement-payment-note" className="mb-1 block text-xs text-slate-400">
@@ -142,6 +167,17 @@ function OpenStatementPaymentModal({
           </div>
         )}
       </div>
+      {amount != null && validationKey && (
+        <p role="alert" className="text-xs text-rose-400">{t(validationKey)}</p>
+      )}
+      {awaitingOverpayConfirm && (
+        <p role="alert" className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
+          {t("cardAbonoOverpayWarning", { remaining: formatPlain(remaining ?? 0) })}
+        </p>
+      )}
+      {errorMessage && (
+        <p role="alert" className="rounded-lg border border-rose-500/25 bg-rose-500/5 px-3 py-2 text-xs text-rose-300">{errorMessage}</p>
+      )}
       <div className="flex min-w-0 flex-wrap justify-end gap-2 pt-2">
         <StatementButton variant="ghost" size="md" onClick={closeIfIdle} disabled={loading}>
           {t("cancel")}
@@ -150,20 +186,28 @@ function OpenStatementPaymentModal({
           variant="pay"
           size="md"
           className="!h-auto min-h-10 min-w-0 max-w-full !whitespace-normal break-words py-2 text-center leading-tight"
-          onClick={() =>
-            isValid &&
+          onClick={() => {
+            if (!isValid || amount == null) return;
+            if (overpaying && !overpayAcknowledged) {
+              setOverpayAcknowledged(true);
+              return;
+            }
             void onConfirm({
               amount,
               currency,
               paidAt: `${paidAt}T12:00:00.000Z`,
               note: note.trim() || undefined,
               reason: reason.trim() || undefined,
-            })
-          }
+            });
+          }}
           disabled={loading || !isValid}
           aria-busy={loading}
         >
-          {loading ? t("working") : t(correction ? "correctPayment" : "recordPayment")}
+          {loading
+            ? t("working")
+            : awaitingOverpayConfirm
+              ? t("cardAbonoOverpayConfirm")
+              : t(correction ? "correctPayment" : "recordPayment")}
         </StatementButton>
       </div>
     </Modal>

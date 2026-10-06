@@ -78,6 +78,14 @@ export function CreditCardsView() {
     await load();
   };
 
+  const statementPaymentChanged = async (notice?: string) => {
+    setError(undefined);
+    setSuccess(notice);
+    // The sidebar and the "pending payments" KPI read the same overview data.
+    window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
+    await load();
+  };
+
   const successAlert = success ? (
     <div
       role="status"
@@ -138,6 +146,7 @@ export function CreditCardsView() {
           onUpdate={async (id, body) => refreshAfter(await updateCreditCardAction(id, body))}
           onDeactivate={async (id) => refreshAfter(await deactivateCreditCardAction(id))}
           onDeletePermanently={deletePermanently}
+          onStatementPaymentChanged={statementPaymentChanged}
           onReactivate={async (id) =>
             refreshAfter(await updateCreditCardAction(id, { isActive: true }))
           }

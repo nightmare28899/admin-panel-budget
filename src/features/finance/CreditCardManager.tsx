@@ -26,6 +26,7 @@ export function CreditCardManager({
   onDeactivate,
   onReactivate,
   onDeletePermanently,
+  onStatementPaymentChanged,
   notice,
 }: {
   overview: CreditCardOverviewResponse;
@@ -34,6 +35,8 @@ export function CreditCardManager({
   onDeactivate: (id: string) => Promise<void>;
   onReactivate: (id: string) => Promise<void>;
   onDeletePermanently: (id: string) => Promise<void>;
+  /** A statement payment was written (or the ledger moved): reload the overview, optionally with a success notice. */
+  onStatementPaymentChanged: (notice?: string) => Promise<void>;
   /** Rendered between the page header and the KPI row (e.g. an error alert). */
   notice?: ReactNode;
 }) {
@@ -309,6 +312,7 @@ export function CreditCardManager({
               onDeactivate={() => setDeactivateTarget(card)}
               onReactivate={() => void onReactivate(card.id)}
               onDeletePermanently={() => setDeleteTarget(card)}
+              onStatementPaymentChanged={onStatementPaymentChanged}
             />
           ))}
         </div>

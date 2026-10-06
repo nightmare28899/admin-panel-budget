@@ -16,6 +16,7 @@ import {
 import { daysUntilDueDate, hasPaymentPending } from "./cardPaymentSchedule";
 import type { CreditCardOverviewItem } from "./credit-cards.types";
 import { CreditCardInstallmentPlans } from "./CreditCardInstallmentPlans";
+import { CardStatementPayments } from "./CardStatementPayments";
 
 type Tone = "emerald" | "gold" | "rose";
 
@@ -82,6 +83,7 @@ export function CreditCardTile({
   onDeactivate,
   onReactivate,
   onDeletePermanently,
+  onStatementPaymentChanged,
 }: {
   card: CreditCardOverviewItem;
   detailsExpanded: boolean;
@@ -90,6 +92,7 @@ export function CreditCardTile({
   onDeactivate: () => void;
   onReactivate: () => void;
   onDeletePermanently: () => void;
+  onStatementPaymentChanged: (notice?: string) => void | Promise<void>;
 }) {
   const router = useRouter();
   const { t, formatNumber, formatDate } = useLocale();
@@ -240,7 +243,7 @@ export function CreditCardTile({
 
         {statementId ? (
           <div
-            className={`flex items-center justify-between gap-3 rounded-xl border p-3.5 text-xs ${
+            className={`rounded-xl border p-3.5 text-xs ${
               pending
                 ? overdue
                   ? "border-rose-500/25 bg-rose-500/5"
@@ -248,6 +251,7 @@ export function CreditCardTile({
                 : "border-slate-800 bg-slate-900/80"
             }`}
           >
+            <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] text-slate-400">{t("latestStatement")}</p>
               <p className="mt-0.5 font-mono font-medium text-slate-200">
@@ -267,6 +271,8 @@ export function CreditCardTile({
                 {statementPaymentStatus === "PARTIAL" ? t("partial") : t("pending")}
               </span>
             )}
+            </div>
+            <CardStatementPayments card={card} onChanged={onStatementPaymentChanged} />
           </div>
         ) : (
           <p className="text-xs text-slate-400">{t("noStatementAvailable")}</p>
@@ -347,16 +353,11 @@ export function CreditCardTile({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-t border-slate-800/80 bg-[#0A0F19] p-4">
-        {pending && statementId && (
-          <FooterButton variant="primary" className="flex-1" onClick={() => router.push(`/finance/statements/${statementId}`)}>
-            {t("registerPayment")}
-          </FooterButton>
-        )}
-        <FooterButton className={pending && statementId ? "" : "flex-1"} onClick={onEdit}>
+        <FooterButton className="flex-1" onClick={onEdit}>
           {t("edit")}
         </FooterButton>
         {card.isActive ? (
-          <FooterButton variant="danger" className={pending && statementId ? "" : "flex-1"} onClick={onDeactivate}>
+          <FooterButton variant="danger" className="flex-1" onClick={onDeactivate}>
             {t("deactivate")}
           </FooterButton>
         ) : (
