@@ -264,25 +264,39 @@ export function CardStatementPayments({
         </div>
       )}
 
-      {!isPaid &&
-        (needsReview ? (
-          <Link
-            href={reviewHref}
-            className="inline-block rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-[11px] font-semibold text-slate-200 transition hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-sky-400"
-          >
-            {t("cardAbonoReviewStatement")}
-          </Link>
-        ) : (
-          <button
-            type="button"
-            disabled={fetching || writing}
-            aria-busy={fetching}
-            onClick={() => void openPayment()}
-            className="cursor-pointer rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:from-cyan-500 hover:to-sky-500 focus-visible:outline-2 focus-visible:outline-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {fetching ? t("working") : t("cardAbonoRegister")}
-          </button>
-        ))}
+      {(!isPaid || (!detail && summary.paidTotal > 0)) && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {!isPaid &&
+          (needsReview ? (
+            <Link
+              href={reviewHref}
+              className="inline-block rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-[11px] font-semibold text-slate-200 transition hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-sky-400"
+            >
+              {t("cardAbonoReviewStatement")}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled={fetching || writing}
+              aria-busy={fetching}
+              onClick={() => void openPayment()}
+              className="cursor-pointer rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:from-cyan-500 hover:to-sky-500 focus-visible:outline-2 focus-visible:outline-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {fetching ? t("working") : t("cardAbonoRegister")}
+            </button>
+          ))}
+          {!detail && summary.paidTotal > 0 && (
+            <button
+              type="button"
+              disabled={fetching}
+              onClick={() => void openHistory()}
+              className="cursor-pointer text-[11px] font-semibold text-sky-400 hover:text-sky-300 focus-visible:outline-2 focus-visible:outline-sky-400 disabled:opacity-60"
+            >
+              {fetching ? t("working") : t("cardAbonoShowPayments")}
+            </button>
+          )}
+        </div>
+      )}
 
       {error && (
         <p role="alert" className="text-[11px] text-rose-400">{error}</p>
@@ -317,16 +331,6 @@ export function CardStatementPayments({
             })}
           </ul>
         </div>
-      )}
-      {!detail && summary.paidTotal > 0 && (
-        <button
-          type="button"
-          disabled={fetching}
-          onClick={() => void openHistory()}
-          className="cursor-pointer text-[11px] font-semibold text-sky-400 hover:text-sky-300 focus-visible:outline-2 focus-visible:outline-sky-400 disabled:opacity-60"
-        >
-          {fetching ? t("working") : t("cardAbonoShowPayments")}
-        </button>
       )}
 
       <MarkStatementPaidModal
