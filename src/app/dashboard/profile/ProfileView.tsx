@@ -99,7 +99,7 @@ export function ProfileView({
   return (
     <section className="space-y-8">
       <div className="relative overflow-hidden rounded-[20px] border border-[var(--border-soft)] bg-[var(--bg-2)]">
-        <div className="h-[3px] bg-[var(--emerald)]" />
+        <div className="h-[3px] bg-[var(--accent)]" />
         <div
           className="pointer-events-none absolute inset-x-0 top-[3px] bottom-0 opacity-50"
           style={{

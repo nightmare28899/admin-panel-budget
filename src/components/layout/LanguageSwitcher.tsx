@@ -36,7 +36,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
                       setOpen(false);
                     }}
                     className={`flex w-full cursor-pointer items-center justify-between gap-2 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-[var(--bg-3)] ${
-                      active ? "text-[var(--emerald-text)]" : "text-[var(--text-2)]"
+                      active ? "text-[var(--accent-text)]" : "text-[var(--text-2)]"
                     }`}
                   >
                     {t(option.labelKey)}

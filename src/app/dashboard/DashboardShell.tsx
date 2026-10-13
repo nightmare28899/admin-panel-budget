@@ -115,6 +115,7 @@ export function DashboardShell({
       user={user}
       profileHref="/dashboard/profile"
       headerActions={<HeaderActions />}
+      workspace="admin"
     >
       {children}
     </AppShell>

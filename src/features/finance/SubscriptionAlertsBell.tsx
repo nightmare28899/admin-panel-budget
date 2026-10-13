@@ -90,7 +90,7 @@ export function SubscriptionAlertsBell() {
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
       </svg>
       {alerts.length > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[var(--rose)] px-1 text-[10px] font-semibold leading-none text-white">
+        <span className="absolute -right-0.5 -top-0.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[var(--rose)] px-1 text-[10px] font-semibold leading-none text-[var(--text-1)]">
           {alerts.length}
         </span>
       )}
@@ -172,7 +172,7 @@ export function SubscriptionAlertsBell() {
           <Link
             href="/finance/subscriptions"
             onClick={() => setOpen(false)}
-            className="block border-t border-[var(--border-soft)] px-4 py-2.5 text-xs font-medium text-[var(--emerald-text)] transition-colors hover:bg-[var(--bg-3)] hover:underline"
+            className="block border-t border-[var(--border-soft)] px-4 py-2.5 text-xs font-medium text-[var(--accent-text)] transition-colors hover:bg-[var(--bg-3)] hover:underline"
           >
              {t("viewAllSubscriptions")}
           </Link>

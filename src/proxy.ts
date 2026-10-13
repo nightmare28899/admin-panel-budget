@@ -96,5 +96,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/finance/:path*"],
+  matcher: ["/finance/:path*", "/nutrition/:path*", "/api/nutrition/:path*"],
 };

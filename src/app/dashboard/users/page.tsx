@@ -106,7 +106,7 @@ export default function UsersPage() {
       <div className="group relative">
         <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
           <svg
-            className="h-[15px] w-[15px] text-[var(--text-3)] transition-colors group-focus-within:text-[var(--emerald-text)]"
+            className="h-[15px] w-[15px] text-[var(--text-3)] transition-colors group-focus-within:text-[var(--accent-text)]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -124,7 +124,7 @@ export default function UsersPage() {
           placeholder={t("searchUsers")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-32 rounded-full border border-[var(--border-soft)] bg-[var(--bg-2)] py-[7px] pl-9 pr-[14px] text-sm text-[var(--text-1)] placeholder:text-[var(--text-3)] outline-none transition-colors focus:border-[var(--emerald)] sm:w-[240px]"
+          className="w-32 rounded-full border border-[var(--border-soft)] bg-[var(--bg-2)] py-[7px] pl-9 pr-[14px] text-sm text-[var(--text-1)] placeholder:text-[var(--text-3)] outline-none transition-colors focus:border-[var(--accent)] sm:w-[240px]"
         />
       </div>,
     );
@@ -312,9 +312,9 @@ export default function UsersPage() {
       {loading ? (
         <MetricCardsSkeleton count={4} className="mb-6 sm:grid-cols-2 lg:grid-cols-4" />
       ) : (
-        <div className="relative mb-6 flex flex-col overflow-hidden rounded-2xl border border-[var(--emerald)]/25 bg-[var(--bg-2)]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:flex-row">
+        <div className="relative mb-6 flex flex-col overflow-hidden rounded-2xl border border-[var(--accent)]/25 bg-[var(--bg-2)]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:flex-row">
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_0%_0%,var(--emerald-dim),transparent_55%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_0%_0%,var(--accent-dim),transparent_55%)]"
             aria-hidden="true"
           />
         <div className="relative flex-1 border-b border-[var(--border-soft)] px-6 py-5 sm:border-b-0 sm:border-r">
@@ -368,7 +368,7 @@ export default function UsersPage() {
               onClick={() => setStatusFilter(f.key)}
               className={`cursor-pointer rounded-full px-[13px] py-1.5 text-xs transition-colors ${
                 statusFilter === f.key
-                  ? "bg-[var(--emerald-dim)] font-medium text-[var(--emerald-text)]"
+                  ? "bg-[var(--accent-dim)] font-medium text-[var(--accent-text)]"
                   : "text-[var(--text-3)] hover:text-[var(--text-1)]"
               }`}
             >
@@ -383,9 +383,9 @@ export default function UsersPage() {
       {loading ? (
         <TableSkeleton rows={7} columns={6} />
       ) : (
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--emerald)]/25 bg-[var(--bg-2)]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--accent)]/25 bg-[var(--bg-2)]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_0%_0%,var(--emerald-dim),transparent_55%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_0%_0%,var(--accent-dim),transparent_55%)]"
             aria-hidden="true"
           />
         <div className="relative overflow-x-auto">

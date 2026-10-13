@@ -1,0 +1,872 @@
+- generic [active] [ref=f8e1]:
+  - generic [ref=f8e3]:
+    - complementary [ref=f8e4]:
+      - generic [ref=f8e5]:
+        - generic [ref=f8e6]:
+          - generic [ref=f8e7]: B
+          - generic [ref=f8e9]: Budget Panel
+        - paragraph [ref=f8e10]: Navigation
+        - navigation [ref=f8e11]:
+          - link "Expenses" [ref=f8e12] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f8e167] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f8e23]: My Cards
+            - generic "3" [ref=f8e168]
+          - link "Statements" [ref=f8e24] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f8e30] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f8e36] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f8e44] [cursor=pointer]:
+            - /url: /finance/reports
+        - paragraph [ref=f8e49]: Workspaces
+        - navigation "Workspaces" [ref=f8e50]:
+          - link "Personal nutrition" [ref=f8e51] [cursor=pointer]:
+            - /url: /nutrition/today
+        - generic [ref=f8e58]:
+          - img "Kevin" [ref=f8e59]
+          - generic [ref=f8e60]:
+            - generic [ref=f8e61]: Kevin
+            - generic [ref=f8e62]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f8e63] [cursor=pointer]
+    - generic [ref=f8e67]:
+      - banner [ref=f8e68]:
+        - button "Expand sidebar" [ref=f8e70] [cursor=pointer]
+        - generic [ref=f8e73]:
+          - button "Search (Cmd+K)" [ref=f8e74]
+          - button "Language" [ref=f8e78] [cursor=pointer]:
+            - img "global" [ref=f8e79]
+          - button "Subscription alerts" [ref=f8e82] [cursor=pointer]
+      - main [ref=f8e86]:
+        - generic [ref=f8e324]:
+          - generic [ref=f8e325]:
+            - generic [ref=f8e326]:
+              - button "← Back to statements" [ref=f8e327] [cursor=pointer]
+              - generic [ref=f8e328]:
+                - heading "bbva.pdf" [level=1] [ref=f8e329]
+                - generic [ref=f8e330]: Confirmed
+              - paragraph [ref=f8e332]: Version 4 · Uploaded Oct 1, 2026, 12:34 AM
+            - generic [ref=f8e333]:
+              - button "Reload" [ref=f8e334] [cursor=pointer]
+              - button "Revert import" [ref=f8e335] [cursor=pointer]
+          - generic [ref=f8e336]:
+            - generic [ref=f8e337]:
+              - generic [ref=f8e338]:
+                - heading "Bank reconciliation" [level=2] [ref=f8e339]
+                - generic [ref=f8e340]: Passed
+              - generic [ref=f8e343]:
+                - generic [ref=f8e344]:
+                  - generic [ref=f8e345]: Opening balance
+                  - paragraph [ref=f8e350]: $13,310.66 MXN
+                - generic [ref=f8e351]:
+                  - generic [ref=f8e352]: Charges
+                  - paragraph [ref=f8e357]: $11,132.09 MXN
+                - generic [ref=f8e358]:
+                  - generic [ref=f8e359]: Payments
+                  - paragraph [ref=f8e364]: $10,421.21 MXN
+                - generic [ref=f8e365]:
+                  - generic [ref=f8e366]: Credits
+                  - paragraph [ref=f8e371]: $0.00 MXN
+                - generic [ref=f8e372]:
+                  - generic [ref=f8e373]: Closing balance
+                  - paragraph [ref=f8e378]: $14,021.54 MXN
+                - generic [ref=f8e379]:
+                  - generic [ref=f8e380]: Difference
+                  - paragraph [ref=f8e385]: $0.00 MXN
+            - generic [ref=f8e386]:
+              - generic [ref=f8e387]:
+                - heading "Review adjustments" [level=2] [ref=f8e388]
+                - generic [ref=f8e389]: Confirmed
+              - generic [ref=f8e391]:
+                - generic [ref=f8e392]:
+                  - generic [ref=f8e393]:
+                    - generic [ref=f8e394]: Paid
+                    - paragraph [ref=f8e396]: Paid Oct 7, 2026, 6:00 AM
+                  - paragraph [ref=f8e397]: Paid in full. Use Correct or Void in the payment history to adjust it.
+                - generic [ref=f8e398]:
+                  - paragraph [ref=f8e399]: 47 source rows
+                  - paragraph [ref=f8e400]: 37 expenses selected
+                  - paragraph [ref=f8e401]: 0 pending decisions
+                  - paragraph [ref=f8e402]: 0 parser warnings
+                  - paragraph [ref=f8e403]: 0 review adjustments
+          - generic [ref=f8e404]:
+            - heading "Payment history" [level=2] [ref=f8e406]
+            - list [ref=f8e408]:
+              - listitem [ref=f8e409]:
+                - generic [ref=f8e410]:
+                  - generic [ref=f8e411]:
+                    - generic [ref=f8e412]: MXN 5,000.00
+                    - generic [ref=f8e413]: Active
+                  - paragraph [ref=f8e415]: Oct 7, 2026
+                - generic [ref=f8e416]:
+                  - button "Correct" [ref=f8e417] [cursor=pointer]
+                  - button "Void payment" [ref=f8e418] [cursor=pointer]
+              - listitem [ref=f8e419]:
+                - generic [ref=f8e420]:
+                  - generic [ref=f8e421]:
+                    - generic [ref=f8e422]: MXN 5,000.00
+                    - generic [ref=f8e423]: Active
+                  - paragraph [ref=f8e425]: Oct 6, 2026
+                - generic [ref=f8e426]:
+                  - button "Correct" [ref=f8e427] [cursor=pointer]
+                  - button "Void payment" [ref=f8e428] [cursor=pointer]
+              - listitem [ref=f8e429]:
+                - generic [ref=f8e430]:
+                  - generic [ref=f8e431]:
+                    - generic [ref=f8e432]: MXN 4,021.54
+                    - generic [ref=f8e433]: Active
+                  - paragraph [ref=f8e435]: Oct 5, 2026
+                - generic [ref=f8e436]:
+                  - button "Correct" [ref=f8e437] [cursor=pointer]
+                  - button "Void payment" [ref=f8e438] [cursor=pointer]
+          - generic [ref=f8e439]:
+            - generic [ref=f8e440]:
+              - heading "Payment targets" [level=2] [ref=f8e441]
+              - generic [ref=f8e442]: "3"
+            - generic [ref=f8e444]:
+              - generic [ref=f8e445]:
+                - paragraph [ref=f8e446]: Payment to avoid interest
+                - paragraph [ref=f8e447]: $14,021.54 MXN
+                - paragraph [ref=f8e448]: Due Oct 5, 2026
+              - generic [ref=f8e449]:
+                - paragraph [ref=f8e450]: Minimum payment plus installments
+                - paragraph [ref=f8e451]: $4,919.00 MXN
+                - paragraph [ref=f8e452]: Due Oct 5, 2026
+              - generic [ref=f8e453]:
+                - paragraph [ref=f8e454]: Minimum payment
+                - paragraph [ref=f8e455]: $1,255.00 MXN
+                - paragraph [ref=f8e456]: Due Oct 5, 2026
+          - generic [ref=f8e458]:
+            - generic [ref=f8e459]:
+              - generic [ref=f8e460]:
+                - heading "Statement rows" [level=2] [ref=f8e461]
+                - paragraph [ref=f8e462]: 47 source rows
+              - generic [ref=f8e463]:
+                - generic [ref=f8e464]: Ready to confirm
+                - generic [ref=f8e466]: Pending decision
+                - generic [ref=f8e468]: Missing required data
+            - generic [ref=f8e470]:
+              - generic [ref=f8e471]:
+                - generic [ref=f8e472]: Filter statement rows
+                - generic [ref=f8e473] [cursor=pointer]:
+                  - generic "All rows" [ref=f8e474]:
+                    - text: All rows
+                    - combobox "Filter statement rows" [ref=f8e475]
+                  - img "down" [ref=f8e477]
+              - status [ref=f8e480]: Showing 47 of 47 statement rows
+            - generic [ref=f8e484]:
+              - generic [ref=f8e486]:
+                - table [ref=f8e488]:
+                  - rowgroup [ref=f8e495]:
+                    - row [ref=f8e496]:
+                      - columnheader "Transaction" [ref=f8e497]
+                      - columnheader "Type" [ref=f8e498]
+                      - columnheader "Amount" [ref=f8e499]
+                      - columnheader "Category" [ref=f8e500]
+                      - columnheader "Decision" [ref=f8e501]
+                - table [ref=f8e503]:
+                  - rowgroup [ref=f8e510]:
+                    - row [ref=f8e511]:
+                      - cell "Transaction date 2026-08-19 Statement description REST PECADOS MILAGROS Normalized merchant Same as description" [ref=f8e512]:
+                        - generic [ref=f8e513]:
+                          - generic [ref=f8e514]:
+                            - generic [ref=f8e515]: Transaction date
+                            - textbox "Transaction date for REST PECADOS MILAGROS" [disabled] [ref=f8e516]: 2026-08-19
+                          - generic [ref=f8e517]:
+                            - generic [ref=f8e518]: Statement description
+                            - textbox "Description for row 1" [disabled] [ref=f8e519]: REST PECADOS MILAGROS
+                          - generic [ref=f8e520]:
+                            - generic [ref=f8e521]: Normalized merchant
+                            - generic [ref=f8e522]: Same as description
+                      - cell "Charge Current charges" [ref=f8e524]:
+                        - generic [ref=f8e525]:
+                          - generic [ref=f8e526]: Charge
+                          - paragraph [ref=f8e527]: Current charges
+                      - cell [ref=f8e528]:
+                        - generic [ref=f8e530]:
+                          - generic [ref=f8e531]:
+                            - generic: $
+                            - spinbutton "Amount for REST PECADOS MILAGROS" [disabled] [ref=f8e532]: "316.00"
+                          - textbox "Currency for REST PECADOS MILAGROS" [disabled] [ref=f8e533]: MXN
+                      - cell [ref=f8e534]:
+                        - generic [ref=f8e535]:
+                          - generic "🍽️ Restaurantes" [ref=f8e536]:
+                            - text: 🍽️ Restaurantes
+                            - combobox "Category for REST PECADOS MILAGROS" [disabled] [ref=f8e537]
+                          - img "down" [ref=f8e539]
+                      - cell [ref=f8e542]:
+                        - generic [ref=f8e544]:
+                          - generic "Include as expense" [ref=f8e545]:
+                            - text: Include as expense
+                            - combobox "Review decision for REST PECADOS MILAGROS" [disabled] [ref=f8e546]
+                          - img "down" [ref=f8e548]
+                    - row [ref=f8e551]:
+                      - cell "Transaction date 2026-08-20 Statement description ABTS 1738MCHMORPRADO Normalized merchant Same as description" [ref=f8e552]:
+                        - generic [ref=f8e553]:
+                          - generic [ref=f8e554]:
+                            - generic [ref=f8e555]: Transaction date
+                            - textbox "Transaction date for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e556]: 2026-08-20
+                          - generic [ref=f8e557]:
+                            - generic [ref=f8e558]: Statement description
+                            - textbox "Description for row 2" [disabled] [ref=f8e559]: ABTS 1738MCHMORPRADO
+                          - generic [ref=f8e560]:
+                            - generic [ref=f8e561]: Normalized merchant
+                            - generic [ref=f8e562]: Same as description
+                      - cell "Charge Current charges" [ref=f8e564]:
+                        - generic [ref=f8e565]:
+                          - generic [ref=f8e566]: Charge
+                          - paragraph [ref=f8e567]: Current charges
+                      - cell [ref=f8e568]:
+                        - generic [ref=f8e570]:
+                          - generic [ref=f8e571]:
+                            - generic: $
+                            - spinbutton "Amount for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e572]: "156.00"
+                          - textbox "Currency for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e573]: MXN
+                      - cell [ref=f8e574]:
+                        - generic [ref=f8e575]:
+                          - generic "🏪 Tienda de conveniencia" [ref=f8e576]:
+                            - text: 🏪 Tienda de conveniencia
+                            - combobox "Category for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e577]
+                          - img "down" [ref=f8e579]
+                      - cell [ref=f8e582]:
+                        - generic [ref=f8e584]:
+                          - generic "Include as expense" [ref=f8e585]:
+                            - text: Include as expense
+                            - combobox "Review decision for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e586]
+                          - img "down" [ref=f8e588]
+                    - row [ref=f8e591]:
+                      - cell "Transaction date 2026-08-21 Statement description BMOVIL.PAGO TDC Normalized merchant Same as description" [ref=f8e592]:
+                        - generic [ref=f8e593]:
+                          - generic [ref=f8e594]:
+                            - generic [ref=f8e595]: Transaction date
+                            - textbox "Transaction date for BMOVIL.PAGO TDC" [disabled] [ref=f8e596]: 2026-08-21
+                          - generic [ref=f8e597]:
+                            - generic [ref=f8e598]: Statement description
+                            - textbox "Description for row 3" [disabled] [ref=f8e599]: BMOVIL.PAGO TDC
+                          - generic [ref=f8e600]:
+                            - generic [ref=f8e601]: Normalized merchant
+                            - generic [ref=f8e602]: Same as description
+                      - cell "Payment Current charges" [ref=f8e604]:
+                        - generic [ref=f8e605]:
+                          - generic [ref=f8e606]: Payment
+                          - paragraph [ref=f8e607]: Current charges
+                      - cell [ref=f8e608]:
+                        - generic [ref=f8e610]:
+                          - generic [ref=f8e611]:
+                            - generic: $
+                            - spinbutton "Amount for BMOVIL.PAGO TDC" [disabled] [ref=f8e612]: "4848.68"
+                          - textbox "Currency for BMOVIL.PAGO TDC" [disabled] [ref=f8e613]: MXN
+                      - cell [ref=f8e614]:
+                        - generic [ref=f8e615]:
+                          - generic [ref=f8e616]:
+                            - generic: Select a category
+                            - combobox "Category for BMOVIL.PAGO TDC" [disabled] [ref=f8e617]
+                          - img "down" [ref=f8e619]
+                      - cell [ref=f8e622]:
+                        - generic [ref=f8e624]:
+                          - generic "Information only" [ref=f8e625]:
+                            - text: Information only
+                            - combobox "Review decision for BMOVIL.PAGO TDC" [disabled] [ref=f8e626]
+                          - img "down" [ref=f8e628]
+                    - row [ref=f8e631]:
+                      - cell "Transaction date 2026-08-22 Statement description BMOVIL.PAGO TDC Normalized merchant Same as description" [ref=f8e632]:
+                        - generic [ref=f8e633]:
+                          - generic [ref=f8e634]:
+                            - generic [ref=f8e635]: Transaction date
+                            - textbox "Transaction date for BMOVIL.PAGO TDC" [disabled] [ref=f8e636]: 2026-08-22
+                          - generic [ref=f8e637]:
+                            - generic [ref=f8e638]: Statement description
+                            - textbox "Description for row 4" [disabled] [ref=f8e639]: BMOVIL.PAGO TDC
+                          - generic [ref=f8e640]:
+                            - generic [ref=f8e641]: Normalized merchant
+                            - generic [ref=f8e642]: Same as description
+                      - cell "Payment Current charges" [ref=f8e644]:
+                        - generic [ref=f8e645]:
+                          - generic [ref=f8e646]: Payment
+                          - paragraph [ref=f8e647]: Current charges
+                      - cell [ref=f8e648]:
+                        - generic [ref=f8e650]:
+                          - generic [ref=f8e651]:
+                            - generic: $
+                            - spinbutton "Amount for BMOVIL.PAGO TDC" [disabled] [ref=f8e652]: "272.53"
+                          - textbox "Currency for BMOVIL.PAGO TDC" [disabled] [ref=f8e653]: MXN
+                      - cell [ref=f8e654]:
+                        - generic [ref=f8e655]:
+                          - generic [ref=f8e656]:
+                            - generic: Select a category
+                            - combobox "Category for BMOVIL.PAGO TDC" [disabled] [ref=f8e657]
+                          - img "down" [ref=f8e659]
+                      - cell [ref=f8e662]:
+                        - generic [ref=f8e664]:
+                          - generic "Information only" [ref=f8e665]:
+                            - text: Information only
+                            - combobox "Review decision for BMOVIL.PAGO TDC" [disabled] [ref=f8e666]
+                          - img "down" [ref=f8e668]
+                    - row [ref=f8e671]:
+                      - cell "Transaction date 2026-08-22 Statement description BAE PRADOS VERDES Normalized merchant Same as description" [ref=f8e672]:
+                        - generic [ref=f8e673]:
+                          - generic [ref=f8e674]:
+                            - generic [ref=f8e675]: Transaction date
+                            - textbox "Transaction date for BAE PRADOS VERDES" [disabled] [ref=f8e676]: 2026-08-22
+                          - generic [ref=f8e677]:
+                            - generic [ref=f8e678]: Statement description
+                            - textbox "Description for row 5" [disabled] [ref=f8e679]: BAE PRADOS VERDES
+                          - generic [ref=f8e680]:
+                            - generic [ref=f8e681]: Normalized merchant
+                            - generic [ref=f8e682]: Same as description
+                      - cell "Charge Current charges" [ref=f8e684]:
+                        - generic [ref=f8e685]:
+                          - generic [ref=f8e686]: Charge
+                          - paragraph [ref=f8e687]: Current charges
+                      - cell [ref=f8e688]:
+                        - generic [ref=f8e690]:
+                          - generic [ref=f8e691]:
+                            - generic: $
+                            - spinbutton "Amount for BAE PRADOS VERDES" [disabled] [ref=f8e692]: "125.22"
+                          - textbox "Currency for BAE PRADOS VERDES" [disabled] [ref=f8e693]: MXN
+                      - cell [ref=f8e694]:
+                        - generic [ref=f8e695]:
+                          - generic "🛒 Supermercado" [ref=f8e696]:
+                            - text: 🛒 Supermercado
+                            - combobox "Category for BAE PRADOS VERDES" [disabled] [ref=f8e697]
+                          - img "down" [ref=f8e699]
+                      - cell [ref=f8e702]:
+                        - generic [ref=f8e704]:
+                          - generic "Include as expense" [ref=f8e705]:
+                            - text: Include as expense
+                            - combobox "Review decision for BAE PRADOS VERDES" [disabled] [ref=f8e706]
+                          - img "down" [ref=f8e708]
+                    - row [ref=f8e711]:
+                      - cell "Transaction date 2026-08-22 Statement description KOFI CAFE Normalized merchant Same as description" [ref=f8e712]:
+                        - generic [ref=f8e713]:
+                          - generic [ref=f8e714]:
+                            - generic [ref=f8e715]: Transaction date
+                            - textbox "Transaction date for KOFI CAFE" [disabled] [ref=f8e716]: 2026-08-22
+                          - generic [ref=f8e717]:
+                            - generic [ref=f8e718]: Statement description
+                            - textbox "Description for row 6" [disabled] [ref=f8e719]: KOFI CAFE
+                          - generic [ref=f8e720]:
+                            - generic [ref=f8e721]: Normalized merchant
+                            - generic [ref=f8e722]: Same as description
+                      - cell "Charge Current charges" [ref=f8e724]:
+                        - generic [ref=f8e725]:
+                          - generic [ref=f8e726]: Charge
+                          - paragraph [ref=f8e727]: Current charges
+                      - cell [ref=f8e728]:
+                        - generic [ref=f8e730]:
+                          - generic [ref=f8e731]:
+                            - generic: $
+                            - spinbutton "Amount for KOFI CAFE" [disabled] [ref=f8e732]: "160.00"
+                          - textbox "Currency for KOFI CAFE" [disabled] [ref=f8e733]: MXN
+                      - cell [ref=f8e734]:
+                        - generic [ref=f8e735]:
+                          - generic "☕ Cafeterías" [ref=f8e736]:
+                            - text: ☕ Cafeterías
+                            - combobox "Category for KOFI CAFE" [disabled] [ref=f8e737]
+                          - img "down" [ref=f8e739]
+                      - cell [ref=f8e742]:
+                        - generic [ref=f8e744]:
+                          - generic "Include as expense" [ref=f8e745]:
+                            - text: Include as expense
+                            - combobox "Review decision for KOFI CAFE" [disabled] [ref=f8e746]
+                          - img "down" [ref=f8e748]
+                    - row [ref=f8e751]:
+                      - cell "Transaction date 2026-08-22 Statement description ABTS 1738MCHMORPRADO Normalized merchant Same as description" [ref=f8e752]:
+                        - generic [ref=f8e753]:
+                          - generic [ref=f8e754]:
+                            - generic [ref=f8e755]: Transaction date
+                            - textbox "Transaction date for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e756]: 2026-08-22
+                          - generic [ref=f8e757]:
+                            - generic [ref=f8e758]: Statement description
+                            - textbox "Description for row 7" [disabled] [ref=f8e759]: ABTS 1738MCHMORPRADO
+                          - generic [ref=f8e760]:
+                            - generic [ref=f8e761]: Normalized merchant
+                            - generic [ref=f8e762]: Same as description
+                      - cell "Charge Current charges" [ref=f8e764]:
+                        - generic [ref=f8e765]:
+                          - generic [ref=f8e766]: Charge
+                          - paragraph [ref=f8e767]: Current charges
+                      - cell [ref=f8e768]:
+                        - generic [ref=f8e770]:
+                          - generic [ref=f8e771]:
+                            - generic: $
+                            - spinbutton "Amount for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e772]: "170.00"
+                          - textbox "Currency for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e773]: MXN
+                      - cell [ref=f8e774]:
+                        - generic [ref=f8e775]:
+                          - generic "🏪 Tienda de conveniencia" [ref=f8e776]:
+                            - text: 🏪 Tienda de conveniencia
+                            - combobox "Category for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e777]
+                          - img "down" [ref=f8e779]
+                      - cell [ref=f8e782]:
+                        - generic [ref=f8e784]:
+                          - generic "Include as expense" [ref=f8e785]:
+                            - text: Include as expense
+                            - combobox "Review decision for ABTS 1738MCHMORPRADO" [disabled] [ref=f8e786]
+                          - img "down" [ref=f8e788]
+                    - row [ref=f8e791]:
+                      - cell "Transaction date 2026-08-23 Statement description HOMMYS PASTELERIAS Normalized merchant Same as description" [ref=f8e792]:
+                        - generic [ref=f8e793]:
+                          - generic [ref=f8e794]:
+                            - generic [ref=f8e795]: Transaction date
+                            - textbox "Transaction date for HOMMYS PASTELERIAS" [disabled] [ref=f8e796]: 2026-08-23
+                          - generic [ref=f8e797]:
+                            - generic [ref=f8e798]: Statement description
+                            - textbox "Description for row 8" [disabled] [ref=f8e799]: HOMMYS PASTELERIAS
+                          - generic [ref=f8e800]:
+                            - generic [ref=f8e801]: Normalized merchant
+                            - generic [ref=f8e802]: Same as description
+                      - cell "Charge Current charges" [ref=f8e804]:
+                        - generic [ref=f8e805]:
+                          - generic [ref=f8e806]: Charge
+                          - paragraph [ref=f8e807]: Current charges
+                      - cell [ref=f8e808]:
+                        - generic [ref=f8e810]:
+                          - generic [ref=f8e811]:
+                            - generic: $
+                            - spinbutton "Amount for HOMMYS PASTELERIAS" [disabled] [ref=f8e812]: "50.00"
+                          - textbox "Currency for HOMMYS PASTELERIAS" [disabled] [ref=f8e813]: MXN
+                      - cell [ref=f8e814]:
+                        - generic [ref=f8e815]:
+                          - generic "☕ Cafeterías" [ref=f8e816]:
+                            - text: ☕ Cafeterías
+                            - combobox "Category for HOMMYS PASTELERIAS" [disabled] [ref=f8e817]
+                          - img "down" [ref=f8e819]
+                      - cell [ref=f8e822]:
+                        - generic [ref=f8e824]:
+                          - generic "Include as expense" [ref=f8e825]:
+                            - text: Include as expense
+                            - combobox "Review decision for HOMMYS PASTELERIAS" [disabled] [ref=f8e826]
+                          - img "down" [ref=f8e828]
+                    - row [ref=f8e831]:
+                      - cell "Transaction date 2026-08-26 Statement description CENT DE SERV LTH REFA A 06 MSI Normalized merchant Same as description" [ref=f8e832]:
+                        - generic [ref=f8e833]:
+                          - generic [ref=f8e834]:
+                            - generic [ref=f8e835]: Transaction date
+                            - textbox "Transaction date for CENT DE SERV LTH REFA A 06 MSI" [disabled] [ref=f8e836]: 2026-08-26
+                          - generic [ref=f8e837]:
+                            - generic [ref=f8e838]: Statement description
+                            - textbox "Description for row 9" [disabled] [ref=f8e839]: CENT DE SERV LTH REFA A 06 MSI
+                          - generic [ref=f8e840]:
+                            - generic [ref=f8e841]: Normalized merchant
+                            - generic [ref=f8e842]: Same as description
+                      - cell "Charge Current charges" [ref=f8e844]:
+                        - generic [ref=f8e845]:
+                          - generic [ref=f8e846]: Charge
+                          - paragraph [ref=f8e847]: Current charges
+                      - cell [ref=f8e848]:
+                        - generic [ref=f8e850]:
+                          - generic [ref=f8e851]:
+                            - generic: $
+                            - spinbutton "Amount for CENT DE SERV LTH REFA A 06 MSI" [disabled] [ref=f8e852]: "4514.00"
+                          - textbox "Currency for CENT DE SERV LTH REFA A 06 MSI" [disabled] [ref=f8e853]: MXN
+                      - cell [ref=f8e854]:
+                        - generic [ref=f8e855]:
+                          - generic "🚕 Transporte" [ref=f8e856]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for CENT DE SERV LTH REFA A 06 MSI" [disabled] [ref=f8e857]
+                          - img "down" [ref=f8e859]
+                      - cell [ref=f8e862]:
+                        - generic [ref=f8e864]:
+                          - generic "Include as expense" [ref=f8e865]:
+                            - text: Include as expense
+                            - combobox "Review decision for CENT DE SERV LTH REFA A 06 MSI" [disabled] [ref=f8e866]
+                          - img "down" [ref=f8e868]
+                    - row [ref=f8e871]:
+                      - cell "Transaction date 2026-08-31 Statement description TDAS CHEDRAUI MOR 1 Normalized merchant Same as description" [ref=f8e872]:
+                        - generic [ref=f8e873]:
+                          - generic [ref=f8e874]:
+                            - generic [ref=f8e875]: Transaction date
+                            - textbox "Transaction date for TDAS CHEDRAUI MOR 1" [disabled] [ref=f8e876]: 2026-08-31
+                          - generic [ref=f8e877]:
+                            - generic [ref=f8e878]: Statement description
+                            - textbox "Description for row 10" [disabled] [ref=f8e879]: TDAS CHEDRAUI MOR 1
+                          - generic [ref=f8e880]:
+                            - generic [ref=f8e881]: Normalized merchant
+                            - generic [ref=f8e882]: Same as description
+                      - cell "Charge Current charges" [ref=f8e884]:
+                        - generic [ref=f8e885]:
+                          - generic [ref=f8e886]: Charge
+                          - paragraph [ref=f8e887]: Current charges
+                      - cell [ref=f8e888]:
+                        - generic [ref=f8e890]:
+                          - generic [ref=f8e891]:
+                            - generic: $
+                            - spinbutton "Amount for TDAS CHEDRAUI MOR 1" [disabled] [ref=f8e892]: "356.51"
+                          - textbox "Currency for TDAS CHEDRAUI MOR 1" [disabled] [ref=f8e893]: MXN
+                      - cell [ref=f8e894]:
+                        - generic [ref=f8e895]:
+                          - generic "🛒 Supermercado" [ref=f8e896]:
+                            - text: 🛒 Supermercado
+                            - combobox "Category for TDAS CHEDRAUI MOR 1" [disabled] [ref=f8e897]
+                          - img "down" [ref=f8e899]
+                      - cell [ref=f8e902]:
+                        - generic [ref=f8e904]:
+                          - generic "Include as expense" [ref=f8e905]:
+                            - text: Include as expense
+                            - combobox "Review decision for TDAS CHEDRAUI MOR 1" [disabled] [ref=f8e906]
+                          - img "down" [ref=f8e908]
+                    - row [ref=f8e911]:
+                      - cell "Transaction date 2026-09-06 Statement description BMOVIL.PAGO TDC Normalized merchant Same as description" [ref=f8e912]:
+                        - generic [ref=f8e913]:
+                          - generic [ref=f8e914]:
+                            - generic [ref=f8e915]: Transaction date
+                            - textbox "Transaction date for BMOVIL.PAGO TDC" [disabled] [ref=f8e916]: 2026-09-06
+                          - generic [ref=f8e917]:
+                            - generic [ref=f8e918]: Statement description
+                            - textbox "Description for row 11" [disabled] [ref=f8e919]: BMOVIL.PAGO TDC
+                          - generic [ref=f8e920]:
+                            - generic [ref=f8e921]: Normalized merchant
+                            - generic [ref=f8e922]: Same as description
+                      - cell "Payment Current charges" [ref=f8e924]:
+                        - generic [ref=f8e925]:
+                          - generic [ref=f8e926]: Payment
+                          - paragraph [ref=f8e927]: Current charges
+                      - cell [ref=f8e928]:
+                        - generic [ref=f8e930]:
+                          - generic [ref=f8e931]:
+                            - generic: $
+                            - spinbutton "Amount for BMOVIL.PAGO TDC" [disabled] [ref=f8e932]: "5300.00"
+                          - textbox "Currency for BMOVIL.PAGO TDC" [disabled] [ref=f8e933]: MXN
+                      - cell [ref=f8e934]:
+                        - generic [ref=f8e935]:
+                          - generic [ref=f8e936]:
+                            - generic: Select a category
+                            - combobox "Category for BMOVIL.PAGO TDC" [disabled] [ref=f8e937]
+                          - img "down" [ref=f8e939]
+                      - cell [ref=f8e942]:
+                        - generic [ref=f8e944]:
+                          - generic "Information only" [ref=f8e945]:
+                            - text: Information only
+                            - combobox "Review decision for BMOVIL.PAGO TDC" [disabled] [ref=f8e946]
+                          - img "down" [ref=f8e948]
+                    - row [ref=f8e951]:
+                      - cell "Transaction date 2026-09-05 Statement description REST LA GUARECITA Normalized merchant Same as description" [ref=f8e952]:
+                        - generic [ref=f8e953]:
+                          - generic [ref=f8e954]:
+                            - generic [ref=f8e955]: Transaction date
+                            - textbox "Transaction date for REST LA GUARECITA" [disabled] [ref=f8e956]: 2026-09-05
+                          - generic [ref=f8e957]:
+                            - generic [ref=f8e958]: Statement description
+                            - textbox "Description for row 12" [disabled] [ref=f8e959]: REST LA GUARECITA
+                          - generic [ref=f8e960]:
+                            - generic [ref=f8e961]: Normalized merchant
+                            - generic [ref=f8e962]: Same as description
+                      - cell "Charge Current charges" [ref=f8e964]:
+                        - generic [ref=f8e965]:
+                          - generic [ref=f8e966]: Charge
+                          - paragraph [ref=f8e967]: Current charges
+                      - cell [ref=f8e968]:
+                        - generic [ref=f8e970]:
+                          - generic [ref=f8e971]:
+                            - generic: $
+                            - spinbutton "Amount for REST LA GUARECITA" [disabled] [ref=f8e972]: "112.00"
+                          - textbox "Currency for REST LA GUARECITA" [disabled] [ref=f8e973]: MXN
+                      - cell [ref=f8e974]:
+                        - generic [ref=f8e975]:
+                          - generic "🍽️ Restaurantes" [ref=f8e976]:
+                            - text: 🍽️ Restaurantes
+                            - combobox "Category for REST LA GUARECITA" [disabled] [ref=f8e977]
+                          - img "down" [ref=f8e979]
+                      - cell [ref=f8e982]:
+                        - generic [ref=f8e984]:
+                          - generic "Include as expense" [ref=f8e985]:
+                            - text: Include as expense
+                            - combobox "Review decision for REST LA GUARECITA" [disabled] [ref=f8e986]
+                          - img "down" [ref=f8e988]
+                    - row [ref=f8e991]:
+                      - cell "Transaction date 2026-09-11 Statement description MERPAGO*CRANEOBAR Normalized merchant Same as description" [ref=f8e992]:
+                        - generic [ref=f8e993]:
+                          - generic [ref=f8e994]:
+                            - generic [ref=f8e995]: Transaction date
+                            - textbox "Transaction date for MERPAGO*CRANEOBAR" [disabled] [ref=f8e996]: 2026-09-11
+                          - generic [ref=f8e997]:
+                            - generic [ref=f8e998]: Statement description
+                            - textbox "Description for row 13" [disabled] [ref=f8e999]: MERPAGO*CRANEOBAR
+                          - generic [ref=f8e1000]:
+                            - generic [ref=f8e1001]: Normalized merchant
+                            - generic [ref=f8e1002]: Same as description
+                      - cell "Charge Current charges" [ref=f8e1004]:
+                        - generic [ref=f8e1005]:
+                          - generic [ref=f8e1006]: Charge
+                          - paragraph [ref=f8e1007]: Current charges
+                      - cell [ref=f8e1008]:
+                        - generic [ref=f8e1010]:
+                          - generic [ref=f8e1011]:
+                            - generic: $
+                            - spinbutton "Amount for MERPAGO*CRANEOBAR" [disabled] [ref=f8e1012]: "356.40"
+                          - textbox "Currency for MERPAGO*CRANEOBAR" [disabled] [ref=f8e1013]: MXN
+                      - cell [ref=f8e1014]:
+                        - generic [ref=f8e1015]:
+                          - generic "🍽️ Restaurantes" [ref=f8e1016]:
+                            - text: 🍽️ Restaurantes
+                            - combobox "Category for MERPAGO*CRANEOBAR" [disabled] [ref=f8e1017]
+                          - img "down" [ref=f8e1019]
+                      - cell [ref=f8e1022]:
+                        - generic [ref=f8e1024]:
+                          - generic "Include as expense" [ref=f8e1025]:
+                            - text: Include as expense
+                            - combobox "Review decision for MERPAGO*CRANEOBAR" [disabled] [ref=f8e1026]
+                          - img "down" [ref=f8e1028]
+                    - row [ref=f8e1031]:
+                      - cell "Transaction date 2026-09-12 Statement description PILLO BOLILLO I Normalized merchant Same as description" [ref=f8e1032]:
+                        - generic [ref=f8e1033]:
+                          - generic [ref=f8e1034]:
+                            - generic [ref=f8e1035]: Transaction date
+                            - textbox "Transaction date for PILLO BOLILLO I" [disabled] [ref=f8e1036]: 2026-09-12
+                          - generic [ref=f8e1037]:
+                            - generic [ref=f8e1038]: Statement description
+                            - textbox "Description for row 14" [disabled] [ref=f8e1039]: PILLO BOLILLO I
+                          - generic [ref=f8e1040]:
+                            - generic [ref=f8e1041]: Normalized merchant
+                            - generic [ref=f8e1042]: Same as description
+                      - cell "Charge Current charges" [ref=f8e1044]:
+                        - generic [ref=f8e1045]:
+                          - generic [ref=f8e1046]: Charge
+                          - paragraph [ref=f8e1047]: Current charges
+                      - cell [ref=f8e1048]:
+                        - generic [ref=f8e1050]:
+                          - generic [ref=f8e1051]:
+                            - generic: $
+                            - spinbutton "Amount for PILLO BOLILLO I" [disabled] [ref=f8e1052]: "167.00"
+                          - textbox "Currency for PILLO BOLILLO I" [disabled] [ref=f8e1053]: MXN
+                      - cell [ref=f8e1054]:
+                        - generic [ref=f8e1055]:
+                          - generic "🍽️ Restaurantes" [ref=f8e1056]:
+                            - text: 🍽️ Restaurantes
+                            - combobox "Category for PILLO BOLILLO I" [disabled] [ref=f8e1057]
+                          - img "down" [ref=f8e1059]
+                      - cell [ref=f8e1062]:
+                        - generic [ref=f8e1064]:
+                          - generic "Include as expense" [ref=f8e1065]:
+                            - text: Include as expense
+                            - combobox "Review decision for PILLO BOLILLO I" [disabled] [ref=f8e1066]
+                          - img "down" [ref=f8e1068]
+                    - row [ref=f8e1071]:
+                      - 'cell "Transaction date 2026-09-14 Statement description 03 DE 03 ABONO POR TRASP. Normalized merchant Merchant: ABONO POR TRASP." [ref=f8e1072]':
+                        - generic [ref=f8e1073]:
+                          - generic [ref=f8e1074]:
+                            - generic [ref=f8e1075]: Transaction date
+                            - textbox "Transaction date for 03 DE 03 ABONO POR TRASP." [disabled] [ref=f8e1076]: 2026-09-14
+                          - generic [ref=f8e1077]:
+                            - generic [ref=f8e1078]: Statement description
+                            - textbox "Description for row 15" [disabled] [ref=f8e1079]: 03 DE 03 ABONO POR TRASP.
+                          - generic [ref=f8e1080]:
+                            - generic [ref=f8e1081]: Normalized merchant
+                            - generic [ref=f8e1082]: "Merchant: ABONO POR TRASP."
+                      - cell "Refinanced principal Financing plan Debt amortization, not an expense" [ref=f8e1084]:
+                        - generic [ref=f8e1085]:
+                          - generic [ref=f8e1086]: Refinanced principal
+                          - paragraph [ref=f8e1087]: Financing plan
+                          - paragraph [ref=f8e1088]: Debt amortization, not an expense
+                      - cell [ref=f8e1089]:
+                        - generic [ref=f8e1091]:
+                          - generic [ref=f8e1092]:
+                            - generic: $
+                            - spinbutton "Amount for 03 DE 03 ABONO POR TRASP." [disabled] [ref=f8e1093]: "392.00"
+                          - textbox "Currency for 03 DE 03 ABONO POR TRASP." [disabled] [ref=f8e1094]: MXN
+                      - cell [ref=f8e1095]:
+                        - generic [ref=f8e1096]:
+                          - generic [ref=f8e1097]:
+                            - generic: Select a category
+                            - combobox "Category for 03 DE 03 ABONO POR TRASP." [disabled] [ref=f8e1098]
+                          - img "down" [ref=f8e1100]
+                      - cell [ref=f8e1103]:
+                        - generic [ref=f8e1105]:
+                          - generic "Information only" [ref=f8e1106]:
+                            - text: Information only
+                            - combobox "Review decision for 03 DE 03 ABONO POR TRASP." [disabled] [ref=f8e1107]
+                          - img "down" [ref=f8e1109]
+                    - row [ref=f8e1112]:
+                      - 'cell "Transaction date 2026-09-14 Statement description 03 DE 06 ABONO POR TRASP. Normalized merchant Merchant: ABONO POR TRASP." [ref=f8e1113]':
+                        - generic [ref=f8e1114]:
+                          - generic [ref=f8e1115]:
+                            - generic [ref=f8e1116]: Transaction date
+                            - textbox "Transaction date for 03 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1117]: 2026-09-14
+                          - generic [ref=f8e1118]:
+                            - generic [ref=f8e1119]: Statement description
+                            - textbox "Description for row 16" [disabled] [ref=f8e1120]: 03 DE 06 ABONO POR TRASP.
+                          - generic [ref=f8e1121]:
+                            - generic [ref=f8e1122]: Normalized merchant
+                            - generic [ref=f8e1123]: "Merchant: ABONO POR TRASP."
+                      - cell "Refinanced principal Financing plan Debt amortization, not an expense" [ref=f8e1125]:
+                        - generic [ref=f8e1126]:
+                          - generic [ref=f8e1127]: Refinanced principal
+                          - paragraph [ref=f8e1128]: Financing plan
+                          - paragraph [ref=f8e1129]: Debt amortization, not an expense
+                      - cell [ref=f8e1130]:
+                        - generic [ref=f8e1132]:
+                          - generic [ref=f8e1133]:
+                            - generic: $
+                            - spinbutton "Amount for 03 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1134]: "182.00"
+                          - textbox "Currency for 03 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1135]: MXN
+                      - cell [ref=f8e1136]:
+                        - generic [ref=f8e1137]:
+                          - generic [ref=f8e1138]:
+                            - generic: Select a category
+                            - combobox "Category for 03 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1139]
+                          - img "down" [ref=f8e1141]
+                      - cell [ref=f8e1144]:
+                        - generic [ref=f8e1146]:
+                          - generic "Information only" [ref=f8e1147]:
+                            - text: Information only
+                            - combobox "Review decision for 03 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1148]
+                          - img "down" [ref=f8e1150]
+                    - row [ref=f8e1153]:
+                      - 'cell "Transaction date 2026-09-14 Statement description 02 DE 06 ABONO POR TRASP. Normalized merchant Merchant: ABONO POR TRASP." [ref=f8e1154]':
+                        - generic [ref=f8e1155]:
+                          - generic [ref=f8e1156]:
+                            - generic [ref=f8e1157]: Transaction date
+                            - textbox "Transaction date for 02 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1158]: 2026-09-14
+                          - generic [ref=f8e1159]:
+                            - generic [ref=f8e1160]: Statement description
+                            - textbox "Description for row 17" [disabled] [ref=f8e1161]: 02 DE 06 ABONO POR TRASP.
+                          - generic [ref=f8e1162]:
+                            - generic [ref=f8e1163]: Normalized merchant
+                            - generic [ref=f8e1164]: "Merchant: ABONO POR TRASP."
+                      - cell "Refinanced principal Financing plan Debt amortization, not an expense" [ref=f8e1166]:
+                        - generic [ref=f8e1167]:
+                          - generic [ref=f8e1168]: Refinanced principal
+                          - paragraph [ref=f8e1169]: Financing plan
+                          - paragraph [ref=f8e1170]: Debt amortization, not an expense
+                      - cell [ref=f8e1171]:
+                        - generic [ref=f8e1173]:
+                          - generic [ref=f8e1174]:
+                            - generic: $
+                            - spinbutton "Amount for 02 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1175]: "478.00"
+                          - textbox "Currency for 02 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1176]: MXN
+                      - cell [ref=f8e1177]:
+                        - generic [ref=f8e1178]:
+                          - generic [ref=f8e1179]:
+                            - generic: Select a category
+                            - combobox "Category for 02 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1180]
+                          - img "down" [ref=f8e1182]
+                      - cell [ref=f8e1185]:
+                        - generic [ref=f8e1187]:
+                          - generic "Information only" [ref=f8e1188]:
+                            - text: Information only
+                            - combobox "Review decision for 02 DE 06 ABONO POR TRASP." [disabled] [ref=f8e1189]
+                          - img "down" [ref=f8e1191]
+                    - row [ref=f8e1194]:
+                      - 'cell "Transaction date 2026-09-14 Statement description 01 DE 06 CENT DE SERV LTH REFA Normalized merchant Merchant: CENT DE SERV LTH REFA" [ref=f8e1195]':
+                        - generic [ref=f8e1196]:
+                          - generic [ref=f8e1197]:
+                            - generic [ref=f8e1198]: Transaction date
+                            - textbox "Transaction date for 01 DE 06 CENT DE SERV LTH REFA" [disabled] [ref=f8e1199]: 2026-09-14
+                          - generic [ref=f8e1200]:
+                            - generic [ref=f8e1201]: Statement description
+                            - textbox "Description for row 18" [disabled] [ref=f8e1202]: 01 DE 06 CENT DE SERV LTH REFA
+                          - generic [ref=f8e1203]:
+                            - generic [ref=f8e1204]: Normalized merchant
+                            - generic [ref=f8e1205]: "Merchant: CENT DE SERV LTH REFA"
+                      - cell "Refinanced principal Financing plan Debt amortization, not an expense" [ref=f8e1207]:
+                        - generic [ref=f8e1208]:
+                          - generic [ref=f8e1209]: Refinanced principal
+                          - paragraph [ref=f8e1210]: Financing plan
+                          - paragraph [ref=f8e1211]: Debt amortization, not an expense
+                      - cell [ref=f8e1212]:
+                        - generic [ref=f8e1214]:
+                          - generic [ref=f8e1215]:
+                            - generic: $
+                            - spinbutton "Amount for 01 DE 06 CENT DE SERV LTH REFA" [disabled] [ref=f8e1216]: "753.00"
+                          - textbox "Currency for 01 DE 06 CENT DE SERV LTH REFA" [disabled] [ref=f8e1217]: MXN
+                      - cell [ref=f8e1218]:
+                        - generic [ref=f8e1219]:
+                          - generic [ref=f8e1220]:
+                            - generic: Select a category
+                            - combobox "Category for 01 DE 06 CENT DE SERV LTH REFA" [disabled] [ref=f8e1221]
+                          - img "down" [ref=f8e1223]
+                      - cell [ref=f8e1226]:
+                        - generic [ref=f8e1228]:
+                          - generic "Information only" [ref=f8e1229]:
+                            - text: Information only
+                            - combobox "Review decision for 01 DE 06 CENT DE SERV LTH REFA" [disabled] [ref=f8e1230]
+                          - img "down" [ref=f8e1232]
+                    - row [ref=f8e1235]:
+                      - 'cell "Transaction date 2026-08-15 Statement description PAYPAL*PPCINEPOLIS ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL*PPCINEPOLIS" [ref=f8e1236]':
+                        - generic [ref=f8e1237]:
+                          - generic [ref=f8e1238]:
+                            - generic [ref=f8e1239]: Transaction date
+                            - textbox "Transaction date for PAYPAL*PPCINEPOLIS ; Tarjeta Digital ***7931" [disabled] [ref=f8e1240]: 2026-08-15
+                          - generic [ref=f8e1241]:
+                            - generic [ref=f8e1242]: Statement description
+                            - textbox "Description for row 19" [disabled] [ref=f8e1243]: PAYPAL*PPCINEPOLIS ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1244]:
+                            - generic [ref=f8e1245]: Normalized merchant
+                            - generic [ref=f8e1246]: "Merchant: PAYPAL*PPCINEPOLIS"
+                      - cell "Charge Current charges" [ref=f8e1248]:
+                        - generic [ref=f8e1249]:
+                          - generic [ref=f8e1250]: Charge
+                          - paragraph [ref=f8e1251]: Current charges
+                      - cell [ref=f8e1252]:
+                        - generic [ref=f8e1254]:
+                          - generic [ref=f8e1255]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL*PPCINEPOLIS ; Tarjeta Digital ***7931" [disabled] [ref=f8e1256]: "697.00"
+                          - textbox "Currency for PAYPAL*PPCINEPOLIS ; Tarjeta Digital ***7931" [disabled] [ref=f8e1257]: MXN
+                      - cell [ref=f8e1258]:
+                        - generic [ref=f8e1259]:
+                          - generic "🧩 Otros gastos" [ref=f8e1260]:
+                            - text: 🧩 Otros gastos
+                            - combobox "Category for PAYPAL*PPCINEPOLIS ; Tarjeta Digital ***7931" [disabled] [ref=f8e1261]
+                          - img "down" [ref=f8e1263]
+                      - cell [ref=f8e1266]:
+                        - generic [ref=f8e1268]:
+                          - generic "Include as expense" [ref=f8e1269]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL*PPCINEPOLIS ; Tarjeta Digital ***7931" [disabled] [ref=f8e1270]
+                          - img "down" [ref=f8e1272]
+                    - row [ref=f8e1275]:
+                      - 'cell "Transaction date 2026-08-15 Statement description PP*ITUNESAPPST APPLE.C ; Tarjeta Digital ***7931 Normalized merchant Merchant: PP*ITUNESAPPST APPLE.C" [ref=f8e1276]':
+                        - generic [ref=f8e1277]:
+                          - generic [ref=f8e1278]:
+                            - generic [ref=f8e1279]: Transaction date
+                            - textbox "Transaction date for PP*ITUNESAPPST APPLE.C ; Tarjeta Digital ***7931" [disabled] [ref=f8e1280]: 2026-08-15
+                          - generic [ref=f8e1281]:
+                            - generic [ref=f8e1282]: Statement description
+                            - textbox "Description for row 20" [disabled] [ref=f8e1283]: PP*ITUNESAPPST APPLE.C ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1284]:
+                            - generic [ref=f8e1285]: Normalized merchant
+                            - generic [ref=f8e1286]: "Merchant: PP*ITUNESAPPST APPLE.C"
+                      - cell "Charge Current charges" [ref=f8e1288]:
+                        - generic [ref=f8e1289]:
+                          - generic [ref=f8e1290]: Charge
+                          - paragraph [ref=f8e1291]: Current charges
+                      - cell [ref=f8e1292]:
+                        - generic [ref=f8e1294]:
+                          - generic [ref=f8e1295]:
+                            - generic: $
+                            - spinbutton "Amount for PP*ITUNESAPPST APPLE.C ; Tarjeta Digital ***7931" [disabled] [ref=f8e1296]: "49.00"
+                          - textbox "Currency for PP*ITUNESAPPST APPLE.C ; Tarjeta Digital ***7931" [disabled] [ref=f8e1297]: MXN
+                      - cell [ref=f8e1298]:
+                        - generic [ref=f8e1299]:
+                          - generic "🎬 Streaming y suscripciones" [ref=f8e1300]:
+                            - text: 🎬 Streaming y suscripciones
+                            - combobox "Category for PP*ITUNESAPPST APPLE.C ; Tarjeta Digital ***7931" [disabled] [ref=f8e1301]
+                          - img "down" [ref=f8e1303]
+                      - cell [ref=f8e1306]:
+                        - generic [ref=f8e1308]:
+                          - generic "Include as expense" [ref=f8e1309]:
+                            - text: Include as expense
+                            - combobox "Review decision for PP*ITUNESAPPST APPLE.C ; Tarjeta Digital ***7931" [disabled] [ref=f8e1310]
+                          - img "down" [ref=f8e1312]
+              - list [ref=f8e1315]:
+                - listitem [ref=f8e1316]: 47 source rows
+                - listitem "Previous Page" [ref=f8e1317]:
+                  - button [disabled] [ref=f8e1318]:
+                    - img "left" [ref=f8e1319]
+                - listitem "1" [ref=f8e1322] [cursor=pointer]
+                - listitem "2" [ref=f8e1324] [cursor=pointer]
+                - listitem "3" [ref=f8e1326] [cursor=pointer]
+                - listitem "Next Page" [ref=f8e1328] [cursor=pointer]:
+                  - button [ref=f8e1329]:
+                    - img "right" [ref=f8e1330]
+                - listitem [ref=f8e1333]:
+                  - generic [ref=f8e1334]:
+                    - generic "20 / page" [ref=f8e1335]:
+                      - text: 20 / page
+                      - combobox "Page Size" [ref=f8e1336]
+                    - img "down" [ref=f8e1338]
+  - alert [ref=f8e166]

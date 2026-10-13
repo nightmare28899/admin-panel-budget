@@ -3,12 +3,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { loginAction } from "@/lib/actions";
+import { googleLoginAction, loginAction } from "@/lib/actions";
+import { signInWithGoogle } from "@/lib/googleAuth";
 import { Button } from "@/components/ui/Button";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { WorkspaceTheme } from "@/components/layout/WorkspaceTheme";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -20,6 +22,8 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const [shakeForm, setShakeForm] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const busy = loading || googleLoading;
 
     useEffect(() => {
         if (!toast) return;
@@ -68,7 +72,37 @@ export default function LoginPage() {
         }
     }
 
+    function showLoginError(message: string) {
+        setError(message);
+        triggerErrorFeedback();
+        showToast(message, "error");
+    }
+
+    async function onGoogleLogin() {
+        setError("");
+        setGoogleLoading(true);
+        try {
+            const token = await signInWithGoogle();
+            const res = await googleLoginAction(token);
+            if (res.error) {
+                showLoginError(frontendError(res.error, t, "googleFailed"));
+                setGoogleLoading(false);
+                return;
+            }
+            router.push("/dashboard/users");
+        } catch (reason) {
+            const code = typeof reason === "object" && reason !== null && "code" in reason ? String(reason.code) : "";
+            showLoginError(
+                code.includes("popup-closed") || code.includes("cancelled")
+                    ? t("googleCancelled")
+                    : frontendError(reason instanceof Error ? reason.message : undefined, t, "googleFailed"),
+            );
+            setGoogleLoading(false);
+        }
+    }
+
     return (
+        <WorkspaceTheme workspace="admin">
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] p-6">
             <AmbientBackground variant="auth" />
 
@@ -111,7 +145,7 @@ export default function LoginPage() {
             >
                 <Link
                     href="/"
-                    className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-3)] transition-colors hover:text-[var(--emerald-text)] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)]"
+                    className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-3)] transition-colors hover:text-[var(--accent-text)] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 >
                     <span aria-hidden="true">←</span>
                     {t("backToPlatformSelection")}
@@ -127,7 +161,7 @@ export default function LoginPage() {
                             name="email"
                             type="email"
                             required
-                            disabled={loading}
+                            disabled={busy}
                             autoComplete="email"
                             value={email}
                             onChange={(e) => {
@@ -151,7 +185,7 @@ export default function LoginPage() {
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 required
-                                disabled={loading}
+                                disabled={busy}
                                 autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => {
@@ -168,7 +202,7 @@ export default function LoginPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword((prev) => !prev)}
-                                disabled={loading}
+                                disabled={busy}
                                 className="absolute inset-y-0 right-2 my-auto h-8 cursor-pointer rounded-[var(--radius-sm)] px-2 text-[var(--text-2)] transition hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                             >
@@ -177,7 +211,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <Button type="submit" variant="primary" disabled={loading} className="w-full">
+                    <Button type="submit" variant="primary" disabled={busy} className="w-full">
                         {loading ? (
                             <>
                                 <svg
@@ -197,7 +231,25 @@ export default function LoginPage() {
                         )}
                     </Button>
                 </form>
+
+                <div className="my-4 flex items-center gap-3 text-xs text-[var(--text-3)]">
+                    <div className="h-px flex-1 bg-[var(--border-soft)]" />
+                    {t("or")}
+                    <div className="h-px flex-1 bg-[var(--border-soft)]" />
+                </div>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={onGoogleLogin}
+                    aria-label={t("continueWithGoogle")}
+                    className="w-full"
+                >
+                    {googleLoading ? t("connecting") : t("continueWithGoogle")}
+                </Button>
             </div>
         </main>
+        </WorkspaceTheme>
     );
 }

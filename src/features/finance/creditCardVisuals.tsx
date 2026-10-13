@@ -55,7 +55,7 @@ export type CardTheme = {
   badgeClass: string;
 };
 
-const EMERALD_BADGE = "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
+const EMERALD_BADGE = "border-emerald-500/20 bg-[var(--emerald-dim)] text-[var(--emerald-text)]";
 
 const CARD_THEMES: Record<CardThemeKey, CardTheme> = {
   banamex: {
@@ -72,7 +72,7 @@ const CARD_THEMES: Record<CardThemeKey, CardTheme> = {
     borderClass: "border-cyan-400/30",
     glow: "0 14px 35px -10px rgba(14, 116, 144, 0.4)",
     barClass: "bg-gradient-to-r from-sky-400 to-cyan-300",
-    badgeClass: "border-cyan-500/20 bg-cyan-500/10 text-cyan-400",
+    badgeClass: "border-cyan-500/20 bg-[var(--info-dim)] text-[var(--info-text)]",
   },
   rappi: {
     key: "rappi",

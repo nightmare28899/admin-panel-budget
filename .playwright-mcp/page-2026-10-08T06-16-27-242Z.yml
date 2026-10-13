@@ -1,0 +1,347 @@
+- generic [ref=f10e1]:
+  - generic [ref=f10e2]:
+    - complementary [ref=f10e3]:
+      - generic [ref=f10e4]:
+        - generic [ref=f10e5]:
+          - generic [ref=f10e6]: B
+          - generic [ref=f10e8]: Budget Panel
+        - paragraph [ref=f10e9]: Navigation
+        - navigation [ref=f10e10]:
+          - link "Expenses" [ref=f10e11] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f10e205] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f10e22]: My Cards
+            - generic "3" [ref=f10e206]
+          - link "Statements" [ref=f10e23] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f10e29] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f10e35] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f10e43] [cursor=pointer]:
+            - /url: /finance/reports
+        - generic [ref=f10e49]:
+          - img "Kevin López González" [ref=f10e50]
+          - generic [ref=f10e51]:
+            - generic [ref=f10e52]: Kevin López González
+            - generic [ref=f10e53]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f10e54] [cursor=pointer]
+    - generic [ref=f10e58]:
+      - banner [ref=f10e59]:
+        - button "Collapse sidebar" [ref=f10e586] [cursor=pointer]
+        - generic [ref=f10e64]:
+          - button "Search (Cmd+K)" [ref=f10e65]
+          - button "Language" [ref=f10e69] [cursor=pointer]:
+            - img "global" [ref=f10e70]
+          - button "Subscription alerts (3)" [ref=f10e207] [cursor=pointer]:
+            - generic [ref=f10e211]: "3"
+      - main [ref=f10e77]:
+        - generic [ref=f10e587]:
+          - generic [ref=f10e588]:
+            - generic [ref=f10e589]:
+              - heading "Your expenses" [level=1] [ref=f10e590]
+              - paragraph [ref=f10e591]: Live data from your Budget account.
+            - generic [ref=f10e592]:
+              - generic [ref=f10e593]: Updated 12:16 AM
+              - button "Refresh" [ref=f10e594] [cursor=pointer]
+              - button "New expense" [ref=f10e598] [cursor=pointer]
+          - status [ref=f10e599]:
+            - generic [ref=f10e600]:
+              - strong [ref=f10e601]: iCloud
+              - text: is due in 1 day (~MXN 49.00, based on your payment history).
+            - button "Dismiss" [ref=f10e602] [cursor=pointer]: ✕
+          - generic [ref=f10e603]:
+            - generic [ref=f10e606]:
+              - generic [ref=f10e607]:
+                - img "wallet" [ref=f10e609]
+                - paragraph [ref=f10e612]: Spent this period
+              - generic [ref=f10e614]:
+                - generic [ref=f10e615]: MXN
+                - generic [ref=f10e616]: 2,470.75
+              - generic [ref=f10e618]:
+                - generic [ref=f10e619]: Monthly · Oct 1 – Oct 31
+                - button "Edit budget" [ref=f10e620] [cursor=pointer]
+            - generic [ref=f10e622]:
+              - generic [ref=f10e623]:
+                - generic [ref=f10e624]:
+                  - img "safety" [ref=f10e626]
+                  - paragraph [ref=f10e630]: Budget period remaining
+                - generic [ref=f10e632]:
+                  - generic [ref=f10e633]: MXN
+                  - generic [ref=f10e634]: "-820.75"
+              - img "100% of budget used" [ref=f10e636]:
+                - generic [ref=f10e639]: "100"
+          - generic [ref=f10e641]:
+            - heading "Expense history" [level=3] [ref=f10e642]
+            - generic [ref=f10e643]:
+              - generic [ref=f10e644]:
+                - searchbox "Search expenses" [ref=f10e646]
+                - button [ref=f10e648] [cursor=pointer]:
+                  - img "search" [ref=f10e650]
+              - generic [ref=f10e653]:
+                - textbox "Filter by date range" [ref=f10e655]:
+                  - /placeholder: From
+                  - text: 2026-09-15
+                - generic "to" [ref=f10e657]:
+                  - img "swap-right" [ref=f10e658]
+                - textbox "Filter by date range" [ref=f10e662]:
+                  - /placeholder: To
+                  - text: 2026-10-14
+                - generic:
+                  - img "calendar"
+                - button [ref=f10e1037] [cursor=pointer]:
+                  - img "close-circle" [ref=f10e1038]
+              - generic [ref=f10e663] [cursor=pointer]:
+                - generic [ref=f10e664]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=f10e665]
+                - img "down" [ref=f10e667]
+              - generic [ref=f10e670] [cursor=pointer]:
+                - generic "BBVA · BBVA •••• 7289" [ref=f10e1492]:
+                  - text: BBVA · BBVA •••• 7289
+                  - combobox "Filter by card" [ref=f10e672]
+                - img "down" [ref=f10e674]
+                - img "close-circle" [ref=f10e980]
+              - generic [ref=f10e677] [cursor=pointer]:
+                - generic "All" [ref=f10e678]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=f10e679]
+                - img "down" [ref=f10e681]
+            - generic [ref=f10e684]:
+              - generic [ref=f10e685]:
+                - generic [ref=f10e2129]:
+                  - generic [ref=f10e2130]:
+                    - generic [ref=f10e2131]: 🧩
+                    - generic [ref=f10e2132]:
+                      - paragraph [ref=f10e2133]: Total pass sapi de cv
+                      - paragraph [ref=f10e2134]:
+                        - generic [ref=f10e2135]: Sep 22, 2026
+                        - generic [aria-hidden] [ref=f10e2136]: ·
+                        - generic [ref=f10e2137]: Total pass sapi de cv
+                        - generic [aria-hidden] [ref=f10e2138]: ·
+                        - generic [ref=f10e2139]: Otros gastos
+                      - paragraph [ref=f10e2140]:
+                        - generic [ref=f10e2141]:
+                          - img "credit-card" [ref=f10e2142]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2145]:
+                    - generic [ref=f10e2146]: "-MXN 369.00"
+                    - generic [ref=f10e2147]:
+                      - button "Edit Total pass sapi de cv" [ref=f10e2148] [cursor=pointer]:
+                        - img "edit" [ref=f10e2149]
+                      - button "Delete Total pass sapi de cv" [ref=f10e2152] [cursor=pointer]:
+                        - img "delete" [ref=f10e2153]
+                - generic [ref=f10e2156]:
+                  - generic [ref=f10e2157]:
+                    - generic [ref=f10e2158]: 🧩
+                    - generic [ref=f10e2159]:
+                      - paragraph [ref=f10e2160]: Farm guad1258
+                      - paragraph [ref=f10e2161]:
+                        - generic [ref=f10e2162]: Sep 21, 2026
+                        - generic [aria-hidden] [ref=f10e2163]: ·
+                        - generic [ref=f10e2164]: Farm guad1258
+                        - generic [aria-hidden] [ref=f10e2165]: ·
+                        - generic [ref=f10e2166]: Otros gastos
+                      - paragraph [ref=f10e2167]:
+                        - generic [ref=f10e2168]:
+                          - img "credit-card" [ref=f10e2169]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2172]:
+                    - generic [ref=f10e2173]: "-MXN 45.00"
+                    - generic [ref=f10e2174]:
+                      - button "Edit Farm guad1258" [ref=f10e2175] [cursor=pointer]:
+                        - img "edit" [ref=f10e2176]
+                      - button "Delete Farm guad1258" [ref=f10e2179] [cursor=pointer]:
+                        - img "delete" [ref=f10e2180]
+                - generic [ref=f10e2183]:
+                  - generic [ref=f10e2184]:
+                    - generic [ref=f10e2185]: 🔁
+                    - generic [ref=f10e2186]:
+                      - paragraph [ref=f10e2187]: Paypal*ionos inc
+                      - paragraph [ref=f10e2188]:
+                        - generic [ref=f10e2189]: Sep 21, 2026
+                        - generic [aria-hidden] [ref=f10e2190]: ·
+                        - generic [ref=f10e2191]: Paypal*ionos inc
+                        - generic [aria-hidden] [ref=f10e2192]: ·
+                        - generic [ref=f10e2193]: Suscripción
+                      - paragraph [ref=f10e2194]:
+                        - generic [ref=f10e2195]:
+                          - img "credit-card" [ref=f10e2196]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2199]:
+                    - generic [ref=f10e2200]: "-MXN 52.50"
+                    - generic [ref=f10e2201]:
+                      - button "Edit Paypal*ionos inc" [ref=f10e2202] [cursor=pointer]:
+                        - img "edit" [ref=f10e2203]
+                      - button "Delete Paypal*ionos inc" [ref=f10e2206] [cursor=pointer]:
+                        - img "delete" [ref=f10e2207]
+                - generic [ref=f10e2210]:
+                  - generic [ref=f10e2211]:
+                    - generic [ref=f10e2212]: ☕
+                    - generic [ref=f10e2213]:
+                      - paragraph [ref=f10e2214]: Starbucks ven puent
+                      - paragraph [ref=f10e2215]:
+                        - generic [ref=f10e2216]: Sep 21, 2026
+                        - generic [aria-hidden] [ref=f10e2217]: ·
+                        - generic [ref=f10e2218]: Starbucks ven puent
+                        - generic [aria-hidden] [ref=f10e2219]: ·
+                        - generic [ref=f10e2220]: Cafeterías
+                      - paragraph [ref=f10e2221]:
+                        - generic [ref=f10e2222]:
+                          - img "credit-card" [ref=f10e2223]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2226]:
+                    - generic [ref=f10e2227]: "-MXN 235.00"
+                    - generic [ref=f10e2228]:
+                      - button "Edit Starbucks ven puent" [ref=f10e2229] [cursor=pointer]:
+                        - img "edit" [ref=f10e2230]
+                      - button "Delete Starbucks ven puent" [ref=f10e2233] [cursor=pointer]:
+                        - img "delete" [ref=f10e2234]
+                - generic [ref=f10e2237]:
+                  - generic [ref=f10e2238]:
+                    - generic [ref=f10e2239]: 🧩
+                    - generic [ref=f10e2240]:
+                      - paragraph [ref=f10e2241]: Paypal*corpa tech
+                      - paragraph [ref=f10e2242]:
+                        - generic [ref=f10e2243]: Sep 20, 2026
+                        - generic [aria-hidden] [ref=f10e2244]: ·
+                        - generic [ref=f10e2245]: Paypal*corpa tech
+                        - generic [aria-hidden] [ref=f10e2246]: ·
+                        - generic [ref=f10e2247]: Otros gastos
+                      - paragraph [ref=f10e2248]:
+                        - generic [ref=f10e2249]:
+                          - img "credit-card" [ref=f10e2250]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2253]:
+                    - generic [ref=f10e2254]: "-MXN 48.00"
+                    - generic [ref=f10e2255]:
+                      - button "Edit Paypal*corpa tech" [ref=f10e2256] [cursor=pointer]:
+                        - img "edit" [ref=f10e2257]
+                      - button "Delete Paypal*corpa tech" [ref=f10e2260] [cursor=pointer]:
+                        - img "delete" [ref=f10e2261]
+                - generic [ref=f10e2264]:
+                  - generic [ref=f10e2265]:
+                    - generic [ref=f10e2266]: 🚕
+                    - generic [ref=f10e2267]:
+                      - paragraph [ref=f10e2268]: Paypal*ubrpagosmex
+                      - paragraph [ref=f10e2269]:
+                        - generic [ref=f10e2270]: Sep 20, 2026
+                        - generic [aria-hidden] [ref=f10e2271]: ·
+                        - generic [ref=f10e2272]: Paypal*ubrpagosmex
+                        - generic [aria-hidden] [ref=f10e2273]: ·
+                        - generic [ref=f10e2274]: Transporte
+                      - paragraph [ref=f10e2275]:
+                        - generic [ref=f10e2276]:
+                          - img "credit-card" [ref=f10e2277]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2280]:
+                    - generic [ref=f10e2281]: "-MXN 41.12"
+                    - generic [ref=f10e2282]:
+                      - button "Edit Paypal*ubrpagosmex" [ref=f10e2283] [cursor=pointer]:
+                        - img "edit" [ref=f10e2284]
+                      - button "Delete Paypal*ubrpagosmex" [ref=f10e2287] [cursor=pointer]:
+                        - img "delete" [ref=f10e2288]
+                - generic [ref=f10e2291]:
+                  - generic [ref=f10e2292]:
+                    - generic [ref=f10e2293]: 🚕
+                    - generic [ref=f10e2294]:
+                      - paragraph [ref=f10e2295]: Pay pal*ubrpagosmex
+                      - paragraph [ref=f10e2296]:
+                        - generic [ref=f10e2297]: Sep 20, 2026
+                        - generic [aria-hidden] [ref=f10e2298]: ·
+                        - generic [ref=f10e2299]: Pay pal*ubrpagosmex
+                        - generic [aria-hidden] [ref=f10e2300]: ·
+                        - generic [ref=f10e2301]: Transporte
+                      - paragraph [ref=f10e2302]:
+                        - generic [ref=f10e2303]:
+                          - img "credit-card" [ref=f10e2304]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2307]:
+                    - generic [ref=f10e2308]: "-MXN 38.14"
+                    - generic [ref=f10e2309]:
+                      - button "Edit Pay pal*ubrpagosmex" [ref=f10e2310] [cursor=pointer]:
+                        - img "edit" [ref=f10e2311]
+                      - button "Delete Pay pal*ubrpagosmex" [ref=f10e2314] [cursor=pointer]:
+                        - img "delete" [ref=f10e2315]
+                - generic [ref=f10e2318]:
+                  - generic [ref=f10e2319]:
+                    - generic [ref=f10e2320]: 🚕
+                    - generic [ref=f10e2321]:
+                      - paragraph [ref=f10e2322]: Paypal*ubrpagosmex
+                      - paragraph [ref=f10e2323]:
+                        - generic [ref=f10e2324]: Sep 19, 2026
+                        - generic [aria-hidden] [ref=f10e2325]: ·
+                        - generic [ref=f10e2326]: Paypal*ubrpagosmex
+                        - generic [aria-hidden] [ref=f10e2327]: ·
+                        - generic [ref=f10e2328]: Transporte
+                      - paragraph [ref=f10e2329]:
+                        - generic [ref=f10e2330]:
+                          - img "credit-card" [ref=f10e2331]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2334]:
+                    - generic [ref=f10e2335]: "-MXN 55.12"
+                    - generic [ref=f10e2336]:
+                      - button "Edit Paypal*ubrpagosmex" [ref=f10e2337] [cursor=pointer]:
+                        - img "edit" [ref=f10e2338]
+                      - button "Delete Paypal*ubrpagosmex" [ref=f10e2341] [cursor=pointer]:
+                        - img "delete" [ref=f10e2342]
+                - generic [ref=f10e2345]:
+                  - generic [ref=f10e2346]:
+                    - generic [ref=f10e2347]: ☕
+                    - generic [ref=f10e2348]:
+                      - paragraph [ref=f10e2349]: Cafe europa
+                      - paragraph [ref=f10e2350]:
+                        - generic [ref=f10e2351]: Sep 19, 2026
+                        - generic [aria-hidden] [ref=f10e2352]: ·
+                        - generic [ref=f10e2353]: Cafe europa
+                        - generic [aria-hidden] [ref=f10e2354]: ·
+                        - generic [ref=f10e2355]: Cafeterías
+                      - paragraph [ref=f10e2356]:
+                        - generic [ref=f10e2357]:
+                          - img "credit-card" [ref=f10e2358]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2361]:
+                    - generic [ref=f10e2362]: "-MXN 180.01"
+                    - generic [ref=f10e2363]:
+                      - button "Edit Cafe europa" [ref=f10e2364] [cursor=pointer]:
+                        - img "edit" [ref=f10e2365]
+                      - button "Delete Cafe europa" [ref=f10e2368] [cursor=pointer]:
+                        - img "delete" [ref=f10e2369]
+                - generic [ref=f10e2372]:
+                  - generic [ref=f10e2373]:
+                    - generic [ref=f10e2374]: 🧩
+                    - generic [ref=f10e2375]:
+                      - paragraph [ref=f10e2376]: Telcel claro[t]payt
+                      - paragraph [ref=f10e2377]:
+                        - generic [ref=f10e2378]: Sep 18, 2026
+                        - generic [aria-hidden] [ref=f10e2379]: ·
+                        - generic [ref=f10e2380]: Telcel claro[t]payt
+                        - generic [aria-hidden] [ref=f10e2381]: ·
+                        - generic [ref=f10e2382]: Otros gastos
+                      - paragraph [ref=f10e2383]:
+                        - generic [ref=f10e2384]:
+                          - img "credit-card" [ref=f10e2385]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2388]:
+                    - generic [ref=f10e2389]: "-MXN 499.00"
+                    - generic [ref=f10e2390]:
+                      - button "Edit Telcel claro[t]payt" [ref=f10e2391] [cursor=pointer]:
+                        - img "edit" [ref=f10e2392]
+                      - button "Delete Telcel claro[t]payt" [ref=f10e2395] [cursor=pointer]:
+                        - img "delete" [ref=f10e2396]
+              - generic [ref=f10e950]:
+                - generic [ref=f10e951]: Showing 21–30 of 34 records
+                - generic [ref=f10e952]:
+                  - generic [ref=f10e953] [cursor=pointer]:
+                    - generic "10 / page" [ref=f10e954]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=f10e955]
+                    - img "down" [ref=f10e957]
+                  - generic [ref=f10e960]:
+                    - button "Previous" [ref=f10e1488] [cursor=pointer]:
+                      - img "left" [ref=f10e1489]
+                    - generic [ref=f10e961]: Page 3 of 4
+                    - button "Next" [active] [ref=f10e962] [cursor=pointer]:
+                      - img "right" [ref=f10e963]
+  - alert [ref=f10e204]

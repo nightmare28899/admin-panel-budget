@@ -47,7 +47,7 @@ export function CreditCardPicker({
           onClick={() => onSelect(undefined)}
           className={`flex h-40 w-40 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden! rounded-[28px] border-2 border-dashed text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] ${
             selectedCardId === undefined
-              ? "border-[var(--emerald)] bg-[var(--emerald-dim)] text-[var(--emerald-text)]"
+              ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent-text)]"
               : "border-[var(--border-soft)] text-[var(--text-3)] hover:border-[var(--border)] hover:text-[var(--text-2)]"
           }`}
         >
@@ -71,7 +71,7 @@ export function CreditCardPicker({
             onClick={() => onSelect(card.id)}
             style={{
               background,
-              boxShadow: selected ? `${theme.glow}, 0 0 0 2px var(--emerald)` : theme.glow,
+              boxShadow: selected ? `${theme.glow}, 0 0 0 2px var(--accent)` : theme.glow,
             }}
             className="group relative flex h-40 w-56 shrink-0 cursor-pointer flex-col justify-between overflow-hidden! rounded-[28px] p-4 text-left transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-1)]"
           >
@@ -85,7 +85,7 @@ export function CreditCardPicker({
                 <CreditCardContactlessIcon />
                 <span
                   aria-hidden="true"
-                  className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-bold text-[var(--emerald-text)] shadow-sm transition-opacity duration-200 ${
+                  className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-bold text-[var(--accent-text)] shadow-sm transition-opacity duration-200 ${
                     selected ? "opacity-100" : "opacity-0"
                   }`}
                 >

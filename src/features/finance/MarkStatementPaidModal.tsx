@@ -86,10 +86,10 @@ function OpenStatementPaymentModal({
 
   return (
     <Modal open onClose={closeIfIdle} title={t(correction ? "correctPayment" : "recordPayment")}>
-      <p className="text-sm leading-6 text-slate-300">{t("recordPaymentPrompt")}</p>
+      <p className="text-sm leading-6 text-[var(--text-2)]">{t("recordPaymentPrompt")}</p>
       <div className={`space-y-3 ${STATEMENT_FIELD_SCOPE}`}>
         <div>
-          <label htmlFor="statement-payment-amount" className="mb-1 block text-xs text-slate-400">
+          <label htmlFor="statement-payment-amount" className="mb-1 block text-xs text-[var(--text-3)]">
             {t("paymentAmount")}
           </label>
           <Space.Compact block className="min-w-0 max-w-full">
@@ -136,8 +136,8 @@ function OpenStatementPaymentModal({
                   onClick={() => changeAmount(chip.amount)}
                   className={`cursor-pointer rounded-full border px-2.5 py-1 text-[11px] font-semibold transition focus-visible:outline-2 focus-visible:outline-sky-400 disabled:cursor-not-allowed disabled:opacity-60 ${
                     amount === chip.amount
-                      ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
-                      : "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                      ? "border-emerald-500/50 bg-emerald-500/15 text-[var(--emerald-text)]"
+                      : "border-[var(--border-soft)] bg-[var(--bg-3)]/80 text-[var(--text-2)] hover:bg-[var(--bg-3)]"
                   }`}
                 >
                   {chip.label} · <span className="font-mono">{formatPlain(chip.amount)}</span>
@@ -147,20 +147,20 @@ function OpenStatementPaymentModal({
           )}
         </div>
         <div>
-          <label htmlFor="statement-payment-date" className="mb-1 block text-xs text-slate-400">
+          <label htmlFor="statement-payment-date" className="mb-1 block text-xs text-[var(--text-3)]">
             {t("paymentDate")}
           </label>
           <Input id="statement-payment-date" type="date" min={EARLIEST_PAYMENT_DATE} max={today} value={paidAt} onChange={(event) => setPaidAt(event.target.value)} />
         </div>
         <div>
-          <label htmlFor="statement-payment-note" className="mb-1 block text-xs text-slate-400">
+          <label htmlFor="statement-payment-note" className="mb-1 block text-xs text-[var(--text-3)]">
             {t("paymentNote")}
           </label>
           <Input.TextArea id="statement-payment-note" value={note} maxLength={500} rows={2} onChange={(event) => setNote(event.target.value)} />
         </div>
         {correction && (
           <div>
-            <label htmlFor="statement-payment-reason" className="mb-1 block text-xs text-slate-400">
+            <label htmlFor="statement-payment-reason" className="mb-1 block text-xs text-[var(--text-3)]">
               {t("correctionReason")}
             </label>
             <Input.TextArea id="statement-payment-reason" value={reason} maxLength={500} rows={2} required onChange={(event) => setReason(event.target.value)} />
@@ -168,15 +168,15 @@ function OpenStatementPaymentModal({
         )}
       </div>
       {amount != null && validationKey && (
-        <p role="alert" className="text-xs text-rose-400">{t(validationKey)}</p>
+        <p role="alert" className="text-xs text-[var(--rose-text)]">{t(validationKey)}</p>
       )}
       {awaitingOverpayConfirm && (
-        <p role="alert" className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
+        <p role="alert" className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-[var(--gold-text)]">
           {t("cardAbonoOverpayWarning", { remaining: formatPlain(remaining ?? 0) })}
         </p>
       )}
       {errorMessage && (
-        <p role="alert" className="rounded-lg border border-rose-500/25 bg-rose-500/5 px-3 py-2 text-xs text-rose-300">{errorMessage}</p>
+        <p role="alert" className="rounded-lg border border-rose-500/25 bg-rose-500/5 px-3 py-2 text-xs text-[var(--rose-text)]">{errorMessage}</p>
       )}
       <div className="flex min-w-0 flex-wrap justify-end gap-2 pt-2">
         <StatementButton variant="ghost" size="md" onClick={closeIfIdle} disabled={loading}>

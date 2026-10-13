@@ -1,0 +1,868 @@
+- generic [ref=f8e1]:
+  - generic [ref=f8e3]:
+    - complementary [ref=f8e4]:
+      - generic [ref=f8e5]:
+        - generic [ref=f8e6]:
+          - generic [ref=f8e7]: B
+          - generic [ref=f8e9]: Budget Panel
+        - paragraph [ref=f8e10]: Navigation
+        - navigation [ref=f8e11]:
+          - link "Expenses" [ref=f8e12] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f8e167] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f8e23]: My Cards
+            - generic "3" [ref=f8e168]
+          - link "Statements" [ref=f8e24] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f8e30] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f8e36] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f8e44] [cursor=pointer]:
+            - /url: /finance/reports
+        - paragraph [ref=f8e49]: Workspaces
+        - navigation "Workspaces" [ref=f8e50]:
+          - link "Personal nutrition" [ref=f8e51] [cursor=pointer]:
+            - /url: /nutrition/today
+        - generic [ref=f8e58]:
+          - img "Kevin" [ref=f8e59]
+          - generic [ref=f8e60]:
+            - generic [ref=f8e61]: Kevin
+            - generic [ref=f8e62]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f8e63] [cursor=pointer]
+    - generic [ref=f8e67]:
+      - banner [ref=f8e68]:
+        - button "Expand sidebar" [ref=f8e70] [cursor=pointer]
+        - generic [ref=f8e73]:
+          - button "Search (Cmd+K)" [ref=f8e74]
+          - button "Language" [ref=f8e78] [cursor=pointer]:
+            - img "global" [ref=f8e79]
+          - button "Subscription alerts" [ref=f8e82] [cursor=pointer]
+      - main [ref=f8e86]:
+        - generic [ref=f8e324]:
+          - generic [ref=f8e325]:
+            - generic [ref=f8e326]:
+              - button "← Back to statements" [ref=f8e327] [cursor=pointer]
+              - generic [ref=f8e328]:
+                - heading "bbva.pdf" [level=1] [ref=f8e329]
+                - generic [ref=f8e330]: Confirmed
+              - paragraph [ref=f8e332]: Version 4 · Uploaded Oct 1, 2026, 12:34 AM
+            - generic [ref=f8e333]:
+              - button "Reload" [ref=f8e334] [cursor=pointer]
+              - button "Revert import" [ref=f8e335] [cursor=pointer]
+          - generic [ref=f8e336]:
+            - generic [ref=f8e337]:
+              - generic [ref=f8e338]:
+                - heading "Bank reconciliation" [level=2] [ref=f8e339]
+                - generic [ref=f8e340]: Passed
+              - generic [ref=f8e343]:
+                - generic [ref=f8e344]:
+                  - generic [ref=f8e345]: Opening balance
+                  - paragraph [ref=f8e350]: $13,310.66 MXN
+                - generic [ref=f8e351]:
+                  - generic [ref=f8e352]: Charges
+                  - paragraph [ref=f8e357]: $11,132.09 MXN
+                - generic [ref=f8e358]:
+                  - generic [ref=f8e359]: Payments
+                  - paragraph [ref=f8e364]: $10,421.21 MXN
+                - generic [ref=f8e365]:
+                  - generic [ref=f8e366]: Credits
+                  - paragraph [ref=f8e371]: $0.00 MXN
+                - generic [ref=f8e372]:
+                  - generic [ref=f8e373]: Closing balance
+                  - paragraph [ref=f8e378]: $14,021.54 MXN
+                - generic [ref=f8e379]:
+                  - generic [ref=f8e380]: Difference
+                  - paragraph [ref=f8e385]: $0.00 MXN
+            - generic [ref=f8e386]:
+              - generic [ref=f8e387]:
+                - heading "Review adjustments" [level=2] [ref=f8e388]
+                - generic [ref=f8e389]: Confirmed
+              - generic [ref=f8e391]:
+                - generic [ref=f8e392]:
+                  - generic [ref=f8e393]:
+                    - generic [ref=f8e394]: Paid
+                    - paragraph [ref=f8e396]: Paid Oct 7, 2026, 6:00 AM
+                  - paragraph [ref=f8e397]: Paid in full. Use Correct or Void in the payment history to adjust it.
+                - generic [ref=f8e398]:
+                  - paragraph [ref=f8e399]: 47 source rows
+                  - paragraph [ref=f8e400]: 37 expenses selected
+                  - paragraph [ref=f8e401]: 0 pending decisions
+                  - paragraph [ref=f8e402]: 0 parser warnings
+                  - paragraph [ref=f8e403]: 0 review adjustments
+          - generic [ref=f8e404]:
+            - heading "Payment history" [level=2] [ref=f8e406]
+            - list [ref=f8e408]:
+              - listitem [ref=f8e409]:
+                - generic [ref=f8e410]:
+                  - generic [ref=f8e411]:
+                    - generic [ref=f8e412]: MXN 5,000.00
+                    - generic [ref=f8e413]: Active
+                  - paragraph [ref=f8e415]: Oct 7, 2026
+                - generic [ref=f8e416]:
+                  - button "Correct" [ref=f8e417] [cursor=pointer]
+                  - button "Void payment" [ref=f8e418] [cursor=pointer]
+              - listitem [ref=f8e419]:
+                - generic [ref=f8e420]:
+                  - generic [ref=f8e421]:
+                    - generic [ref=f8e422]: MXN 5,000.00
+                    - generic [ref=f8e423]: Active
+                  - paragraph [ref=f8e425]: Oct 6, 2026
+                - generic [ref=f8e426]:
+                  - button "Correct" [ref=f8e427] [cursor=pointer]
+                  - button "Void payment" [ref=f8e428] [cursor=pointer]
+              - listitem [ref=f8e429]:
+                - generic [ref=f8e430]:
+                  - generic [ref=f8e431]:
+                    - generic [ref=f8e432]: MXN 4,021.54
+                    - generic [ref=f8e433]: Active
+                  - paragraph [ref=f8e435]: Oct 5, 2026
+                - generic [ref=f8e436]:
+                  - button "Correct" [ref=f8e437] [cursor=pointer]
+                  - button "Void payment" [ref=f8e438] [cursor=pointer]
+          - generic [ref=f8e439]:
+            - generic [ref=f8e440]:
+              - heading "Payment targets" [level=2] [ref=f8e441]
+              - generic [ref=f8e442]: "3"
+            - generic [ref=f8e444]:
+              - generic [ref=f8e445]:
+                - paragraph [ref=f8e446]: Payment to avoid interest
+                - paragraph [ref=f8e447]: $14,021.54 MXN
+                - paragraph [ref=f8e448]: Due Oct 5, 2026
+              - generic [ref=f8e449]:
+                - paragraph [ref=f8e450]: Minimum payment plus installments
+                - paragraph [ref=f8e451]: $4,919.00 MXN
+                - paragraph [ref=f8e452]: Due Oct 5, 2026
+              - generic [ref=f8e453]:
+                - paragraph [ref=f8e454]: Minimum payment
+                - paragraph [ref=f8e455]: $1,255.00 MXN
+                - paragraph [ref=f8e456]: Due Oct 5, 2026
+          - generic [ref=f8e458]:
+            - generic [ref=f8e459]:
+              - generic [ref=f8e460]:
+                - heading "Statement rows" [level=2] [ref=f8e461]
+                - paragraph [ref=f8e462]: 47 source rows
+              - generic [ref=f8e463]:
+                - generic [ref=f8e464]: Ready to confirm
+                - generic [ref=f8e466]: Pending decision
+                - generic [ref=f8e468]: Missing required data
+            - generic [ref=f8e470]:
+              - generic [ref=f8e471]:
+                - generic [ref=f8e472]: Filter statement rows
+                - generic [ref=f8e473] [cursor=pointer]:
+                  - generic "All rows" [ref=f8e474]:
+                    - text: All rows
+                    - combobox "Filter statement rows" [ref=f8e475]
+                  - img "down" [ref=f8e477]
+              - status [ref=f8e480]: Showing 47 of 47 statement rows
+            - generic [ref=f8e484]:
+              - generic [ref=f8e486]:
+                - table [ref=f8e488]:
+                  - rowgroup [ref=f8e495]:
+                    - row [ref=f8e496]:
+                      - columnheader "Transaction" [ref=f8e497]
+                      - columnheader "Type" [ref=f8e498]
+                      - columnheader "Amount" [ref=f8e499]
+                      - columnheader "Category" [ref=f8e500]
+                      - columnheader "Decision" [ref=f8e501]
+                - table [ref=f8e503]:
+                  - rowgroup [ref=f8e510]:
+                    - row [ref=f8e1341]:
+                      - 'cell "Transaction date 2026-08-15 Statement description PAYPAL*CORPATECH ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL*CORPATECH" [ref=f8e1342]':
+                        - generic [ref=f8e1343]:
+                          - generic [ref=f8e1344]:
+                            - generic [ref=f8e1345]: Transaction date
+                            - textbox "Transaction date for PAYPAL*CORPATECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1346]: 2026-08-15
+                          - generic [ref=f8e1347]:
+                            - generic [ref=f8e1348]: Statement description
+                            - textbox "Description for row 21" [disabled] [ref=f8e1349]: PAYPAL*CORPATECH ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1350]:
+                            - generic [ref=f8e1351]: Normalized merchant
+                            - generic [ref=f8e1352]: "Merchant: PAYPAL*CORPATECH"
+                      - cell "Charge Current charges" [ref=f8e1354]:
+                        - generic [ref=f8e1355]:
+                          - generic [ref=f8e1356]: Charge
+                          - paragraph [ref=f8e1357]: Current charges
+                      - cell [ref=f8e1358]:
+                        - generic [ref=f8e1360]:
+                          - generic [ref=f8e1361]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL*CORPATECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1362]: "15.00"
+                          - textbox "Currency for PAYPAL*CORPATECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1363]: MXN
+                      - cell [ref=f8e1364]:
+                        - generic [ref=f8e1365]:
+                          - generic "🧩 Otros gastos" [ref=f8e1366]:
+                            - text: 🧩 Otros gastos
+                            - combobox "Category for PAYPAL*CORPATECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1367]
+                          - img "down" [ref=f8e1369]
+                      - cell [ref=f8e1372]:
+                        - generic [ref=f8e1374]:
+                          - generic "Include as expense" [ref=f8e1375]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL*CORPATECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1376]
+                          - img "down" [ref=f8e1378]
+                    - row [ref=f8e1381]:
+                      - 'cell "Transaction date 2026-08-16 Statement description PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *UBRPAGOSMEX" [ref=f8e1382]':
+                        - generic [ref=f8e1383]:
+                          - generic [ref=f8e1384]:
+                            - generic [ref=f8e1385]: Transaction date
+                            - textbox "Transaction date for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1386]: 2026-08-16
+                          - generic [ref=f8e1387]:
+                            - generic [ref=f8e1388]: Statement description
+                            - textbox "Description for row 22" [disabled] [ref=f8e1389]: PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1390]:
+                            - generic [ref=f8e1391]: Normalized merchant
+                            - generic [ref=f8e1392]: "Merchant: PAYPAL *UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1394]:
+                        - generic [ref=f8e1395]:
+                          - generic [ref=f8e1396]: Charge
+                          - paragraph [ref=f8e1397]: Current charges
+                      - cell [ref=f8e1398]:
+                        - generic [ref=f8e1400]:
+                          - generic [ref=f8e1401]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1402]: "36.66"
+                          - textbox "Currency for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1403]: MXN
+                      - cell [ref=f8e1404]:
+                        - generic [ref=f8e1405]:
+                          - generic "🚕 Transporte" [ref=f8e1406]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1407]
+                          - img "down" [ref=f8e1409]
+                      - cell [ref=f8e1412]:
+                        - generic [ref=f8e1414]:
+                          - generic "Include as expense" [ref=f8e1415]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1416]
+                          - img "down" [ref=f8e1418]
+                    - row [ref=f8e1421]:
+                      - 'cell "Transaction date 2026-08-16 Statement description PAY PAL*CORPA TECH ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAY PAL*CORPA TECH" [ref=f8e1422]':
+                        - generic [ref=f8e1423]:
+                          - generic [ref=f8e1424]:
+                            - generic [ref=f8e1425]: Transaction date
+                            - textbox "Transaction date for PAY PAL*CORPA TECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1426]: 2026-08-16
+                          - generic [ref=f8e1427]:
+                            - generic [ref=f8e1428]: Statement description
+                            - textbox "Description for row 23" [disabled] [ref=f8e1429]: PAY PAL*CORPA TECH ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1430]:
+                            - generic [ref=f8e1431]: Normalized merchant
+                            - generic [ref=f8e1432]: "Merchant: PAY PAL*CORPA TECH"
+                      - cell "Charge Current charges" [ref=f8e1434]:
+                        - generic [ref=f8e1435]:
+                          - generic [ref=f8e1436]: Charge
+                          - paragraph [ref=f8e1437]: Current charges
+                      - cell [ref=f8e1438]:
+                        - generic [ref=f8e1440]:
+                          - generic [ref=f8e1441]:
+                            - generic: $
+                            - spinbutton "Amount for PAY PAL*CORPA TECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1442]: "51.00"
+                          - textbox "Currency for PAY PAL*CORPA TECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1443]: MXN
+                      - cell [ref=f8e1444]:
+                        - generic [ref=f8e1445]:
+                          - generic "🧩 Otros gastos" [ref=f8e1446]:
+                            - text: 🧩 Otros gastos
+                            - combobox "Category for PAY PAL*CORPA TECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1447]
+                          - img "down" [ref=f8e1449]
+                      - cell [ref=f8e1452]:
+                        - generic [ref=f8e1454]:
+                          - generic "Include as expense" [ref=f8e1455]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAY PAL*CORPA TECH ; Tarjeta Digital ***7931" [disabled] [ref=f8e1456]
+                          - img "down" [ref=f8e1458]
+                    - row [ref=f8e1461]:
+                      - 'cell "Transaction date 2026-08-20 Statement description PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL*UBRPAGOSMEX" [ref=f8e1462]':
+                        - generic [ref=f8e1463]:
+                          - generic [ref=f8e1464]:
+                            - generic [ref=f8e1465]: Transaction date
+                            - textbox "Transaction date for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1466]: 2026-08-20
+                          - generic [ref=f8e1467]:
+                            - generic [ref=f8e1468]: Statement description
+                            - textbox "Description for row 24" [disabled] [ref=f8e1469]: PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1470]:
+                            - generic [ref=f8e1471]: Normalized merchant
+                            - generic [ref=f8e1472]: "Merchant: PAYPAL*UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1474]:
+                        - generic [ref=f8e1475]:
+                          - generic [ref=f8e1476]: Charge
+                          - paragraph [ref=f8e1477]: Current charges
+                      - cell [ref=f8e1478]:
+                        - generic [ref=f8e1480]:
+                          - generic [ref=f8e1481]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1482]: "65.40"
+                          - textbox "Currency for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1483]: MXN
+                      - cell [ref=f8e1484]:
+                        - generic [ref=f8e1485]:
+                          - generic "🚕 Transporte" [ref=f8e1486]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1487]
+                          - img "down" [ref=f8e1489]
+                      - cell [ref=f8e1492]:
+                        - generic [ref=f8e1494]:
+                          - generic "Include as expense" [ref=f8e1495]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1496]
+                          - img "down" [ref=f8e1498]
+                    - row [ref=f8e1501]:
+                      - 'cell "Transaction date 2026-08-22 Statement description PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *UBRPAGOSMEX" [ref=f8e1502]':
+                        - generic [ref=f8e1503]:
+                          - generic [ref=f8e1504]:
+                            - generic [ref=f8e1505]: Transaction date
+                            - textbox "Transaction date for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1506]: 2026-08-22
+                          - generic [ref=f8e1507]:
+                            - generic [ref=f8e1508]: Statement description
+                            - textbox "Description for row 25" [disabled] [ref=f8e1509]: PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1510]:
+                            - generic [ref=f8e1511]: Normalized merchant
+                            - generic [ref=f8e1512]: "Merchant: PAYPAL *UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1514]:
+                        - generic [ref=f8e1515]:
+                          - generic [ref=f8e1516]: Charge
+                          - paragraph [ref=f8e1517]: Current charges
+                      - cell [ref=f8e1518]:
+                        - generic [ref=f8e1520]:
+                          - generic [ref=f8e1521]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1522]: "186.22"
+                          - textbox "Currency for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1523]: MXN
+                      - cell [ref=f8e1524]:
+                        - generic [ref=f8e1525]:
+                          - generic "🚕 Transporte" [ref=f8e1526]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1527]
+                          - img "down" [ref=f8e1529]
+                      - cell [ref=f8e1532]:
+                        - generic [ref=f8e1534]:
+                          - generic "Include as expense" [ref=f8e1535]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1536]
+                          - img "down" [ref=f8e1538]
+                    - row [ref=f8e1541]:
+                      - 'cell "Transaction date 2026-08-22 Statement description PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *UBRPAGOSMEX" [ref=f8e1542]':
+                        - generic [ref=f8e1543]:
+                          - generic [ref=f8e1544]:
+                            - generic [ref=f8e1545]: Transaction date
+                            - textbox "Transaction date for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1546]: 2026-08-22
+                          - generic [ref=f8e1547]:
+                            - generic [ref=f8e1548]: Statement description
+                            - textbox "Description for row 26" [disabled] [ref=f8e1549]: PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1550]:
+                            - generic [ref=f8e1551]: Normalized merchant
+                            - generic [ref=f8e1552]: "Merchant: PAYPAL *UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1554]:
+                        - generic [ref=f8e1555]:
+                          - generic [ref=f8e1556]: Charge
+                          - paragraph [ref=f8e1557]: Current charges
+                      - cell [ref=f8e1558]:
+                        - generic [ref=f8e1560]:
+                          - generic [ref=f8e1561]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1562]: "14.89"
+                          - textbox "Currency for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1563]: MXN
+                      - cell [ref=f8e1564]:
+                        - generic [ref=f8e1565]:
+                          - generic "🚕 Transporte" [ref=f8e1566]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1567]
+                          - img "down" [ref=f8e1569]
+                      - cell [ref=f8e1572]:
+                        - generic [ref=f8e1574]:
+                          - generic "Include as expense" [ref=f8e1575]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1576]
+                          - img "down" [ref=f8e1578]
+                    - row [ref=f8e1581]:
+                      - 'cell "Transaction date 2026-08-22 Statement description PAYPAL *IONOS INC ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *IONOS INC" [ref=f8e1582]':
+                        - generic [ref=f8e1583]:
+                          - generic [ref=f8e1584]:
+                            - generic [ref=f8e1585]: Transaction date
+                            - textbox "Transaction date for PAYPAL *IONOS INC ; Tarjeta Digital ***7931" [disabled] [ref=f8e1586]: 2026-08-22
+                          - generic [ref=f8e1587]:
+                            - generic [ref=f8e1588]: Statement description
+                            - textbox "Description for row 27" [disabled] [ref=f8e1589]: PAYPAL *IONOS INC ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1590]:
+                            - generic [ref=f8e1591]: Normalized merchant
+                            - generic [ref=f8e1592]: "Merchant: PAYPAL *IONOS INC"
+                      - cell "Charge Current charges" [ref=f8e1594]:
+                        - generic [ref=f8e1595]:
+                          - generic [ref=f8e1596]: Charge
+                          - paragraph [ref=f8e1597]: Current charges
+                      - cell [ref=f8e1598]:
+                        - generic [ref=f8e1600]:
+                          - generic [ref=f8e1601]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *IONOS INC ; Tarjeta Digital ***7931" [disabled] [ref=f8e1602]: "52.50"
+                          - textbox "Currency for PAYPAL *IONOS INC ; Tarjeta Digital ***7931" [disabled] [ref=f8e1603]: MXN
+                      - cell [ref=f8e1604]:
+                        - generic [ref=f8e1605]:
+                          - generic "🔁 Suscripción" [ref=f8e1606]:
+                            - text: 🔁 Suscripción
+                            - combobox "Category for PAYPAL *IONOS INC ; Tarjeta Digital ***7931" [disabled] [ref=f8e1607]
+                          - img "down" [ref=f8e1609]
+                      - cell [ref=f8e1612]:
+                        - generic [ref=f8e1614]:
+                          - generic "Include as expense" [ref=f8e1615]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *IONOS INC ; Tarjeta Digital ***7931" [disabled] [ref=f8e1616]
+                          - img "down" [ref=f8e1618]
+                    - row [ref=f8e1621]:
+                      - 'cell "Transaction date 2026-08-23 Statement description OPENAI *CHATGPT SUBSCR ; Tarjeta Digital ***7931 Normalized merchant Merchant: OPENAI *CHATGPT SUBSCR" [ref=f8e1622]':
+                        - generic [ref=f8e1623]:
+                          - generic [ref=f8e1624]:
+                            - generic [ref=f8e1625]: Transaction date
+                            - textbox "Transaction date for OPENAI *CHATGPT SUBSCR ; Tarjeta Digital ***7931" [disabled] [ref=f8e1626]: 2026-08-23
+                          - generic [ref=f8e1627]:
+                            - generic [ref=f8e1628]: Statement description
+                            - textbox "Description for row 28" [disabled] [ref=f8e1629]: OPENAI *CHATGPT SUBSCR ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1630]:
+                            - generic [ref=f8e1631]: Normalized merchant
+                            - generic [ref=f8e1632]: "Merchant: OPENAI *CHATGPT SUBSCR"
+                      - cell "Charge Current charges" [ref=f8e1634]:
+                        - generic [ref=f8e1635]:
+                          - generic [ref=f8e1636]: Charge
+                          - paragraph [ref=f8e1637]: Current charges
+                      - cell [ref=f8e1638]:
+                        - generic [ref=f8e1640]:
+                          - generic [ref=f8e1641]:
+                            - generic: $
+                            - spinbutton "Amount for OPENAI *CHATGPT SUBSCR ; Tarjeta Digital ***7931" [disabled] [ref=f8e1642]: "399.00"
+                          - textbox "Currency for OPENAI *CHATGPT SUBSCR ; Tarjeta Digital ***7931" [disabled] [ref=f8e1643]: MXN
+                      - cell [ref=f8e1644]:
+                        - generic [ref=f8e1645]:
+                          - generic "🔁 Suscripción" [ref=f8e1646]:
+                            - text: 🔁 Suscripción
+                            - combobox "Category for OPENAI *CHATGPT SUBSCR ; Tarjeta Digital ***7931" [disabled] [ref=f8e1647]
+                          - img "down" [ref=f8e1649]
+                      - cell [ref=f8e1652]:
+                        - generic [ref=f8e1654]:
+                          - generic "Include as expense" [ref=f8e1655]:
+                            - text: Include as expense
+                            - combobox "Review decision for OPENAI *CHATGPT SUBSCR ; Tarjeta Digital ***7931" [disabled] [ref=f8e1656]
+                          - img "down" [ref=f8e1658]
+                    - row [ref=f8e1661]:
+                      - 'cell "Transaction date 2026-08-26 Statement description PAYPAL*GOOGLEGOOGLEONE ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL*GOOGLEGOOGLEONE" [ref=f8e1662]':
+                        - generic [ref=f8e1663]:
+                          - generic [ref=f8e1664]:
+                            - generic [ref=f8e1665]: Transaction date
+                            - textbox "Transaction date for PAYPAL*GOOGLEGOOGLEONE ; Tarjeta Digital ***7931" [disabled] [ref=f8e1666]: 2026-08-26
+                          - generic [ref=f8e1667]:
+                            - generic [ref=f8e1668]: Statement description
+                            - textbox "Description for row 29" [disabled] [ref=f8e1669]: PAYPAL*GOOGLEGOOGLEONE ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1670]:
+                            - generic [ref=f8e1671]: Normalized merchant
+                            - generic [ref=f8e1672]: "Merchant: PAYPAL*GOOGLEGOOGLEONE"
+                      - cell "Charge Current charges" [ref=f8e1674]:
+                        - generic [ref=f8e1675]:
+                          - generic [ref=f8e1676]: Charge
+                          - paragraph [ref=f8e1677]: Current charges
+                      - cell [ref=f8e1678]:
+                        - generic [ref=f8e1680]:
+                          - generic [ref=f8e1681]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL*GOOGLEGOOGLEONE ; Tarjeta Digital ***7931" [disabled] [ref=f8e1682]: "59.00"
+                          - textbox "Currency for PAYPAL*GOOGLEGOOGLEONE ; Tarjeta Digital ***7931" [disabled] [ref=f8e1683]: MXN
+                      - cell [ref=f8e1684]:
+                        - generic [ref=f8e1685]:
+                          - generic "🎬 Streaming y suscripciones" [ref=f8e1686]:
+                            - text: 🎬 Streaming y suscripciones
+                            - combobox "Category for PAYPAL*GOOGLEGOOGLEONE ; Tarjeta Digital ***7931" [disabled] [ref=f8e1687]
+                          - img "down" [ref=f8e1689]
+                      - cell [ref=f8e1692]:
+                        - generic [ref=f8e1694]:
+                          - generic "Include as expense" [ref=f8e1695]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL*GOOGLEGOOGLEONE ; Tarjeta Digital ***7931" [disabled] [ref=f8e1696]
+                          - img "down" [ref=f8e1698]
+                    - row [ref=f8e1701]:
+                      - 'cell "Transaction date 2026-08-27 Statement description PAYPAL*GOOGLEYOUTUBESU ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL*GOOGLEYOUTUBESU" [ref=f8e1702]':
+                        - generic [ref=f8e1703]:
+                          - generic [ref=f8e1704]:
+                            - generic [ref=f8e1705]: Transaction date
+                            - textbox "Transaction date for PAYPAL*GOOGLEYOUTUBESU ; Tarjeta Digital ***7931" [disabled] [ref=f8e1706]: 2026-08-27
+                          - generic [ref=f8e1707]:
+                            - generic [ref=f8e1708]: Statement description
+                            - textbox "Description for row 30" [disabled] [ref=f8e1709]: PAYPAL*GOOGLEYOUTUBESU ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1710]:
+                            - generic [ref=f8e1711]: Normalized merchant
+                            - generic [ref=f8e1712]: "Merchant: PAYPAL*GOOGLEYOUTUBESU"
+                      - cell "Charge Current charges" [ref=f8e1714]:
+                        - generic [ref=f8e1715]:
+                          - generic [ref=f8e1716]: Charge
+                          - paragraph [ref=f8e1717]: Current charges
+                      - cell [ref=f8e1718]:
+                        - generic [ref=f8e1720]:
+                          - generic [ref=f8e1721]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL*GOOGLEYOUTUBESU ; Tarjeta Digital ***7931" [disabled] [ref=f8e1722]: "319.00"
+                          - textbox "Currency for PAYPAL*GOOGLEYOUTUBESU ; Tarjeta Digital ***7931" [disabled] [ref=f8e1723]: MXN
+                      - cell [ref=f8e1724]:
+                        - generic [ref=f8e1725]:
+                          - generic "🎬 Streaming y suscripciones" [ref=f8e1726]:
+                            - text: 🎬 Streaming y suscripciones
+                            - combobox "Category for PAYPAL*GOOGLEYOUTUBESU ; Tarjeta Digital ***7931" [disabled] [ref=f8e1727]
+                          - img "down" [ref=f8e1729]
+                      - cell [ref=f8e1732]:
+                        - generic [ref=f8e1734]:
+                          - generic "Include as expense" [ref=f8e1735]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL*GOOGLEYOUTUBESU ; Tarjeta Digital ***7931" [disabled] [ref=f8e1736]
+                          - img "down" [ref=f8e1738]
+                    - row [ref=f8e1741]:
+                      - 'cell "Transaction date 2026-08-28 Statement description PAYPAL *MICROSOFT ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *MICROSOFT" [ref=f8e1742]':
+                        - generic [ref=f8e1743]:
+                          - generic [ref=f8e1744]:
+                            - generic [ref=f8e1745]: Transaction date
+                            - textbox "Transaction date for PAYPAL *MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e1746]: 2026-08-28
+                          - generic [ref=f8e1747]:
+                            - generic [ref=f8e1748]: Statement description
+                            - textbox "Description for row 31" [disabled] [ref=f8e1749]: PAYPAL *MICROSOFT ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1750]:
+                            - generic [ref=f8e1751]: Normalized merchant
+                            - generic [ref=f8e1752]: "Merchant: PAYPAL *MICROSOFT"
+                      - cell "Charge Current charges" [ref=f8e1754]:
+                        - generic [ref=f8e1755]:
+                          - generic [ref=f8e1756]: Charge
+                          - paragraph [ref=f8e1757]: Current charges
+                      - cell [ref=f8e1758]:
+                        - generic [ref=f8e1760]:
+                          - generic [ref=f8e1761]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e1762]: "39.99"
+                          - textbox "Currency for PAYPAL *MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e1763]: MXN
+                      - cell [ref=f8e1764]:
+                        - generic [ref=f8e1765]:
+                          - generic "🔁 Suscripción" [ref=f8e1766]:
+                            - text: 🔁 Suscripción
+                            - combobox "Category for PAYPAL *MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e1767]
+                          - img "down" [ref=f8e1769]
+                      - cell [ref=f8e1772]:
+                        - generic [ref=f8e1774]:
+                          - generic "Include as expense" [ref=f8e1775]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e1776]
+                          - img "down" [ref=f8e1778]
+                    - row [ref=f8e1781]:
+                      - 'cell "Transaction date 2026-08-29 Statement description TELMEX CARGO RECURR 3 ; Tarjeta Digital ***7931 Normalized merchant Merchant: TELMEX CARGO RECURR 3" [ref=f8e1782]':
+                        - generic [ref=f8e1783]:
+                          - generic [ref=f8e1784]:
+                            - generic [ref=f8e1785]: Transaction date
+                            - textbox "Transaction date for TELMEX CARGO RECURR 3 ; Tarjeta Digital ***7931" [disabled] [ref=f8e1786]: 2026-08-29
+                          - generic [ref=f8e1787]:
+                            - generic [ref=f8e1788]: Statement description
+                            - textbox "Description for row 32" [disabled] [ref=f8e1789]: TELMEX CARGO RECURR 3 ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1790]:
+                            - generic [ref=f8e1791]: Normalized merchant
+                            - generic [ref=f8e1792]: "Merchant: TELMEX CARGO RECURR 3"
+                      - cell "Charge Current charges" [ref=f8e1794]:
+                        - generic [ref=f8e1795]:
+                          - generic [ref=f8e1796]: Charge
+                          - paragraph [ref=f8e1797]: Current charges
+                      - cell [ref=f8e1798]:
+                        - generic [ref=f8e1800]:
+                          - generic [ref=f8e1801]:
+                            - generic: $
+                            - spinbutton "Amount for TELMEX CARGO RECURR 3 ; Tarjeta Digital ***7931" [disabled] [ref=f8e1802]: "649.00"
+                          - textbox "Currency for TELMEX CARGO RECURR 3 ; Tarjeta Digital ***7931" [disabled] [ref=f8e1803]: MXN
+                      - cell [ref=f8e1804]:
+                        - generic [ref=f8e1805]:
+                          - generic "🧩 Otros gastos" [ref=f8e1806]:
+                            - text: 🧩 Otros gastos
+                            - combobox "Category for TELMEX CARGO RECURR 3 ; Tarjeta Digital ***7931" [disabled] [ref=f8e1807]
+                          - img "down" [ref=f8e1809]
+                      - cell [ref=f8e1812]:
+                        - generic [ref=f8e1814]:
+                          - generic "Include as expense" [ref=f8e1815]:
+                            - text: Include as expense
+                            - combobox "Review decision for TELMEX CARGO RECURR 3 ; Tarjeta Digital ***7931" [disabled] [ref=f8e1816]
+                          - img "down" [ref=f8e1818]
+                    - row [ref=f8e1821]:
+                      - 'cell "Transaction date 2026-08-29 Statement description PAY PAL*UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAY PAL*UBRPAGOSMEX" [ref=f8e1822]':
+                        - generic [ref=f8e1823]:
+                          - generic [ref=f8e1824]:
+                            - generic [ref=f8e1825]: Transaction date
+                            - textbox "Transaction date for PAY PAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1826]: 2026-08-29
+                          - generic [ref=f8e1827]:
+                            - generic [ref=f8e1828]: Statement description
+                            - textbox "Description for row 33" [disabled] [ref=f8e1829]: PAY PAL*UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1830]:
+                            - generic [ref=f8e1831]: Normalized merchant
+                            - generic [ref=f8e1832]: "Merchant: PAY PAL*UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1834]:
+                        - generic [ref=f8e1835]:
+                          - generic [ref=f8e1836]: Charge
+                          - paragraph [ref=f8e1837]: Current charges
+                      - cell [ref=f8e1838]:
+                        - generic [ref=f8e1840]:
+                          - generic [ref=f8e1841]:
+                            - generic: $
+                            - spinbutton "Amount for PAY PAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1842]: "10.00"
+                          - textbox "Currency for PAY PAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1843]: MXN
+                      - cell [ref=f8e1844]:
+                        - generic [ref=f8e1845]:
+                          - generic "🚕 Transporte" [ref=f8e1846]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAY PAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1847]
+                          - img "down" [ref=f8e1849]
+                      - cell [ref=f8e1852]:
+                        - generic [ref=f8e1854]:
+                          - generic "Include as expense" [ref=f8e1855]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAY PAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1856]
+                          - img "down" [ref=f8e1858]
+                    - row [ref=f8e1861]:
+                      - 'cell "Transaction date 2026-08-29 Statement description PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL*UBRPAGOSMEX" [ref=f8e1862]':
+                        - generic [ref=f8e1863]:
+                          - generic [ref=f8e1864]:
+                            - generic [ref=f8e1865]: Transaction date
+                            - textbox "Transaction date for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1866]: 2026-08-29
+                          - generic [ref=f8e1867]:
+                            - generic [ref=f8e1868]: Statement description
+                            - textbox "Description for row 34" [disabled] [ref=f8e1869]: PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1870]:
+                            - generic [ref=f8e1871]: Normalized merchant
+                            - generic [ref=f8e1872]: "Merchant: PAYPAL*UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1874]:
+                        - generic [ref=f8e1875]:
+                          - generic [ref=f8e1876]: Charge
+                          - paragraph [ref=f8e1877]: Current charges
+                      - cell [ref=f8e1878]:
+                        - generic [ref=f8e1880]:
+                          - generic [ref=f8e1881]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1882]: "269.16"
+                          - textbox "Currency for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1883]: MXN
+                      - cell [ref=f8e1884]:
+                        - generic [ref=f8e1885]:
+                          - generic "🚕 Transporte" [ref=f8e1886]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1887]
+                          - img "down" [ref=f8e1889]
+                      - cell [ref=f8e1892]:
+                        - generic [ref=f8e1894]:
+                          - generic "Include as expense" [ref=f8e1895]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1896]
+                          - img "down" [ref=f8e1898]
+                    - row [ref=f8e1901]:
+                      - 'cell "Transaction date 2026-08-30 Statement description PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *UBRPAGOSMEX" [ref=f8e1902]':
+                        - generic [ref=f8e1903]:
+                          - generic [ref=f8e1904]:
+                            - generic [ref=f8e1905]: Transaction date
+                            - textbox "Transaction date for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1906]: 2026-08-30
+                          - generic [ref=f8e1907]:
+                            - generic [ref=f8e1908]: Statement description
+                            - textbox "Description for row 35" [disabled] [ref=f8e1909]: PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1910]:
+                            - generic [ref=f8e1911]: Normalized merchant
+                            - generic [ref=f8e1912]: "Merchant: PAYPAL *UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1914]:
+                        - generic [ref=f8e1915]:
+                          - generic [ref=f8e1916]: Charge
+                          - paragraph [ref=f8e1917]: Current charges
+                      - cell [ref=f8e1918]:
+                        - generic [ref=f8e1920]:
+                          - generic [ref=f8e1921]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1922]: "73.21"
+                          - textbox "Currency for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1923]: MXN
+                      - cell [ref=f8e1924]:
+                        - generic [ref=f8e1925]:
+                          - generic "🚕 Transporte" [ref=f8e1926]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1927]
+                          - img "down" [ref=f8e1929]
+                      - cell [ref=f8e1932]:
+                        - generic [ref=f8e1934]:
+                          - generic "Include as expense" [ref=f8e1935]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1936]
+                          - img "down" [ref=f8e1938]
+                    - row [ref=f8e1941]:
+                      - 'cell "Transaction date 2026-08-30 Statement description PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL*UBRPAGOSMEX" [ref=f8e1942]':
+                        - generic [ref=f8e1943]:
+                          - generic [ref=f8e1944]:
+                            - generic [ref=f8e1945]: Transaction date
+                            - textbox "Transaction date for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1946]: 2026-08-30
+                          - generic [ref=f8e1947]:
+                            - generic [ref=f8e1948]: Statement description
+                            - textbox "Description for row 36" [disabled] [ref=f8e1949]: PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1950]:
+                            - generic [ref=f8e1951]: Normalized merchant
+                            - generic [ref=f8e1952]: "Merchant: PAYPAL*UBRPAGOSMEX"
+                      - cell "Charge Current charges" [ref=f8e1954]:
+                        - generic [ref=f8e1955]:
+                          - generic [ref=f8e1956]: Charge
+                          - paragraph [ref=f8e1957]: Current charges
+                      - cell [ref=f8e1958]:
+                        - generic [ref=f8e1960]:
+                          - generic [ref=f8e1961]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1962]: "66.01"
+                          - textbox "Currency for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1963]: MXN
+                      - cell [ref=f8e1964]:
+                        - generic [ref=f8e1965]:
+                          - generic "🚕 Transporte" [ref=f8e1966]:
+                            - text: 🚕 Transporte
+                            - combobox "Category for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1967]
+                          - img "down" [ref=f8e1969]
+                      - cell [ref=f8e1972]:
+                        - generic [ref=f8e1974]:
+                          - generic "Include as expense" [ref=f8e1975]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL*UBRPAGOSMEX ; Tarjeta Digital ***7931" [disabled] [ref=f8e1976]
+                          - img "down" [ref=f8e1978]
+                    - row [ref=f8e1981]:
+                      - 'cell "Transaction date 2026-09-02 Statement description PP*GOOGLE FACEBOOK ; Tarjeta Digital ***7931 Normalized merchant Merchant: PP*GOOGLE FACEBOOK" [ref=f8e1982]':
+                        - generic [ref=f8e1983]:
+                          - generic [ref=f8e1984]:
+                            - generic [ref=f8e1985]: Transaction date
+                            - textbox "Transaction date for PP*GOOGLE FACEBOOK ; Tarjeta Digital ***7931" [disabled] [ref=f8e1986]: 2026-09-02
+                          - generic [ref=f8e1987]:
+                            - generic [ref=f8e1988]: Statement description
+                            - textbox "Description for row 37" [disabled] [ref=f8e1989]: PP*GOOGLE FACEBOOK ; Tarjeta Digital ***7931
+                          - generic [ref=f8e1990]:
+                            - generic [ref=f8e1991]: Normalized merchant
+                            - generic [ref=f8e1992]: "Merchant: PP*GOOGLE FACEBOOK"
+                      - cell "Charge Current charges" [ref=f8e1994]:
+                        - generic [ref=f8e1995]:
+                          - generic [ref=f8e1996]: Charge
+                          - paragraph [ref=f8e1997]: Current charges
+                      - cell [ref=f8e1998]:
+                        - generic [ref=f8e2000]:
+                          - generic [ref=f8e2001]:
+                            - generic: $
+                            - spinbutton "Amount for PP*GOOGLE FACEBOOK ; Tarjeta Digital ***7931" [disabled] [ref=f8e2002]: "47.00"
+                          - textbox "Currency for PP*GOOGLE FACEBOOK ; Tarjeta Digital ***7931" [disabled] [ref=f8e2003]: MXN
+                      - cell [ref=f8e2004]:
+                        - generic [ref=f8e2005]:
+                          - generic "🧩 Otros gastos" [ref=f8e2006]:
+                            - text: 🧩 Otros gastos
+                            - combobox "Category for PP*GOOGLE FACEBOOK ; Tarjeta Digital ***7931" [disabled] [ref=f8e2007]
+                          - img "down" [ref=f8e2009]
+                      - cell [ref=f8e2012]:
+                        - generic [ref=f8e2014]:
+                          - generic "Include as expense" [ref=f8e2015]:
+                            - text: Include as expense
+                            - combobox "Review decision for PP*GOOGLE FACEBOOK ; Tarjeta Digital ***7931" [disabled] [ref=f8e2016]
+                          - img "down" [ref=f8e2018]
+                    - row [ref=f8e2021]:
+                      - 'cell "Transaction date 2026-09-03 Statement description PAY PAL*MICROSOFT ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAY PAL*MICROSOFT" [ref=f8e2022]':
+                        - generic [ref=f8e2023]:
+                          - generic [ref=f8e2024]:
+                            - generic [ref=f8e2025]: Transaction date
+                            - textbox "Transaction date for PAY PAL*MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e2026]: 2026-09-03
+                          - generic [ref=f8e2027]:
+                            - generic [ref=f8e2028]: Statement description
+                            - textbox "Description for row 38" [disabled] [ref=f8e2029]: PAY PAL*MICROSOFT ; Tarjeta Digital ***7931
+                          - generic [ref=f8e2030]:
+                            - generic [ref=f8e2031]: Normalized merchant
+                            - generic [ref=f8e2032]: "Merchant: PAY PAL*MICROSOFT"
+                      - cell "Charge Current charges" [ref=f8e2034]:
+                        - generic [ref=f8e2035]:
+                          - generic [ref=f8e2036]: Charge
+                          - paragraph [ref=f8e2037]: Current charges
+                      - cell [ref=f8e2038]:
+                        - generic [ref=f8e2040]:
+                          - generic [ref=f8e2041]:
+                            - generic: $
+                            - spinbutton "Amount for PAY PAL*MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e2042]: "339.00"
+                          - textbox "Currency for PAY PAL*MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e2043]: MXN
+                      - cell [ref=f8e2044]:
+                        - generic [ref=f8e2045]:
+                          - generic "🔁 Suscripción" [ref=f8e2046]:
+                            - text: 🔁 Suscripción
+                            - combobox "Category for PAY PAL*MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e2047]
+                          - img "down" [ref=f8e2049]
+                      - cell [ref=f8e2052]:
+                        - generic [ref=f8e2054]:
+                          - generic "Include as expense" [ref=f8e2055]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAY PAL*MICROSOFT ; Tarjeta Digital ***7931" [disabled] [ref=f8e2056]
+                          - img "down" [ref=f8e2058]
+                    - row [ref=f8e2061]:
+                      - 'cell "Transaction date 2026-09-04 Statement description PAYPAL *GOOGLE GOOGLE ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *GOOGLE GOOGLE" [ref=f8e2062]':
+                        - generic [ref=f8e2063]:
+                          - generic [ref=f8e2064]:
+                            - generic [ref=f8e2065]: Transaction date
+                            - textbox "Transaction date for PAYPAL *GOOGLE GOOGLE ; Tarjeta Digital ***7931" [disabled] [ref=f8e2066]: 2026-09-04
+                          - generic [ref=f8e2067]:
+                            - generic [ref=f8e2068]: Statement description
+                            - textbox "Description for row 39" [disabled] [ref=f8e2069]: PAYPAL *GOOGLE GOOGLE ; Tarjeta Digital ***7931
+                          - generic [ref=f8e2070]:
+                            - generic [ref=f8e2071]: Normalized merchant
+                            - generic [ref=f8e2072]: "Merchant: PAYPAL *GOOGLE GOOGLE"
+                      - cell "Charge Current charges" [ref=f8e2074]:
+                        - generic [ref=f8e2075]:
+                          - generic [ref=f8e2076]: Charge
+                          - paragraph [ref=f8e2077]: Current charges
+                      - cell [ref=f8e2078]:
+                        - generic [ref=f8e2080]:
+                          - generic [ref=f8e2081]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *GOOGLE GOOGLE ; Tarjeta Digital ***7931" [disabled] [ref=f8e2082]: "59.00"
+                          - textbox "Currency for PAYPAL *GOOGLE GOOGLE ; Tarjeta Digital ***7931" [disabled] [ref=f8e2083]: MXN
+                      - cell [ref=f8e2084]:
+                        - generic [ref=f8e2085]:
+                          - generic "🎬 Streaming y suscripciones" [ref=f8e2086]:
+                            - text: 🎬 Streaming y suscripciones
+                            - combobox "Category for PAYPAL *GOOGLE GOOGLE ; Tarjeta Digital ***7931" [disabled] [ref=f8e2087]
+                          - img "down" [ref=f8e2089]
+                      - cell [ref=f8e2092]:
+                        - generic [ref=f8e2094]:
+                          - generic "Include as expense" [ref=f8e2095]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *GOOGLE GOOGLE ; Tarjeta Digital ***7931" [disabled] [ref=f8e2096]
+                          - img "down" [ref=f8e2098]
+                    - row [ref=f8e2101]:
+                      - 'cell "Transaction date 2026-09-05 Statement description PAYPAL *IHERB LLC ; Tarjeta Digital ***7931 Normalized merchant Merchant: PAYPAL *IHERB LLC" [ref=f8e2102]':
+                        - generic [ref=f8e2103]:
+                          - generic [ref=f8e2104]:
+                            - generic [ref=f8e2105]: Transaction date
+                            - textbox "Transaction date for PAYPAL *IHERB LLC ; Tarjeta Digital ***7931" [disabled] [ref=f8e2106]: 2026-09-05
+                          - generic [ref=f8e2107]:
+                            - generic [ref=f8e2108]: Statement description
+                            - textbox "Description for row 40" [disabled] [ref=f8e2109]: PAYPAL *IHERB LLC ; Tarjeta Digital ***7931
+                          - generic [ref=f8e2110]:
+                            - generic [ref=f8e2111]: Normalized merchant
+                            - generic [ref=f8e2112]: "Merchant: PAYPAL *IHERB LLC"
+                      - cell "Charge Current charges" [ref=f8e2114]:
+                        - generic [ref=f8e2115]:
+                          - generic [ref=f8e2116]: Charge
+                          - paragraph [ref=f8e2117]: Current charges
+                      - cell [ref=f8e2118]:
+                        - generic [ref=f8e2120]:
+                          - generic [ref=f8e2121]:
+                            - generic: $
+                            - spinbutton "Amount for PAYPAL *IHERB LLC ; Tarjeta Digital ***7931" [disabled] [ref=f8e2122]: "457.48"
+                          - textbox "Currency for PAYPAL *IHERB LLC ; Tarjeta Digital ***7931" [disabled] [ref=f8e2123]: MXN
+                      - cell [ref=f8e2124]:
+                        - generic [ref=f8e2125]:
+                          - generic "🛍️ Compras en línea" [ref=f8e2126]:
+                            - text: 🛍️ Compras en línea
+                            - combobox "Category for PAYPAL *IHERB LLC ; Tarjeta Digital ***7931" [disabled] [ref=f8e2127]
+                          - img "down" [ref=f8e2129]
+                      - cell [ref=f8e2132]:
+                        - generic [ref=f8e2134]:
+                          - generic "Include as expense" [ref=f8e2135]:
+                            - text: Include as expense
+                            - combobox "Review decision for PAYPAL *IHERB LLC ; Tarjeta Digital ***7931" [disabled] [ref=f8e2136]
+                          - img "down" [ref=f8e2138]
+              - list [ref=f8e1315]:
+                - listitem [ref=f8e1316]: 47 source rows
+                - listitem "Previous Page" [ref=f8e1317] [cursor=pointer]:
+                  - button [ref=f8e1318]:
+                    - img "left" [ref=f8e1319]
+                - listitem "1" [ref=f8e1322] [cursor=pointer]
+                - listitem "2" [active] [ref=f8e1324] [cursor=pointer]
+                - listitem "3" [ref=f8e1326] [cursor=pointer]
+                - listitem "Next Page" [ref=f8e1328] [cursor=pointer]:
+                  - button [ref=f8e1329]:
+                    - img "right" [ref=f8e1330]
+                - listitem [ref=f8e1333]:
+                  - generic [ref=f8e1334]:
+                    - generic "20 / page" [ref=f8e1335]:
+                      - text: 20 / page
+                      - combobox "Page Size" [ref=f8e1336]
+                    - img "down" [ref=f8e1338]
+  - alert [ref=f8e166]

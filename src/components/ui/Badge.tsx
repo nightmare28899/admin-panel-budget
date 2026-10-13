@@ -5,7 +5,7 @@ const PILL_VARIANTS: Record<BadgeVariant, string> = {
   success: "bg-[var(--emerald-dim)] text-[var(--emerald-text)]",
   warning: "bg-[var(--gold-dim)] text-[var(--gold-text)]",
   danger: "bg-[var(--rose)]/15 text-[var(--rose)]",
-  info: "bg-[var(--emerald-dim)] text-[var(--emerald-text)]",
+  info: "bg-[var(--accent-dim)] text-[var(--accent-text)]",
 };
 
 export function Badge({

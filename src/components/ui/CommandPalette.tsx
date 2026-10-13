@@ -84,7 +84,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
         aria-expanded="true"
         aria-controls="command-palette-results"
         aria-activedescendant={results[clampedActiveIndex] ? `command-palette-option-${clampedActiveIndex}` : undefined}
-        className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-3)] px-3.5 py-2.5 text-sm text-[var(--text-1)] outline-none placeholder:text-[var(--text-3)] focus:border-[var(--emerald)]"
+        className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-3)] px-3.5 py-2.5 text-sm text-[var(--text-1)] outline-none placeholder:text-[var(--text-3)] focus:border-[var(--accent)]"
       />
       <ul id="command-palette-results" role="listbox" className="-mx-2 mt-1 max-h-72 space-y-0.5 overflow-y-auto">
         {results.length === 0 ? (

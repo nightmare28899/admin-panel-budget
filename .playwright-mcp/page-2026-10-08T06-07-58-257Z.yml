@@ -1,0 +1,42 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - complementary [ref=f7e3]:
+      - generic [ref=f7e4]:
+        - generic [ref=f7e5]:
+          - generic [ref=f7e6]: B
+          - generic [ref=f7e8]: Budget Panel
+        - paragraph [ref=f7e9]: Navigation
+        - navigation [ref=f7e10]:
+          - link "Expenses" [ref=f7e11] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards" [ref=f7e18] [cursor=pointer]:
+            - /url: /finance/cards
+          - link "Statements" [ref=f7e23] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f7e29] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f7e35] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f7e43] [cursor=pointer]:
+            - /url: /finance/reports
+        - generic [ref=f7e49]:
+          - img "Kevin López González" [ref=f7e50]
+          - generic [ref=f7e51]:
+            - generic [ref=f7e52]: Kevin López González
+            - generic [ref=f7e53]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f7e54] [cursor=pointer]
+    - generic [ref=f7e58]:
+      - banner [ref=f7e59]:
+        - button "Expand sidebar" [ref=f7e61] [cursor=pointer]
+        - generic [ref=f7e64]:
+          - button "Search (Cmd+K)" [ref=f7e65]
+          - button "Language" [ref=f7e69] [cursor=pointer]:
+            - img "global" [ref=f7e70]
+          - button "Subscription alerts" [ref=f7e73] [cursor=pointer]
+      - main [ref=f7e77]:
+        - generic [ref=f7e80]:
+          - status [ref=f7e81]: Loading credit cards
+          - generic [ref=f7e84]:
+            - heading [level=1] [ref=f7e86]: My Cards
+            - paragraph [ref=f7e88]: Track your credit cards, their cycle spending, and available credit.
+  - alert [ref=f7e204]

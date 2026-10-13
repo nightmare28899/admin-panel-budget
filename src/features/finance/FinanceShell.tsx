@@ -14,6 +14,21 @@ type FinanceUser = {
   email?: string;
 };
 
+function createWorkspaceItems(t: ReturnType<typeof useLocale>["t"]): AppShellNavItem[] {
+  return [
+    {
+      label: t("nutritionWorkspace"),
+      href: "/nutrition/today",
+      icon: (
+        <>
+          <path d="M20 3C10 2 3 7 4 14c1 8 14 8 16-11Z" />
+          <path d="M4 20 16 8" />
+        </>
+      ),
+    },
+  ];
+}
+
 function createNavItems(
   t: ReturnType<typeof useLocale>["t"],
   activeCardCount: number | null,
@@ -126,10 +141,12 @@ export function FinanceShell({
     <>
       <AppShell
         navItems={createNavItems(t, activeCardCount)}
+        workspaceItems={createWorkspaceItems(t)}
         user={user}
         onSignOut={() => setLogoutConfirmationOpen(true)}
         signingOut={loggingOut}
         mainClassName=""
+        workspace="finance"
         headerActions={<SubscriptionAlertsBell />}
       >
         {children}

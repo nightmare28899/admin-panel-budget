@@ -1,0 +1,27 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e77]
+  - main [ref=e79]:
+    - button "Language" [ref=e81] [cursor=pointer]:
+      - img "global" [ref=e82]
+    - generic [ref=e86]:
+      - link "Back to platform selection" [ref=e87] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=e88]: ←
+        - text: Back to platform selection
+      - generic [ref=e89]:
+        - generic [ref=e90]: B
+        - generic [ref=e92]: Budget Panel
+      - heading "Personal finance" [level=1] [ref=e93]
+      - paragraph [ref=e94]: Sign in with an existing Budget account.
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - generic [ref=e97]: Email
+          - textbox "Email" [ref=e98]:
+            - /placeholder: you@example.com
+        - generic [ref=e99]:
+          - generic [ref=e100]: Password
+          - textbox "Password" [ref=e101]:
+            - /placeholder: Enter your password
+        - button "Sign in" [ref=e102] [cursor=pointer]
+      - generic [ref=e103]: or
+      - button "Continue with Google" [ref=e106] [cursor=pointer]

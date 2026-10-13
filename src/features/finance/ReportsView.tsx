@@ -142,7 +142,7 @@ const GRANULARITY_OPTIONS: { key: MessageKey; value: ReportGranularity }[] = [
   { key: "quarterly", value: "quarterly" },
 ];
 
-const SURFACE = "border border-[#18262E] bg-[#0D1418]";
+const SURFACE = "border border-[var(--border-soft)] bg-[var(--bg-1)]";
 
 function ReportSection({
   title,
@@ -153,8 +153,8 @@ function ReportSection({
 }) {
   return (
     <section className={`rounded-2xl p-6 ${SURFACE}`}>
-      <h2 className="text-base font-bold tracking-tight text-white">{title}</h2>
-      <div className="py-8 text-center text-sm text-slate-400">{children}</div>
+      <h2 className="text-base font-bold tracking-tight text-[var(--text-1)]">{title}</h2>
+      <div className="py-8 text-center text-sm text-[var(--text-3)]">{children}</div>
     </section>
   );
 }
@@ -163,7 +163,7 @@ function CardIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="h-3.5 w-3.5 shrink-0 text-slate-400"
+      className="h-3.5 w-3.5 shrink-0 text-[var(--text-3)]"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -544,24 +544,22 @@ export function ReportsView() {
   }
 
   return (
-    // Full-bleed #080C0E backdrop for this page only: the box-shadow spreads the
-    // colour sideways past the max-w column, clip-path trims it vertically.
-    <div className="mx-auto min-h-full w-full max-w-7xl space-y-7 bg-[#080C0E] p-4 shadow-[0_0_0_100vmax_#080C0E] [clip-path:inset(0_-100vmax)] sm:p-6">
+    <div className="mx-auto min-h-full w-full max-w-7xl space-y-7 bg-[var(--bg-1)] p-4  sm:p-6">
       <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-1)]">
             {t("spendingReports")}
           </h1>
-          <p className="mt-1 text-xs text-slate-400">{t("reportsDescription")}</p>
+          <p className="mt-1 text-xs text-[var(--text-3)]">{t("reportsDescription")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 lg:justify-end">
           <DatePicker.RangePicker
             aria-label={t("reportDateRange")}
             value={range}
             allowClear={false}
-            separator={<span className="text-slate-500">→</span>}
-            suffixIcon={<CalendarOutlined className="!text-emerald-400" />}
-            className="!rounded-xl !border-[#18262E] !bg-[#0D1418] !px-3 !py-1.5 hover:!border-[#243742] [&_input]:!text-xs [&_input]:!font-medium [&_input]:!tracking-wide [&_input]:!text-slate-200"
+            separator={<span className="text-[var(--text-3)]">→</span>}
+            suffixIcon={<CalendarOutlined className="!text-[var(--emerald-text)]" />}
+            className="!rounded-xl !border-[var(--border-soft)] !bg-[var(--bg-1)] !px-3 !py-1.5 hover:!border-[var(--border-soft)] [&_input]:!text-xs [&_input]:!font-medium [&_input]:!tracking-wide [&_input]:!text-[var(--text-2)]"
             presets={[
               {
                 label: t("today"),
@@ -602,8 +600,8 @@ export function ReportsView() {
                 onClick={() => setGranularity(option.value)}
                 className={`cursor-pointer rounded-lg px-3 py-1 transition-all focus-visible:outline-2 focus-visible:outline-emerald-400 ${
                   granularity === option.value
-                    ? "border border-emerald-500/20 bg-[#18262E] font-semibold text-emerald-400 shadow-sm"
-                    : "border border-transparent text-slate-400 hover:text-white"
+                    ? "border border-emerald-500/20 bg-[var(--bg-3)] font-semibold text-[var(--emerald-text)] shadow-sm"
+                    : "border border-transparent text-[var(--text-3)] hover:text-[var(--text-1)]"
                 }`}
               >
                 {t(option.key)}
@@ -616,13 +614,13 @@ export function ReportsView() {
             onClick={() => setCompare((value) => !value)}
             className={`flex cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400 ${
               compare
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                : "border-[#18262E] bg-[#0D1418] text-slate-300 hover:bg-[#18262E]/50"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-[var(--emerald-text)]"
+                : "border-[var(--border-soft)] bg-[var(--bg-1)] text-[var(--text-2)] hover:bg-[var(--bg-3)]/50"
             }`}
           >
             <svg
               aria-hidden="true"
-              className={`h-3.5 w-3.5 ${compare ? "text-emerald-400" : "text-slate-400"}`}
+              className={`h-3.5 w-3.5 ${compare ? "text-[var(--emerald-text)]" : "text-[var(--text-3)]"}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -682,7 +680,7 @@ export function ReportsView() {
       {!loading && !reportComplete && (
         <div
           role="alert"
-          className="rounded-xl border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-4 py-3 text-sm text-slate-300"
+          className="rounded-xl border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-4 py-3 text-sm text-[var(--text-2)]"
         >
           {t("reportIncompleteData")}
         </div>
@@ -710,7 +708,7 @@ export function ReportsView() {
               !dataReady ? undefined : showComparison ? (
                 <>
                   <span>{t("previousPeriodAmount")}</span>
-                  <span className="font-medium text-slate-400">
+                  <span className="font-medium text-[var(--text-3)]">
                     {withCurrency(previousGrandTotal)}
                   </span>
                 </>
@@ -739,14 +737,14 @@ export function ReportsView() {
               !dataReady ? undefined : showComparison ? (
                 <>
                   <span>{t("previousPeriodAmount")}</span>
-                  <span className="font-medium text-slate-400">
+                  <span className="font-medium text-[var(--text-3)]">
                     {withCurrency(previousAveragePerBucket)}
                   </span>
                 </>
               ) : (
                 <>
                   <span>{t("peakAmount")}</span>
-                  <span className="font-medium text-slate-400">
+                  <span className="font-medium text-[var(--text-3)]">
                     {withCurrency(peakBucketValue)}
                   </span>
                 </>
@@ -771,7 +769,7 @@ export function ReportsView() {
               dataReady && transactionCount > 0 ? (
                 <>
                   <span>{t("averageTicket")}</span>
-                  <span className="font-medium text-slate-400">
+                  <span className="font-medium text-[var(--text-3)]">
                     {withCurrency(grandTotal / transactionCount)}
                   </span>
                 </>
@@ -783,7 +781,7 @@ export function ReportsView() {
             label={t("topCard")}
             chip={
               topGroup && cardCurrencyTotal > 0 ? (
-                <span className="inline-flex shrink-0 items-center rounded-full border border-purple-800/40 bg-purple-950/70 px-2 py-0.5 text-[10px] font-semibold text-purple-300">
+                <span className="inline-flex shrink-0 items-center rounded-full border border-purple-800/40 bg-[var(--accent-dim)] px-2 py-0.5 text-[10px] font-semibold text-[var(--accent-text)]">
                   {t("shareOfTotal", {
                     percent: formatNumber(
                       (groupPrimaryTotal(topGroup) / cardCurrencyTotal) * 100,
@@ -797,7 +795,7 @@ export function ReportsView() {
             value={topGroup ? money(groupPrimaryTotal(topGroup)) : "—"}
             right={
               topGroup?.card ? (
-                <span className="max-w-[55%] truncate rounded bg-purple-500/10 px-2 py-1 text-xs font-bold text-purple-400">
+                <span className="max-w-[55%] truncate rounded bg-purple-500/10 px-2 py-1 text-xs font-bold text-[var(--accent-text)]">
                   {cardDisplayName(topGroup.card)}
                 </span>
               ) : undefined
@@ -820,7 +818,7 @@ export function ReportsView() {
       {!loading && reportComplete && !primaryCurrency && expenses.length > 0 && (
         <div
           role="status"
-          className={`rounded-xl px-4 py-3 text-sm text-slate-300 ${SURFACE}`}
+          className={`rounded-xl px-4 py-3 text-sm text-[var(--text-2)] ${SURFACE}`}
         >
           {t("reportPrimaryCurrencyUnavailable")}
         </div>
@@ -828,7 +826,7 @@ export function ReportsView() {
 
       {!loading && reportComplete && currencies.length > 1 && (
         <div className={`rounded-2xl p-4 ${SURFACE}`}>
-          <p className="mb-2 text-[11px] uppercase tracking-wider text-slate-500">
+          <p className="mb-2 text-[11px] uppercase tracking-wider text-[var(--text-3)]">
             {t("otherCurrencies")}
           </p>
           <div className="flex flex-wrap gap-4">
@@ -837,7 +835,7 @@ export function ReportsView() {
               .map((currency) => (
                 <span
                   key={currency}
-                  className="font-mono text-sm text-slate-300"
+                  className="font-mono text-sm text-[var(--text-2)]"
                 >
                   {money(currencyTotals[currency])} {currency}
                 </span>
@@ -850,7 +848,7 @@ export function ReportsView() {
         <ReportSection title={t("spendingOverTime")}>
           <div
             aria-hidden="true"
-            className="h-56 animate-pulse rounded-xl bg-[#121C22] motion-reduce:animate-none"
+            className="h-56 animate-pulse rounded-xl bg-[var(--bg-3)] motion-reduce:animate-none"
           />
         </ReportSection>
       ) : !reportComplete ? (
@@ -877,17 +875,17 @@ export function ReportsView() {
       <section className="space-y-4">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-base font-bold tracking-tight text-white">
+            <h2 className="text-base font-bold tracking-tight text-[var(--text-1)]">
               {t("cardExpenseBreakdown")}
             </h2>
-            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--text-3)]">
               <CardIcon />
               {t("cardExpenseBreakdownDescription")}
             </p>
           </div>
           <Link
             href="/finance/cards"
-            className="self-start text-xs font-medium text-emerald-400 transition-colors hover:text-emerald-300 sm:self-auto"
+            className="self-start text-xs font-medium text-[var(--emerald-text)] transition-colors hover:text-[var(--emerald-text)] sm:self-auto"
           >
             {t("manageCards")}
           </Link>
@@ -898,7 +896,7 @@ export function ReportsView() {
               <div
                 key={index}
                 aria-hidden="true"
-                className="h-48 animate-pulse rounded-2xl border border-[#18262E] bg-[#0D1418] motion-reduce:animate-none"
+                className="h-48 animate-pulse rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] motion-reduce:animate-none"
               />
             ))}
           </div>
@@ -911,7 +909,7 @@ export function ReportsView() {
             {t("cardMetricsIntegrityError")}
           </p>
         ) : !cardBreakdown?.groups.length ? (
-          <p className="py-6 text-center text-sm text-slate-400">
+          <p className="py-6 text-center text-sm text-[var(--text-3)]">
             {t("noDataRange")}
           </p>
         ) : (

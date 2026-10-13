@@ -601,7 +601,7 @@ export function ExpensesView() {
                     <button
                       type="button"
                       onClick={openBudgetModal}
-                      className="cursor-pointer text-[var(--emerald-text)] hover:underline"
+                      className="cursor-pointer text-[var(--accent-text)] hover:underline"
                     >
                       {t("editBudget")}
                     </button>
@@ -820,7 +820,7 @@ export function ExpensesView() {
                 href={receiptUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[var(--emerald-text)] hover:underline"
+                className="text-[var(--accent-text)] hover:underline"
               >
                 {t("openReceiptNewTab")}
               </a>

@@ -63,33 +63,31 @@ const monoFont = JetBrains_Mono({
   display: "swap",
 });
 
-// Local design tokens ("Obsidian Mint Fintech") — applied as CSS custom
-// properties on this view's own root wrapper only. No global token file is
-// touched; nothing here leaks past this component's subtree.
+// Local aliases inherit the active workspace palette, including portaled forms.
 const THEME_STYLE = {
-  "--sub-canvas": "#090D10",
-  "--sub-surface-base": "#10161A",
-  "--sub-surface-raised": "#161F26",
-  "--sub-surface-overlay": "#1E293B",
-  "--sub-surface-tint-emerald": "rgba(16, 185, 129, 0.08)",
-  "--sub-primary": "#10B981",
-  "--sub-primary-subtle": "#059669",
-  "--sub-primary-light": "#34D399",
-  "--sub-secondary": "#38BDF8",
-  "--sub-danger": "#F43F5E",
-  "--sub-warning": "#F59E0B",
-  "--sub-text-high": "#F8FAFC",
-  "--sub-text-medium": "#94A3B8",
-  "--sub-text-low": "#64748B",
-  "--sub-border-subtle": "rgba(255, 255, 255, 0.06)",
-  "--sub-border-active": "rgba(16, 185, 129, 0.35)",
+  "--sub-canvas": "var(--bg-1)",
+  "--sub-surface-base": "var(--bg-1)",
+  "--sub-surface-raised": "var(--bg-2)",
+  "--sub-surface-overlay": "var(--bg-3)",
+  "--sub-surface-tint-emerald": "var(--accent-dim)",
+  "--sub-primary": "var(--accent)",
+  "--sub-primary-subtle": "var(--accent)",
+  "--sub-primary-light": "var(--accent-text)",
+  "--sub-secondary": "var(--info-text)",
+  "--sub-danger": "var(--rose-text)",
+  "--sub-warning": "var(--gold-text)",
+  "--sub-text-high": "var(--text-1)",
+  "--sub-text-medium": "var(--text-2)",
+  "--sub-text-low": "var(--text-3)",
+  "--sub-border-subtle": "var(--border-soft)",
+  "--sub-border-active": "var(--accent)",
 } as CSSProperties;
 
 const PILL_PRIMARY =
-  "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-transparent bg-[var(--sub-primary)] font-semibold text-[#04120C] transition-colors hover:bg-[var(--sub-primary-light)] disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-transparent bg-[var(--sub-primary)] font-semibold text-[var(--accent-contrast)] transition-colors hover:bg-[var(--sub-primary-light)] disabled:cursor-not-allowed disabled:opacity-40";
 
 const PILL_SECONDARY =
-  "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-white/[0.12] bg-[var(--sub-surface-overlay)]/40 font-medium text-[var(--sub-text-high)] transition-colors hover:border-[var(--sub-text-medium)] hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/[0.12] disabled:hover:bg-[var(--sub-surface-overlay)]/40";
+  "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--sub-surface-overlay)]/40 font-medium text-[var(--sub-text-high)] transition-colors hover:border-[var(--sub-text-medium)] hover:bg-[var(--bg-3)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[var(--border)] disabled:hover:bg-[var(--sub-surface-overlay)]/40";
 
 const PILL_DESTRUCTIVE =
   "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-[var(--sub-danger)]/30 bg-[var(--sub-danger)]/[0.15] font-medium text-[var(--sub-danger)] transition-colors hover:bg-[var(--sub-danger)] hover:text-white disabled:cursor-not-allowed disabled:opacity-40";
@@ -161,10 +159,10 @@ function StatTileSkeleton() {
   return (
     <div className="rounded-[16px] border border-[var(--sub-border-subtle)] bg-[var(--sub-surface-raised)] p-3.5">
       <div className="flex items-start justify-between gap-2">
-        <div className="h-3 w-24 animate-pulse rounded bg-white/[0.06]" />
-        <div className="h-7 w-7 shrink-0 animate-pulse rounded-[8px] bg-white/[0.06]" />
+        <div className="h-3 w-24 animate-pulse rounded bg-[var(--bg-3)]" />
+        <div className="h-7 w-7 shrink-0 animate-pulse rounded-[8px] bg-[var(--bg-3)]" />
       </div>
-      <div className="mt-3 h-7 w-28 animate-pulse rounded bg-white/[0.06]" />
+      <div className="mt-3 h-7 w-28 animate-pulse rounded bg-[var(--bg-3)]" />
     </div>
   );
 }
@@ -745,10 +743,10 @@ export function SubscriptionsView() {
                     className="flex items-center justify-between gap-5 border-b border-[var(--sub-border-subtle)] py-4 last:border-b-0"
                   >
                     <div className="flex-1">
-                      <div className="h-4 w-40 max-w-[70%] animate-pulse rounded bg-white/[0.06]" />
-                      <div className="mt-2 h-3 w-28 max-w-[50%] animate-pulse rounded bg-white/[0.06]" />
+                      <div className="h-4 w-40 max-w-[70%] animate-pulse rounded bg-[var(--bg-3)]" />
+                      <div className="mt-2 h-3 w-28 max-w-[50%] animate-pulse rounded bg-[var(--bg-3)]" />
                     </div>
-                    <div className="h-8 w-20 shrink-0 animate-pulse rounded-full bg-white/[0.06]" />
+                    <div className="h-8 w-20 shrink-0 animate-pulse rounded-full bg-[var(--bg-3)]" />
                   </div>
                 ))}
               </div>
@@ -812,12 +810,12 @@ export function SubscriptionsView() {
                                 className={`inline-flex items-center rounded-full border px-2 py-0.5 font-[family-name:var(--font-sub-inter)] text-[11px] font-medium ${
                                   subscription.isActive
                                     ? "border-[var(--sub-border-active)] bg-[var(--sub-surface-tint-emerald)] text-[var(--sub-primary-light)]"
-                                    : "border-white/10 bg-white/[0.06] text-[var(--sub-text-medium)]"
+                                    : "border-[var(--border-soft)] bg-[var(--bg-3)] text-[var(--sub-text-medium)]"
                                 }`}
                               >
                                 {subscription.isActive ? t("active") : t("paused")}
                               </span>
-                              <span className="inline-flex items-center rounded-full bg-white/[0.06] px-2 py-0.5 font-[family-name:var(--font-sub-inter)] text-[11px] text-[var(--sub-text-medium)]">
+                              <span className="inline-flex items-center rounded-full bg-[var(--bg-3)] px-2 py-0.5 font-[family-name:var(--font-sub-inter)] text-[11px] text-[var(--sub-text-medium)]">
                                 {t(BILLING_CYCLE_LABEL_KEYS[subscription.billingCycle])}
                               </span>
                               {due && (
@@ -921,7 +919,7 @@ export function SubscriptionsView() {
                       setPageSize(Number(event.target.value));
                       setPage(1);
                     }}
-                    className="h-8 rounded-[8px] border border-white/10 bg-[var(--sub-surface-base)] px-2 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-text-high)] outline-none transition-colors focus:border-[var(--sub-primary)] focus:ring-1 focus:ring-[var(--sub-primary)]"
+                    className="h-8 rounded-[8px] border border-[var(--border-soft)] bg-[var(--sub-surface-base)] px-2 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-text-high)] outline-none transition-colors focus:border-[var(--sub-primary)] focus:ring-1 focus:ring-[var(--sub-primary)]"
                   >
                     {pageSizeOptions.map((option) => (
                       <option key={option.value} value={option.value} className="bg-[var(--sub-surface-base)] text-[var(--sub-text-high)]">

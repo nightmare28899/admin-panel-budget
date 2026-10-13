@@ -1,0 +1,265 @@
+- generic [ref=f11e1]:
+  - generic [ref=f11e2]:
+    - complementary [ref=f11e3]:
+      - generic [ref=f11e4]:
+        - generic [ref=f11e5]:
+          - generic [ref=f11e6]: B
+          - generic [ref=f11e8]: Budget Panel
+        - paragraph [ref=f11e9]: Navigation
+        - navigation [ref=f11e10]:
+          - link "Expenses" [ref=f11e11] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f11e282] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f11e22]: My Cards
+            - generic "3" [ref=f11e283]
+          - link "Statements" [ref=f11e23] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f11e29] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f11e35] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f11e43] [cursor=pointer]:
+            - /url: /finance/reports
+        - generic [ref=f11e49]:
+          - img "Kevin López González" [ref=f11e50]
+          - generic [ref=f11e51]:
+            - generic [ref=f11e52]: Kevin López González
+            - generic [ref=f11e53]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f11e54] [cursor=pointer]
+    - generic [ref=f11e58]:
+      - banner [ref=f11e59]:
+        - button "Collapse sidebar" [ref=f11e61] [cursor=pointer]
+        - generic [ref=f11e64]:
+          - button "Search (Cmd+K)" [ref=f11e65]
+          - button "Language" [ref=f11e69] [cursor=pointer]:
+            - img "global" [ref=f11e70]
+          - button "Subscription alerts (3)" [ref=f11e284] [cursor=pointer]:
+            - generic [ref=f11e288]: "3"
+      - main [ref=f11e77]:
+        - generic [ref=f11e289]:
+          - generic [ref=f11e290]:
+            - generic [ref=f11e291]:
+              - generic [ref=f11e292]:
+                - heading "My Cards" [level=1] [ref=f11e293]
+                - generic [ref=f11e294]: 3 active
+              - paragraph [ref=f11e295]: Track your credit cards, their cycle spending, and available credit.
+            - generic [ref=f11e296]:
+              - group "My Cards" [ref=f11e297]:
+                - button "Active (3)" [pressed] [ref=f11e298] [cursor=pointer]
+                - button "All (3)" [ref=f11e299] [cursor=pointer]
+                - button "Inactive (0)" [ref=f11e300] [cursor=pointer]
+              - button "Show all details" [ref=f11e301] [cursor=pointer]
+              - button "+ Add card" [ref=f11e302] [cursor=pointer]
+          - generic [ref=f11e303]:
+            - generic [ref=f11e304]:
+              - generic [ref=f11e305]: Total cards
+              - generic [ref=f11e310]:
+                - generic [ref=f11e311]: "3"
+                - generic [ref=f11e312]: 100% active
+              - generic [ref=f11e313]:
+                - paragraph [ref=f11e314]: of 3 tracked
+                - paragraph [ref=f11e315]:
+                  - generic [ref=f11e316]: Total capacity
+                  - generic [ref=f11e317]: MXN 158,600.00
+            - generic [ref=f11e318]:
+              - generic [ref=f11e319]: Spent this cycle
+              - generic [ref=f11e324]:
+                - generic [ref=f11e325]: MXN
+                - generic [ref=f11e326]: 13,342.83
+              - generic [ref=f11e327]:
+                - generic [ref=f11e328]:
+                  - generic [ref=f11e329]: Available credit
+                  - generic [ref=f11e330]: MXN 107,698.63
+                - progressbar "Utilization MXN" [ref=f11e331]
+            - generic [ref=f11e333]:
+              - generic [ref=f11e334]: Pending statement payments
+              - generic [ref=f11e339]:
+                - generic [ref=f11e340]: MXN
+                - generic [ref=f11e341]: "0.00"
+              - paragraph [ref=f11e342]: No pending payments
+            - generic [ref=f11e343]:
+              - generic [ref=f11e344]: Transactions
+              - generic [ref=f11e349]: "62"
+              - generic [ref=f11e351]:
+                - generic [ref=f11e352]: This cycle
+                - generic [ref=f11e353]: Active cycle
+          - generic [ref=f11e354]:
+            - heading "Active credit cards (3 units)" [level=2] [ref=f11e355]:
+              - text: Active credit cards
+              - generic [ref=f11e356]: (3 units)
+            - paragraph [ref=f11e357]: Figures projected to the current cycle
+          - generic [ref=f11e358]:
+            - generic [ref=f11e359]:
+              - generic [ref=f11e360]:
+                - generic [ref=f11e361]: Banamex
+                - paragraph [ref=f11e369]: •••• •••• •••• 0034
+                - generic [ref=f11e370]:
+                  - generic [ref=f11e371]: Banamex
+                  - generic [ref=f11e372]: VISA
+              - generic [ref=f11e373]:
+                - generic [ref=f11e374]:
+                  - generic [ref=f11e375]:
+                    - generic [ref=f11e376]: Projected total debt
+                    - generic [ref=f11e377]: 31.3% used
+                  - generic [ref=f11e378]:
+                    - paragraph [ref=f11e379]: MXN 4,753.50
+                    - paragraph [ref=f11e380]: Limit MXN 15,200.00
+                  - progressbar "Utilization" [ref=f11e381]
+                - generic [ref=f11e383]:
+                  - generic [ref=f11e384]:
+                    - generic [ref=f11e385]:
+                      - paragraph [ref=f11e386]: Latest statement
+                      - paragraph [ref=f11e387]: Aug 22, 2026 – Sep 21, 2026
+                    - generic [ref=f11e388]: Paid
+                  - generic [ref=f11e390]:
+                    - generic [ref=f11e391]:
+                      - paragraph [ref=f11e392]: Paid MXN 4,245.99 of MXN 4,245.99 · MXN 0.00 left
+                      - progressbar "Statement payment progress" [ref=f11e393]
+                    - button "View payments" [ref=f11e396] [cursor=pointer]
+                - generic [ref=f11e397]:
+                  - generic [ref=f11e398]: Current payment due
+                  - generic [ref=f11e399]: MXN 0.00
+                - generic [ref=f11e400]:
+                  - button "2 installment purchases · MXN 780.04/mo" [expanded] [active] [ref=f11e401] [cursor=pointer]:
+                    - generic [aria-hidden] [ref=f11e403]: ▴
+                  - region "Installment purchases" [ref=f11e540]:
+                    - list [ref=f11e541]:
+                      - listitem [ref=f11e542]:
+                        - generic [ref=f11e543]:
+                          - generic [ref=f11e544]: DIFERIMIENTO DE SALDO APP MOBILE
+                          - generic [ref=f11e545]: With interest
+                        - generic [ref=f11e547]:
+                          - progressbar "Installment" [ref=f11e548]
+                          - generic [ref=f11e550]: 4 of 12
+                        - generic [ref=f11e551]:
+                          - generic [ref=f11e552]: MXN 300.16/mo
+                          - generic [ref=f11e553]: "Remaining amount: MXN 2,865.55"
+                        - paragraph [ref=f11e554]: "Original amount: MXN 4,000.00 · Sep 21, 2026"
+                      - listitem [ref=f11e555]:
+                        - generic [ref=f11e556]:
+                          - generic [ref=f11e557]: DIFERIMIENTO DE SALDO APP MOBILE
+                          - generic [ref=f11e558]: With interest
+                        - generic [ref=f11e560]:
+                          - progressbar "Installment" [ref=f11e561]
+                          - generic [ref=f11e563]: 11 of 12
+                        - generic [ref=f11e564]:
+                          - generic [ref=f11e565]: MXN 479.88/mo
+                          - generic [ref=f11e566]: "Remaining amount: MXN 489.91"
+                        - paragraph [ref=f11e567]: "Original amount: MXN 5,261.58 · Sep 21, 2026"
+                    - generic [ref=f11e568]:
+                      - generic [ref=f11e569]:
+                        - generic [ref=f11e570]: Monthly total
+                        - generic [ref=f11e571]: MXN 780.04
+                      - generic [ref=f11e572]:
+                        - generic [ref=f11e573]: Remaining total
+                        - generic [ref=f11e574]: MXN 3,355.46
+                    - paragraph [ref=f11e575]: Per your statement of Sep 21, 2026
+                - button "Show details" [ref=f11e404] [cursor=pointer]
+              - generic [ref=f11e405]:
+                - button "Edit" [ref=f11e406] [cursor=pointer]
+                - button "Deactivate" [ref=f11e407] [cursor=pointer]
+                - button "More actions for Banamex Banamex" [ref=f11e408] [cursor=pointer]:
+                  - generic [aria-hidden] [ref=f11e409]: ⋮
+            - generic [ref=f11e410]:
+              - generic [ref=f11e411]:
+                - generic [ref=f11e412]: BBVA
+                - paragraph [ref=f11e420]: •••• •••• •••• 7289
+                - generic [ref=f11e421]:
+                  - generic [ref=f11e422]: BBVA
+                  - img "Mastercard" [ref=f11e423]
+              - generic [ref=f11e426]:
+                - generic [ref=f11e427]:
+                  - generic [ref=f11e428]:
+                    - generic [ref=f11e429]: Projected total debt
+                    - generic [ref=f11e430]: 31.9% used
+                  - generic [ref=f11e431]:
+                    - paragraph [ref=f11e432]: MXN 32,065.85
+                    - paragraph [ref=f11e433]: Limit MXN 100,400.00
+                  - progressbar "Utilization" [ref=f11e434]
+                - generic [ref=f11e436]:
+                  - generic [ref=f11e437]:
+                    - generic [ref=f11e438]:
+                      - paragraph [ref=f11e439]: Latest statement
+                      - paragraph [ref=f11e440]: Aug 15, 2026 – Sep 14, 2026
+                    - generic [ref=f11e441]: Paid
+                  - generic [ref=f11e443]:
+                    - generic [ref=f11e444]:
+                      - paragraph [ref=f11e445]: Paid MXN 14,021.54 of MXN 14,021.54 · MXN 0.00 left
+                      - progressbar "Statement payment progress" [ref=f11e446]
+                    - generic [ref=f11e448]:
+                      - generic [ref=f11e449]:
+                        - paragraph [ref=f11e450]: Recent payments
+                        - button "View all" [ref=f11e451] [cursor=pointer]
+                      - list [ref=f11e452]:
+                        - listitem [ref=f11e453]:
+                          - generic [ref=f11e454]: Oct 7, 2026
+                          - generic [ref=f11e455]:
+                            - generic [ref=f11e456]: MXN 5,000.00
+                            - generic [ref=f11e457]: Active
+                        - listitem [ref=f11e458]:
+                          - generic [ref=f11e459]: Oct 7, 2026
+                          - generic [ref=f11e460]:
+                            - generic [ref=f11e461]: MXN 1,000.00
+                            - generic [ref=f11e462]: Voided
+                        - listitem [ref=f11e463]:
+                          - generic [ref=f11e464]: Oct 6, 2026
+                          - generic [ref=f11e465]:
+                            - generic [ref=f11e466]: MXN 5,000.00
+                            - generic [ref=f11e467]: Active
+                - generic [ref=f11e468]:
+                  - generic [ref=f11e469]: Current payment due
+                  - generic [ref=f11e470]: MXN 0.00
+                - button "6 installment purchases · MXN 3,272.00/mo" [ref=f11e472] [cursor=pointer]:
+                  - generic [aria-hidden] [ref=f11e474]: ▾
+                - button "Show details" [ref=f11e475] [cursor=pointer]
+              - generic [ref=f11e476]:
+                - button "Edit" [ref=f11e477] [cursor=pointer]
+                - button "Deactivate" [ref=f11e478] [cursor=pointer]
+                - button "More actions for BBVA BBVA" [ref=f11e479] [cursor=pointer]:
+                  - generic [aria-hidden] [ref=f11e480]: ⋮
+            - generic [ref=f11e481]:
+              - generic [ref=f11e482]:
+                - generic [ref=f11e483]: Rappi Card
+                - paragraph [ref=f11e491]: •••• •••• •••• 5969
+                - generic [ref=f11e492]:
+                  - generic [ref=f11e493]: Rappi
+                  - generic [ref=f11e494]: VISA
+              - generic [ref=f11e495]:
+                - generic [ref=f11e496]:
+                  - generic [ref=f11e497]:
+                    - generic [ref=f11e498]: Projected total debt
+                    - generic [ref=f11e499]: 32.7% used
+                  - generic [ref=f11e500]:
+                    - paragraph [ref=f11e501]: MXN 14,082.02
+                    - paragraph [ref=f11e502]: Limit MXN 43,000.00
+                  - progressbar "Utilization" [ref=f11e503]
+                - generic [ref=f11e505]:
+                  - generic [ref=f11e506]:
+                    - generic [ref=f11e507]:
+                      - paragraph [ref=f11e508]: Latest statement
+                      - paragraph [ref=f11e509]: Aug 16, 2026 – Sep 15, 2026
+                    - generic [ref=f11e510]: Paid
+                  - generic [ref=f11e512]:
+                    - generic [ref=f11e513]:
+                      - paragraph [ref=f11e514]: Paid MXN 10,651.60 of MXN 4,199.31 · MXN 0.00 left
+                      - progressbar "Statement payment progress" [ref=f11e515]
+                    - button "View payments" [ref=f11e518] [cursor=pointer]
+                - generic [ref=f11e519]:
+                  - generic [ref=f11e520]: Current payment due
+                  - generic [ref=f11e521]: MXN 0.00
+                - button "12 installment purchases · MXN 6,452.29/mo" [ref=f11e523] [cursor=pointer]:
+                  - generic [aria-hidden] [ref=f11e525]: ▾
+                - button "Show details" [ref=f11e526] [cursor=pointer]
+              - generic [ref=f11e527]:
+                - button "Edit" [ref=f11e528] [cursor=pointer]
+                - button "Deactivate" [ref=f11e529] [cursor=pointer]
+                - button "More actions for Rappi Card Rappi" [ref=f11e530] [cursor=pointer]:
+                  - generic [aria-hidden] [ref=f11e531]: ⋮
+          - complementary "Smart closing reminder" [ref=f11e532]:
+            - generic [ref=f11e533]:
+              - generic [aria-hidden] [ref=f11e534]: ✓
+              - generic [ref=f11e535]:
+                - paragraph [ref=f11e536]: You're all caught up
+                - paragraph [ref=f11e537]: No pending statement payments right now. The next due date will show up here.
+  - alert [ref=f11e204]

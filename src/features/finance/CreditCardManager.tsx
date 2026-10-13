@@ -133,15 +133,15 @@ export function CreditCardManager({
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-serif text-2xl font-semibold tracking-tight text-white">{t("myCards")}</h1>
-            <span className="rounded-full border border-slate-700 bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-300">
+            <h1 className="font-serif text-2xl font-semibold tracking-tight text-[var(--text-1)]">{t("myCards")}</h1>
+            <span className="rounded-full border border-[var(--border-soft)] bg-[var(--bg-3)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-2)]">
               {t("activeCardsCount", { count: formatNumber(activeCards.length) })}
             </span>
           </div>
-          <p className="mt-0.5 text-sm text-slate-400">{t("trackCardsDescription")}</p>
+          <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("trackCardsDescription")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div role="group" aria-label={t("myCards")} className="inline-flex gap-1 rounded-xl border border-slate-800 bg-slate-900 p-1">
+          <div role="group" aria-label={t("myCards")} className="inline-flex gap-1 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] p-1">
             {(["active", "all", "inactive"] as FilterTab[]).map((tab) => (
               <button
                 key={tab}
@@ -150,8 +150,8 @@ export function CreditCardManager({
                 onClick={() => setFilter(tab)}
                 className={`cursor-pointer rounded-lg px-3.5 py-1.5 text-xs transition focus-visible:outline-2 focus-visible:outline-emerald-400 ${
                   filter === tab
-                    ? "bg-emerald-500 font-semibold text-slate-950 shadow-sm"
-                    : "font-medium text-slate-400 hover:text-slate-200"
+                    ? "bg-[var(--accent)] font-semibold text-[var(--accent-contrast)] shadow-sm"
+                    : "font-medium text-[var(--text-3)] hover:text-[var(--text-2)]"
                 }`}
               >
                 {filterLabels[tab]} ({formatNumber(filterCounts[tab])})
@@ -163,7 +163,7 @@ export function CreditCardManager({
               type="button"
               aria-pressed={allVisibleDetailsExpanded}
               onClick={toggleAllVisibleDetails}
-              className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:bg-slate-800/80 focus-visible:outline-2 focus-visible:outline-emerald-400"
+              className="cursor-pointer rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] px-3.5 py-2 text-xs font-medium text-[var(--text-2)] transition hover:bg-[var(--bg-3)]/80 focus-visible:outline-2 focus-visible:outline-emerald-400"
             >
               {allVisibleDetailsExpanded ? t("hideAllDetails") : t("showAllDetails")}
             </button>
@@ -188,16 +188,16 @@ export function CreditCardManager({
           value={String(portfolio.activeCards)}
           aside={
             activePercent !== null ? (
-              <span className="text-xs font-medium text-emerald-400">{t("activePercent", { percent: formatNumber(activePercent) })}</span>
+              <span className="text-xs font-medium text-[var(--emerald-text)]">{t("activePercent", { percent: formatNumber(activePercent) })}</span>
             ) : null
           }
         >
-          <div className="mt-4 space-y-1 border-t border-slate-800/60 pt-3 text-xs text-slate-400">
+          <div className="mt-4 space-y-1 border-t border-[var(--border-soft)]/60 pt-3 text-xs text-[var(--text-3)]">
             <p>{t("trackedCards", { count: formatNumber(portfolio.trackedCards) })}</p>
             {portfolio.byCurrency.filter((summary) => summary.totalCreditLimit > 0).map((summary) => (
               <p key={summary.currency} className="flex justify-between gap-2">
                 <span>{t("totalCapacity")}</span>
-                <span className="font-mono font-semibold text-slate-200">{formatMoney(summary.totalCreditLimit, summary.currency)}</span>
+                <span className="font-mono font-semibold text-[var(--text-2)]">{formatMoney(summary.totalCreditLimit, summary.currency)}</span>
               </p>
             ))}
           </div>
@@ -211,9 +211,9 @@ export function CreditCardManager({
             value={formatNumber(summary.totalCurrentCycleSpend, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           >
             <div className="mt-3">
-              <div className="mb-1 flex justify-between gap-2 text-[11px] text-slate-400">
+              <div className="mb-1 flex justify-between gap-2 text-[11px] text-[var(--text-3)]">
                 <span>{t("availableCredit")}</span>
-                <span className="font-mono font-medium text-slate-300">{formatMoney(summary.totalAvailableCredit, summary.currency)}</span>
+                <span className="font-mono font-medium text-[var(--text-2)]">{formatMoney(summary.totalAvailableCredit, summary.currency)}</span>
               </div>
               {summary.utilizationPercent !== null && (
                 <div
@@ -222,7 +222,7 @@ export function CreditCardManager({
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={Math.round(Math.min(100, Math.max(0, summary.utilizationPercent)))}
-                  className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800"
+                  className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-3)]"
                 >
                   <div
                     className="h-1.5 rounded-full bg-gradient-to-r from-teal-400 to-emerald-400"
@@ -246,43 +246,43 @@ export function CreditCardManager({
               value={formatNumber(total, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             >
               {items.length > 0 ? (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/60 pt-3 text-xs text-slate-400">
-                  <span className="flex items-center gap-1 font-medium text-rose-400/90">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-soft)]/60 pt-3 text-xs text-[var(--text-3)]">
+                  <span className="flex items-center gap-1 font-medium text-[var(--rose-text)]/90">
                     <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-rose-400 motion-safe:animate-ping" />
                     {nearest ? t("nextPaymentOn", { date: formatDate(nearest, { dateStyle: "medium" }) }) : ""}
                   </span>
-                  <span className="rounded border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[11px] font-semibold text-rose-400">
+                  <span className="rounded border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--rose-text)]">
                     {t("paymentsToSettle", { count: formatNumber(items.length) })}
                   </span>
                 </div>
               ) : (
-                <p className="mt-4 border-t border-slate-800/60 pt-3 text-xs text-slate-400">{t("noPendingPayments")}</p>
+                <p className="mt-4 border-t border-[var(--border-soft)]/60 pt-3 text-xs text-[var(--text-3)]">{t("noPendingPayments")}</p>
               )}
             </CardKpiTile>
           );
         })}
         <CardKpiTile accent="indigo" size="lg" label={t("transactions")} value={String(totalTransactions)}>
-          <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-800/60 pt-3 text-xs">
-            <span className="font-medium text-emerald-400">{t("thisCycle")}</span>
-            <span className="text-slate-400">{t("activeCycle")}</span>
+          <div className="mt-4 flex items-center justify-between gap-2 border-t border-[var(--border-soft)]/60 pt-3 text-xs">
+            <span className="font-medium text-[var(--emerald-text)]">{t("thisCycle")}</span>
+            <span className="text-[var(--text-3)]">{t("activeCycle")}</span>
           </div>
         </CardKpiTile>
       </div>
 
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-bold tracking-tight text-white">
+        <h2 className="text-lg font-bold tracking-tight text-[var(--text-1)]">
           {t(sectionTitle[filter])}{" "}
-          <span className="font-mono text-xs font-normal text-slate-400">
+          <span className="font-mono text-xs font-normal text-[var(--text-3)]">
             ({visibleCards.length === 1 ? t("cardUnitsOne") : t("cardUnits", { count: formatNumber(visibleCards.length) })})
           </span>
         </h2>
-        <p className="text-xs text-slate-400">{t("projectedFiguresNote")}</p>
+        <p className="text-xs text-[var(--text-3)]">{t("projectedFiguresNote")}</p>
       </div>
 
       {visibleCards.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-800 px-4 py-8 text-center">
-          <p className="text-sm font-medium text-slate-300">{t("noCardsShow")}</p>
-          <p className="mt-1 text-xs text-slate-400">
+        <div className="rounded-xl border border-dashed border-[var(--border-soft)] px-4 py-8 text-center">
+          <p className="text-sm font-medium text-[var(--text-2)]">{t("noCardsShow")}</p>
+          <p className="mt-1 text-xs text-[var(--text-3)]">
             {filter === "active" ? t("addFirstCard") : t("tryAnotherFilter")}
           </p>
         </div>

@@ -29,19 +29,19 @@ export function CreditCardInstallmentPlans({ plans, currency }: { plans: CreditC
   });
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/80 text-xs">
+    <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/80 text-xs">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={regionId}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2 text-left font-medium text-slate-200 transition hover:text-white focus-visible:outline-2 focus-visible:outline-sky-400"
+        className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2 text-left font-medium text-[var(--text-2)] transition hover:text-[var(--text-1)] focus-visible:outline-2 focus-visible:outline-sky-400"
       >
         <span>{summary}</span>
-        <span aria-hidden="true" className="text-slate-500">{open ? "▴" : "▾"}</span>
+        <span aria-hidden="true" className="text-[var(--text-3)]">{open ? "▴" : "▾"}</span>
       </button>
       {open && (
-        <div id={regionId} role="region" aria-label={t("planPurchasesTitle")} className="border-t border-slate-800/80 px-3 pb-3 pt-1">
+        <div id={regionId} role="region" aria-label={t("planPurchasesTitle")} className="border-t border-[var(--border-soft)]/80 px-3 pb-3 pt-1">
           <ul className="divide-y divide-slate-800/60">
             {sorted.map((plan) => {
               const badge = TYPE_BADGE[plan.type];
@@ -54,7 +54,7 @@ export function CreditCardInstallmentPlans({ plans, currency }: { plans: CreditC
               return (
                 <li key={plan.id} className="py-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-medium text-slate-200">{plan.merchantName || t("planGenericPurchase")}</span>
+                    <span className="truncate font-medium text-[var(--text-2)]">{plan.merchantName || t("planGenericPurchase")}</span>
                     <span className="flex shrink-0 items-center gap-1">
                       {plan.isFinalInstallment && <Badge variant="success">{t("planLastInstallment")}</Badge>}
                       <Badge variant={badge.variant}>{t(badge.label)}</Badge>
@@ -68,30 +68,30 @@ export function CreditCardInstallmentPlans({ plans, currency }: { plans: CreditC
                         aria-valuemin={0}
                         aria-valuemax={100}
                         aria-valuenow={Math.round(pct)}
-                        className="h-1 flex-1 overflow-hidden rounded-full bg-slate-800"
+                        className="h-1 flex-1 overflow-hidden rounded-full bg-[var(--bg-3)]"
                       >
                         <div className="h-1 rounded-full bg-sky-500" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="font-mono text-[11px] text-slate-400">
+                      <span className="font-mono text-[11px] text-[var(--text-3)]">
                         {t("installmentOf", { index: formatNumber(plan.installmentNumber as number), count: formatNumber(plan.installmentCount as number) })}
                       </span>
                     </div>
                   )}
-                  <div className="mt-1 flex items-baseline justify-between gap-2 font-mono text-[11px] text-slate-400">
+                  <div className="mt-1 flex items-baseline justify-between gap-2 font-mono text-[11px] text-[var(--text-3)]">
                     <span>{plan.installmentAmount != null ? t("perMonth", { amount: money(plan.installmentAmount) }) : "—"}</span>
                     {plan.remainingAmount != null && <span>{t("remainingAmount")}: {money(plan.remainingAmount)}</span>}
                   </div>
-                  {details && <p className="mt-0.5 text-[11px] text-slate-500">{details}</p>}
+                  {details && <p className="mt-0.5 text-[11px] text-[var(--text-3)]">{details}</p>}
                 </li>
               );
             })}
           </ul>
-          <div className="mt-1 space-y-0.5 border-t border-slate-800/80 pt-2 font-mono text-slate-300">
-            <div className="flex justify-between"><span className="font-sans text-slate-400">{t("planTotalMonthly")}</span><span>{money(monthly)}</span></div>
-            <div className="flex justify-between"><span className="font-sans text-slate-400">{t("planTotalRemaining")}</span><span>{money(remaining)}</span></div>
+          <div className="mt-1 space-y-0.5 border-t border-[var(--border-soft)]/80 pt-2 font-mono text-[var(--text-2)]">
+            <div className="flex justify-between"><span className="font-sans text-[var(--text-3)]">{t("planTotalMonthly")}</span><span>{money(monthly)}</span></div>
+            <div className="flex justify-between"><span className="font-sans text-[var(--text-3)]">{t("planTotalRemaining")}</span><span>{money(remaining)}</span></div>
           </div>
           {statementEnd && (
-            <p className="mt-2 text-[11px] text-slate-500">
+            <p className="mt-2 text-[11px] text-[var(--text-3)]">
               {t("planStatementAsOf", { date: formatDate(statementEnd, { dateStyle: "medium" }) })}
             </p>
           )}

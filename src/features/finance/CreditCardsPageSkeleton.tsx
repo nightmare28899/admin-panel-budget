@@ -7,12 +7,12 @@ import { useLocale } from "@/i18n/LocaleProvider";
 // palette, so the page doesn't jump when the overview arrives.
 
 function Bone({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-slate-800/70 motion-reduce:animate-none ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-[var(--bg-3)]/70 motion-reduce:animate-none ${className}`} />;
 }
 
 function KpiTileSkeleton() {
   return (
-    <div className="rounded-2xl border border-slate-800/80 bg-gradient-to-b from-[#111A2C] to-[#0D1424] p-5">
+    <div className="rounded-2xl border border-[var(--border-soft)]/80 bg-[var(--bg-1)] p-5">
       <div className="flex items-start justify-between gap-3">
         <Bone className="h-3 w-28" />
         <Bone className="h-8 w-8 rounded-xl" />
@@ -26,21 +26,21 @@ function KpiTileSkeleton() {
 
 function CardTileSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-800/90 bg-[#0D1422]">
+    <div className="flex flex-col overflow-hidden rounded-3xl border border-[var(--border-soft)]/90 bg-[var(--bg-1)]">
       {/* Card face: same h-44 / m-3 / rounded-2xl box as the real one. */}
-      <div className="relative m-3 flex h-44 flex-col justify-between overflow-hidden rounded-2xl border border-slate-700/40 bg-gradient-to-br from-slate-800/80 via-slate-800/50 to-slate-900/80 p-4">
+      <div className="relative m-3 flex h-44 flex-col justify-between overflow-hidden rounded-2xl border border-[var(--border-soft)]/40 bg-gradient-to-br from-slate-800/80 via-slate-800/50 to-slate-900/80 p-4">
         <div className="pointer-events-none absolute inset-0 animate-pulse bg-gradient-to-br from-white/5 via-transparent to-transparent motion-reduce:animate-none" />
         <div className="relative flex items-start justify-between">
-          <Bone className="h-4 w-24 bg-slate-700/70" />
-          <Bone className="h-4 w-4 rounded-full bg-slate-700/70" />
+          <Bone className="h-4 w-24 bg-[var(--bg-3)]/70" />
+          <Bone className="h-4 w-4 rounded-full bg-[var(--bg-3)]/70" />
         </div>
         <div className="relative">
-          <Bone className="h-7 w-10 rounded-md bg-slate-700/70" />
-          <Bone className="mt-3 h-4 w-44 bg-slate-700/70" />
+          <Bone className="h-7 w-10 rounded-md bg-[var(--bg-3)]/70" />
+          <Bone className="mt-3 h-4 w-44 bg-[var(--bg-3)]/70" />
         </div>
         <div className="relative flex items-end justify-between">
-          <Bone className="h-3 w-20 bg-slate-700/70" />
-          <Bone className="h-5 w-12 bg-slate-700/70" />
+          <Bone className="h-3 w-20 bg-[var(--bg-3)]/70" />
+          <Bone className="h-5 w-12 bg-[var(--bg-3)]/70" />
         </div>
       </div>
 
@@ -56,7 +56,7 @@ function CardTileSkeleton() {
           </div>
           <Bone className="mt-3 h-2 w-full rounded-full" />
         </div>
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/80 p-3">
           <div className="space-y-2">
             <Bone className="h-2.5 w-32" />
             <Bone className="h-3.5 w-40" />
@@ -82,13 +82,13 @@ export function CreditCardsPageSkeleton({ cards = 3 }: { cards?: number }) {
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="font-serif text-2xl font-semibold tracking-tight text-white">{t("myCards")}</h1>
+              <h1 className="font-serif text-2xl font-semibold tracking-tight text-[var(--text-1)]">{t("myCards")}</h1>
               <Bone className="h-6 w-20 rounded-full" />
             </div>
-            <p className="mt-1 text-sm text-slate-400">{t("trackCardsDescription")}</p>
+            <p className="mt-1 text-sm text-[var(--text-3)]">{t("trackCardsDescription")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-flex gap-1 rounded-xl border border-slate-800 bg-slate-900 p-1">
+            <div className="inline-flex gap-1 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] p-1">
               <Bone className="h-7 w-20 rounded-lg" />
               <Bone className="h-7 w-20 rounded-lg" />
               <Bone className="h-7 w-20 rounded-lg" />

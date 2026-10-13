@@ -100,13 +100,13 @@ export function ReportSpendChart({
   const areaPath = `${linePath} L${(((count - 0.5) / count) * 100).toFixed(2)} 100 L${((0.5 / count) * 100).toFixed(2)} 100 Z`;
 
   return (
-    <section className="relative rounded-2xl border border-[#18262E] bg-[#0D1418] p-6 shadow-[0_0_35px_-8px_rgba(16,185,129,0.15)]">
-      <div className="flex flex-col justify-between gap-4 border-b border-[#18262E]/70 pb-6 sm:flex-row sm:items-center">
+    <section className="relative rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-6 shadow-sm">
+      <div className="flex flex-col justify-between gap-4 border-b border-[var(--border-soft)]/70 pb-6 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-base font-bold tracking-tight text-white">
+          <h2 className="text-base font-bold tracking-tight text-[var(--text-1)]">
             {t("spendingOverTime")}
           </h2>
-          <p className="mt-0.5 text-xs text-slate-400">{t(DISTRIBUTION_KEY[granularity])}</p>
+          <p className="mt-0.5 text-xs text-[var(--text-3)]">{t(DISTRIBUTION_KEY[granularity])}</p>
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex flex-wrap items-center gap-4 text-xs">
@@ -115,7 +115,7 @@ export function ReportSpendChart({
                 aria-hidden="true"
                 className="h-2.5 w-2.5 rounded-sm bg-gradient-to-t from-emerald-600 to-teal-400"
               />
-              <span className="text-slate-300">
+              <span className="text-[var(--text-2)]">
                 {t(SPEND_KEY[granularity])} ({currency})
               </span>
             </div>
@@ -124,7 +124,7 @@ export function ReportSpendChart({
                 aria-hidden="true"
                 className="h-0 w-3.5 border-b border-dashed border-slate-300"
               />
-              <span className="text-slate-400">
+              <span className="text-[var(--text-3)]">
                 {t("averageLegend", { amount: amount(average) })}
               </span>
             </div>
@@ -132,7 +132,7 @@ export function ReportSpendChart({
           <div
             role="group"
             aria-label={t("chartViewType")}
-            className="flex items-center rounded-lg border border-[#18262E] bg-[#060A0C] p-0.5 text-xs"
+            className="flex items-center rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)] p-0.5 text-xs"
           >
             {(["bars", "line"] as const).map((option) => (
               <button
@@ -142,8 +142,8 @@ export function ReportSpendChart({
                 onClick={() => setMode(option)}
                 className={`cursor-pointer rounded px-2.5 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400 ${
                   mode === option
-                    ? "bg-[#1A262E] font-medium text-slate-200"
-                    : "text-slate-500 hover:text-slate-300"
+                    ? "bg-[var(--bg-3)] font-medium text-[var(--text-2)]"
+                    : "text-[var(--text-3)] hover:text-[var(--text-2)]"
                 }`}
               >
                 {t(option === "bars" ? "chartBars" : "chartLine")}
@@ -154,7 +154,7 @@ export function ReportSpendChart({
       </div>
 
       <div role="group" aria-label={summary} className="mt-8 flex">
-        <div className="relative h-56 w-14 shrink-0 font-mono text-[10px] text-slate-600">
+        <div className="relative h-56 w-14 shrink-0 font-mono text-[10px] text-[var(--text-3)]">
           {ticks.map((tick, index) => {
             const nearAverage = Math.abs(pctOf(tick) - averagePct) < 7;
             if (nearAverage && average > 0 && index !== 0) return null;
@@ -172,7 +172,7 @@ export function ReportSpendChart({
           {average > 0 && (
             <span
               aria-hidden="true"
-              className="absolute right-0 translate-y-1/2 pr-3 text-right font-semibold text-emerald-400"
+              className="absolute right-0 translate-y-1/2 pr-3 text-right font-semibold text-[var(--emerald-text)]"
               style={{ bottom: `${averagePct}%` }}
             >
               {amount(average)}
@@ -187,7 +187,7 @@ export function ReportSpendChart({
                 key={tick}
                 aria-hidden="true"
                 className={`pointer-events-none absolute inset-x-0 h-0 border-t ${
-                  index === 0 ? "border-[#18262E]" : "border-[#18262E]/60"
+                  index === 0 ? "border-[var(--border-soft)]" : "border-[var(--border-soft)]/60"
                 }`}
                 style={{ bottom: `${pctOf(tick)}%` }}
               />
@@ -209,15 +209,15 @@ export function ReportSpendChart({
               >
                 <defs>
                   <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#34d399" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                    <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 <path d={areaPath} fill={`url(#${gradientId})`} />
                 <path
                   d={linePath}
                   fill="none"
-                  stroke="#34d399"
+                  stroke="var(--accent)"
                   strokeWidth={2}
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -257,16 +257,16 @@ export function ReportSpendChart({
                   >
                     <div
                       aria-hidden="true"
-                      className="pointer-events-none absolute left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/40 bg-slate-900 px-2.5 py-1.5 text-center text-[11px] opacity-0 shadow-xl transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
+                      className="pointer-events-none absolute left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/40 bg-[var(--bg-3)] px-2.5 py-1.5 text-center text-[11px] opacity-0 shadow-xl transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
                       style={{ bottom: `calc(${pct}% + 12px)` }}
                     >
-                      <span className="block text-[9px] font-semibold uppercase text-slate-400">
+                      <span className="block text-[9px] font-semibold uppercase text-[var(--text-3)]">
                         {point.fullLabel}
                       </span>
-                      <span className="font-bold text-emerald-400">
+                      <span className="font-bold text-[var(--emerald-text)]">
                         {money(point.value)} {currency}
                       </span>
-                      <span className="block text-[10px] text-slate-400">
+                      <span className="block text-[10px] text-[var(--text-3)]">
                         {t("opsCount", { count: formatNumber(point.count) })}
                       </span>
                     </div>
@@ -283,7 +283,7 @@ export function ReportSpendChart({
                     ) : (
                       <span
                         aria-hidden="true"
-                        className={`absolute left-1/2 h-2 w-2 -translate-x-1/2 translate-y-1/2 rounded-full border-2 border-[#0D1418] transition-transform group-hover:scale-150 ${
+                        className={`absolute left-1/2 h-2 w-2 -translate-x-1/2 translate-y-1/2 rounded-full border-2 border-[var(--border-soft)] transition-transform group-hover:scale-150 ${
                           isPeak ? "bg-teal-300" : "bg-emerald-400"
                         }`}
                         style={{ bottom: `${pct}%` }}
@@ -307,12 +307,12 @@ export function ReportSpendChart({
                 <div key={point.key} className="flex min-w-0 flex-col items-center text-center">
                   {show && (
                     <>
-                      <span className="whitespace-nowrap text-xs font-semibold text-slate-300">
+                      <span className="whitespace-nowrap text-xs font-semibold text-[var(--text-2)]">
                         {point.label}
                       </span>
                       <span
                         className={`whitespace-nowrap text-[10px] ${
-                          isPeak ? "font-semibold text-emerald-400" : "text-slate-500"
+                          isPeak ? "font-semibold text-[var(--emerald-text)]" : "text-[var(--text-3)]"
                         }`}
                       >
                         {t("opsCount", { count: formatNumber(point.count) })}

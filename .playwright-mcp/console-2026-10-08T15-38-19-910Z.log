@@ -1,0 +1,8 @@
+[   63694ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ https://panel.kevinlg.cloud/_next/static/chunks/0hianf2l~jdns.js:0
+[   63695ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ https://panel.kevinlg.cloud/_next/static/chunks/0hianf2l~jdns.js:0
+[  133191ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.close call. @ https://panel.kevinlg.cloud/_next/static/chunks/0hianf2l~jdns.js:0
+[  133191ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.close call. @ https://panel.kevinlg.cloud/_next/static/chunks/0hianf2l~jdns.js:0
+[  164647ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://panel.kevinlg.cloud/finance/expenses:0
+[  390575ms] [ERROR] Failed to load resource: net::ERR_QUIC_PROTOCOL_ERROR.QUIC_NETWORK_IDLE_TIMEOUT @ https://panel.kevinlg.cloud/finance/expenses:0
+[  506105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://panel.kevinlg.cloud/finance/expenses:0
+[  566395ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://panel.kevinlg.cloud/finance/expenses:0

@@ -11,8 +11,9 @@ import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { sanitizeNextPath } from "@/lib/safeNext";
+import { WorkspaceTheme } from "@/components/layout/WorkspaceTheme";
 
-const POST_LOGIN_PATH = "/finance/expenses";
 
 function PostLoginLoader() {
   const { t } = useLocale();
@@ -25,7 +26,7 @@ function PostLoginLoader() {
     >
       <span
         aria-hidden="true"
-        className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--border-soft)] border-t-[var(--emerald)]"
+        className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--border-soft)] border-t-[var(--accent)]"
       />
       <p className="text-sm font-medium text-[var(--text-2)]">{t("loadingYourPanel")}</p>
     </div>
@@ -48,7 +49,29 @@ function SessionExpiredNotice() {
 }
 
 export default function UserLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <UserLoginWorkspace />
+    </Suspense>
+  );
+}
+
+// Finance by default; the nutrition login (`next` under /nutrition) themes green.
+function UserLoginWorkspace() {
+  const searchParams = useSearchParams();
+  const next = sanitizeNextPath(searchParams.get("next"));
+  const workspace = next.startsWith("/nutrition") ? "nutrition" : "finance";
+  return (
+    <WorkspaceTheme workspace={workspace}>
+      <UserLoginForm />
+    </WorkspaceTheme>
+  );
+}
+
+function UserLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const postLoginPath = sanitizeNextPath(searchParams.get("next"));
   const { t } = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,7 +82,7 @@ export default function UserLoginPage() {
 
   function enterPanel() {
     setRedirecting(true);
-    router.replace(POST_LOGIN_PATH);
+    router.replace(postLoginPath);
   }
 
   async function submit(event: FormEvent) {
@@ -79,8 +102,7 @@ export default function UserLoginPage() {
     setError(null);
     setGoogleLoading(true);
     try {
-      const token = await signInWithGoogle();
-      const result = await userGoogleLoginAction(token);
+      const result = await userGoogleLoginAction(await signInWithGoogle());
       if (result.error) setError(frontendError(result.error, t, "googleFailed"));
       else enterPanel();
     } catch (reason) {
@@ -107,13 +129,13 @@ export default function UserLoginPage() {
       <Card className="relative z-10 w-full max-w-md">
         <Link
           href="/"
-          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-3)] transition-colors hover:text-[var(--emerald-text)] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)]"
+          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-3)] transition-colors hover:text-[var(--accent-text)] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <span aria-hidden="true">←</span>
           {t("backToPlatformSelection")}
         </Link>
         <div className="mb-6 flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--emerald)]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)]">
             <span className="font-serif text-lg leading-none text-[var(--bg-0)]">B</span>
           </div>
           <span className="text-[15px] font-semibold tracking-tight text-[var(--text-1)]">Budget Panel</span>

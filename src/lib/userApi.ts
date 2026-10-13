@@ -1,4 +1,4 @@
-import { request } from "./api";
+import { API_BASE_URL, request } from "./api";
 import type { BudgetWritePayload, CardExpenseBreakdownResponse, Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
 import type {
   CreditCardOverviewResponse,
@@ -26,9 +26,46 @@ import type {
   UpdateSubscriptionPayload,
 } from "@/features/finance/subscriptions.types";
 
+/** Nutrition endpoints take the same user bearer token as Personal Finance. */
+const nutritionApi = {
+  nutritionState: (token: string) => request<unknown>("/nutrition/state", { method: "GET" }, token),
+  nutritionCommand: (token: string, command: string, payload: unknown) =>
+    request<{ ok: true }>("/nutrition/commands", { method: "POST", body: JSON.stringify({ command, payload }) }, token),
+  uploadNutritionOriginal: (token: string, dietId: string, file: File) => {
+    const body = new FormData();
+    body.set("file", file, file.name);
+    return request<{ ok: true; id: string }>(`/nutrition/diets/${encodeURIComponent(dietId)}/original`, { method: "POST", body }, token);
+  },
+  /** Extracts a DRAFT diet from 1-3 photos or one PDF. Nothing is persisted by the backend. */
+  importNutritionDiet: (token: string, files: File[]) => {
+    const body = new FormData();
+    for (const file of files) body.append("files", file, file.name);
+    return request<unknown>("/nutrition/diet-imports", { method: "POST", body }, token);
+  },
+  /** Generates AI recipe drafts for one diet option. Nothing is persisted by the backend. */
+  suggestNutritionRecipes: (
+    token: string,
+    body: { optionId: string; count?: number; preferences?: string },
+  ) =>
+    request<unknown>(
+      "/nutrition/recipe-suggestions",
+      { method: "POST", body: JSON.stringify(body) },
+      token,
+    ),
+  /** Raw Response so callers can stream the bytes and copy headers; check `ok` yourself. */
+  downloadNutritionFile: (token: string, id: string): Promise<Response> =>
+    fetch(`${API_BASE_URL}/nutrition/files/${encodeURIComponent(id)}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }),
+};
+
 export const userApi = {
+  ...nutritionApi,
   login: (email: string, password: string) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
-  google: (token: string) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/google", { method: "POST", body: JSON.stringify({ firebaseIdToken: token, existingUserOnly: true }) }),
+  // existingUserOnly=false registers a new account for an unknown Google email.
+  google: (token: string, options: { existingUserOnly?: boolean } = {}) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/google", { method: "POST", body: JSON.stringify({ firebaseIdToken: token, existingUserOnly: options.existingUserOnly ?? false }) }),
   me: (token: string) => request<{ user: UserAccount }>("/users/me", { method: "GET" }, token),
   refresh: (token: string) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/refresh", { method: "POST", body: JSON.stringify({ refreshToken: token }) }),
   logout: (token: string) => request<{ message: string }>("/auth/logout", { method: "POST" }, token),

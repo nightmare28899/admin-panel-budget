@@ -25,6 +25,71 @@ const BG_3_ALPHA_MEDIUM = "rgba(38, 46, 58, 0.6)"; // BG_3 @ 60% — outlined bu
 const BUTTON_LIFT_SHADOW =
   "inset 0 1px 0 rgba(255,255,255,0.16), 0 1px 2px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.28)";
 
+export type Workspace = "finance" | "nutrition" | "admin";
+
+// antd needs a concrete color to derive its palette, so this mirrors the
+// --accent override per [data-workspace] in globals.css.
+export const workspaceAccent: Record<Workspace, string> = {
+  finance: "#613fdd",
+  nutrition: "#613fdd",
+  admin: "#613fdd",
+};
+
+// Concrete hex tokens mirror the screenshot-reference workspace tokens in globals.css.
+// Public/login screens retain antdSharedTheme's dark palette.
+export const workspaceReferenceTheme: ThemeConfig = {
+  algorithm: antdTheme.defaultAlgorithm,
+  token: {
+    colorPrimary: workspaceAccent.nutrition,
+    colorSuccess: "#067647",
+    colorWarning: "#925b08",
+    colorError: "#b42318",
+    colorInfo: "#175cd3",
+    colorBgBase: "#f5f5f6",
+    colorBgContainer: "#ffffff",
+    colorBgElevated: "#f2f2f2",
+    colorBgLayout: "#f5f5f6",
+    colorText: "#242429",
+    colorTextSecondary: "#505057",
+    colorTextTertiary: "#5f5f68",
+    colorTextPlaceholder: "#5f5f68",
+    colorBorder: "#c7c7ce",
+    colorBorderSecondary: "#dedee3",
+    borderRadius: 10,
+    fontFamily: "var(--font-geist-sans), sans-serif",
+  },
+  components: {
+    Button: {
+      fontWeight: 500,
+      primaryColor: "#ffffff",
+      dangerColor: "#ffffff",
+      defaultColor: "#242429",
+      defaultBg: "#ffffff",
+      defaultBorderColor: "#c7c7ce",
+      defaultHoverBg: "#e9e9ec",
+      defaultShadow: "none",
+      primaryShadow: "none",
+      dangerShadow: "none",
+      paddingInline: 20,
+      paddingInlineSM: 12,
+      contentFontSize: 14,
+      contentFontSizeSM: 12,
+    },
+    Table: {
+      colorBgContainer: "#ffffff",
+      headerBg: "#f2f2f2",
+      footerBg: "#f2f2f2",
+      headerColor: "#505057",
+      headerSplitColor: "#dedee3",
+      borderColor: "#dedee3",
+      rowHoverBg: "#e9e9ec",
+      rowExpandedBg: "#e9e9ec",
+    },
+    Modal: { contentBg: "#ffffff", headerBg: "#ffffff" },
+    Popconfirm: { colorBgElevated: "#ffffff" },
+  },
+};
+
 export const antdSharedTheme: ThemeConfig = {
   algorithm: antdTheme.darkAlgorithm,
   token: {

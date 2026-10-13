@@ -4,17 +4,17 @@ export type KpiAccent = "teal" | "amber" | "rose" | "indigo";
 
 // Static class strings so Tailwind can see every utility.
 const CHIP_CLASS: Record<KpiAccent, string> = {
-  teal: "border-teal-500/20 bg-teal-500/10 text-teal-400",
-  amber: "border-amber-500/20 bg-amber-500/10 text-amber-400",
-  rose: "border-rose-500/20 bg-rose-500/10 text-rose-400",
-  indigo: "border-indigo-500/20 bg-indigo-500/10 text-indigo-400",
+  teal: "border-teal-500/20 bg-teal-500/10 text-[var(--info-text)]",
+  amber: "border-amber-500/20 bg-amber-500/10 text-[var(--gold-text)]",
+  rose: "border-rose-500/20 bg-rose-500/10 text-[var(--rose-text)]",
+  indigo: "border-indigo-500/20 bg-indigo-500/10 text-[var(--accent-text)]",
 };
 
 const UNIT_CLASS: Record<KpiAccent, string> = {
-  teal: "text-teal-400",
-  amber: "text-amber-400",
-  rose: "text-rose-400",
-  indigo: "text-indigo-400",
+  teal: "text-[var(--info-text)]",
+  amber: "text-[var(--gold-text)]",
+  rose: "text-[var(--rose-text)]",
+  indigo: "text-[var(--accent-text)]",
 };
 
 const ICON_PATH: Record<KpiAccent, string> = {
@@ -48,9 +48,9 @@ export function CardKpiTile({
   children?: ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-gradient-to-b from-[#111A2C] to-[#0D1424] p-5 transition hover:border-slate-700/80">
+    <div className="relative overflow-hidden rounded-2xl border border-[var(--border-soft)]/80 bg-[var(--bg-1)] p-5 transition hover:border-[var(--border-soft)]/80">
       <div className="flex items-start justify-between gap-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)]">{label}</span>
         <span aria-hidden="true" className={`shrink-0 rounded-xl border p-2 ${CHIP_CLASS[accent]}`}>
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d={ICON_PATH[accent]} strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
@@ -60,7 +60,7 @@ export function CardKpiTile({
       <div className={`mt-3 flex items-baseline ${size === "lg" ? "gap-2" : "gap-1"}`}>
         {unit && <span className={`text-xs font-normal ${UNIT_CLASS[accent]}`}>{unit}</span>}
         <span
-          className={`font-mono font-bold text-white ${size === "lg" ? "text-3xl" : "text-2xl tracking-tight"}`}
+          className={`font-mono font-bold text-[var(--text-1)] ${size === "lg" ? "text-3xl" : "text-2xl tracking-tight"}`}
         >
           {value}
         </span>

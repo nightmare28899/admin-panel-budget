@@ -6,16 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test": "vitest",
+    "nutrition:format": "prettier --config .prettierrc.nutrition.json --write 'src/features/nutrition/**/*.{ts,tsx}' 'src/app/nutrition/**/*.{ts,tsx,css}' 'src/app/api/nutrition/**/*.ts' vitest.config.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.1",
+    "@hookform/resolvers": "^5.9.1",
     "@tanstack/react-query": "^5.96.0",
     "antd": "^6.3.5",
     "firebase": "^12.18.0",
     "next": "^16.2.2",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-hook-form": "^7.89.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -25,7 +31,9 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "^16.2.2",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   }
 }

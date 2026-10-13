@@ -5,9 +5,9 @@ import { createContext, useContext, useEffect, useState, useSyncExternalStore, t
 import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { CommandPalette } from "@/components/ui/CommandPalette";
-import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { WorkspaceTheme, type Workspace } from "@/components/layout/WorkspaceTheme";
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
@@ -65,6 +65,8 @@ export type AppShellNavItem = {
   soon?: boolean;
   /** Small count shown next to the label (e.g. number of active cards). */
   badge?: number;
+  /** Also highlight the item on nested routes (e.g. a detail page under the list). */
+  matchNested?: boolean;
   icon: ReactNode;
 };
 
@@ -77,120 +79,167 @@ export type AppShellUser = {
 
 function SidebarContent({
   navItems,
+  workspaceItems,
   user,
   profileHref,
   onSignOut,
   signingOut,
   onNavigate,
+  brandSubtitle,
+  activeDot,
+  collapsed = false,
 }: {
   navItems: AppShellNavItem[];
+  workspaceItems?: AppShellNavItem[];
   user: AppShellUser;
   profileHref?: string;
   onSignOut?: () => void | Promise<void>;
   signingOut?: boolean;
   onNavigate?: () => void;
+  brandSubtitle?: string;
+  activeDot?: boolean;
+  collapsed?: boolean;
 }) {
   const pathname = usePathname();
   const { t } = useLocale();
+  const labelVisibility = collapsed ? "opacity-0" : "opacity-100";
+  const labelTransition = "transition-opacity duration-300 ease-in-out motion-reduce:transition-none";
+  const itemSpacing = `transition-[padding,gap,background-color,border-color,color] duration-300 ease-in-out motion-reduce:transition-none ${collapsed ? "gap-0 px-2.5" : "gap-3 px-2.5"}`;
+  const renderItems = (items: AppShellNavItem[]) =>
+    items.map((item) => {
+        const active = item.href
+            ? pathname === item.href || (item.matchNested === true && pathname.startsWith(`${item.href}/`))
+            : false;
 
-  return (
-    <div className="flex h-full w-[260px] flex-col overflow-y-auto bg-[var(--bg-1)] px-4 py-6">
-      <div className="mb-4 flex items-center gap-2.5 border-b border-[var(--border-soft)] px-2 pt-2 pb-5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--emerald)] shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-          <span className="font-serif text-[17px] leading-none text-[var(--bg-0)]">B</span>
-        </div>
-        <span className="whitespace-nowrap text-[14.5px] font-semibold tracking-[0.01em] text-[var(--text-1)]">
-          Budget Panel
-        </span>
-      </div>
-
-      <p className="px-2.5 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
-        {t("navigation")}
-      </p>
-
-      <nav className="flex flex-col gap-1">
-        {navItems.map((item) => {
-          const active = item.href ? pathname === item.href : false;
-
-          const inner = (
-            <>
-              <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                  active
-                    ? "bg-[var(--emerald)]/20 text-[var(--emerald-text)]"
-                    : "bg-[var(--bg-2)] text-[var(--text-3)] group-hover:bg-[var(--bg-3)] group-hover:text-[var(--text-2)]"
-                }`}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
-                  {item.icon}
-                </svg>
-              </span>
-              <span
-                className={`flex-1 whitespace-nowrap text-[13.5px] ${
-                  active ? "font-semibold text-[var(--emerald-text)]" : ""
-                }`}
-              >
-                {item.label}
-              </span>
+        const inner = (
+          <>
+            <span
+              className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                active
+                  ? "bg-[var(--accent)]/20 text-[var(--accent-text)]"
+                  : "bg-[var(--bg-2)] text-[var(--text-3)] group-hover:bg-[var(--bg-3)] group-hover:text-[var(--text-2)]"
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+                {item.icon}
+              </svg>
               {item.badge != null && (
                 <span
-                  className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
-                    active
-                      ? "bg-[var(--emerald)] text-[var(--bg-0)]"
-                      : "bg-[var(--bg-3)] text-[var(--text-2)]"
-                  }`}
-                  aria-label={String(item.badge)}
+                  aria-hidden="true"
+                  className={`absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[9px] font-bold tabular-nums text-[var(--accent-contrast)] ring-2 ring-[var(--bg-2)] ${labelTransition} ${collapsed ? "opacity-100" : "opacity-0"}`}
                 >
                   {item.badge}
                 </span>
               )}
-              {item.soon && (
-                <span className="whitespace-nowrap rounded-full border border-[var(--border)] px-1.5 py-0.5 text-[9.5px] tracking-[0.04em] text-[var(--text-3)]">
-                  {t("soon")}
-                </span>
-              )}
-            </>
-          );
-
-          if (!item.href) {
-            return (
-              <span
-                key={item.label}
-                className="group flex items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 text-[var(--text-3)]"
-                aria-disabled="true"
-              >
-                {inner}
-              </span>
-            );
-          }
-
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={onNavigate}
-              className={`group flex items-center gap-3 rounded-xl border px-2.5 py-2 transition-colors ${
-                active
-                  ? "border-[var(--emerald)]/30 bg-[var(--emerald-dim)] text-[var(--text-1)]"
-                  : "border-transparent text-[var(--text-2)] hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
+            </span>
+            <span
+              className={`min-w-0 flex-1 overflow-hidden whitespace-nowrap text-[13.5px] ${labelTransition} ${labelVisibility} ${
+                active ? "font-semibold text-[var(--accent-text)]" : ""
               }`}
             >
-              {inner}
-            </Link>
-          );
-        })}
-      </nav>
+              {item.label}
+            </span>
+            {activeDot && active && (
+              <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)] ${labelTransition} ${labelVisibility}`} />
+            )}
+            {item.badge != null && (
+              <span
+                className={`flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${labelTransition} ${labelVisibility} ${
+                  active
+                    ? "bg-[var(--accent)] text-[var(--accent-contrast)]"
+                    : "bg-[var(--bg-3)] text-[var(--text-2)]"
+                }`}
+                aria-label={String(item.badge)}
+              >
+                {item.badge}
+              </span>
+            )}
+            {item.soon && (
+              <span className={`shrink-0 whitespace-nowrap rounded-full border border-[var(--border)] px-1.5 py-0.5 text-[9.5px] tracking-[0.04em] text-[var(--text-3)] ${labelTransition} ${labelVisibility}`}>
+                {t("soon")}
+              </span>
+            )}
+          </>
+        );
 
-      <div className="flex-1" />
+        if (!item.href) {
+          return (
+            <span
+              key={item.label}
+              className={`group flex shrink-0 items-center overflow-hidden rounded-xl border border-transparent py-2 text-[var(--text-3)] ${itemSpacing}`}
+              aria-disabled="true"
+              title={collapsed ? `${item.label}${item.soon ? ` — ${t("soon")}` : ""}` : undefined}
+            >
+              {inner}
+            </span>
+          );
+        }
+
+        return (
+          <Link
+            key={item.label}
+            href={item.href}
+            onClick={onNavigate}
+            aria-current={active ? "page" : undefined}
+            title={collapsed ? `${item.label}${item.badge != null ? ` (${item.badge})` : ""}${item.soon ? ` — ${t("soon")}` : ""}` : undefined}
+            className={`group flex shrink-0 items-center overflow-hidden rounded-xl border py-2 ${itemSpacing} ${
+              active
+                ? "border-[var(--accent)]/30 bg-[var(--accent-dim)] text-[var(--text-1)]"
+                : "border-transparent text-[var(--text-2)] hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
+            }`}
+          >
+            {inner}
+          </Link>
+        );
+    });
+
+  return (
+    <div className={`flex h-full w-full flex-col overflow-x-hidden overflow-y-auto bg-[var(--bg-2)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-[padding] duration-300 ease-in-out motion-reduce:transition-none ${collapsed ? "px-3" : "px-4"}`}>
+      <div title={collapsed ? "Budget Panel" : undefined} className="mb-4 flex shrink-0 items-center gap-2.5 overflow-hidden border-b border-[var(--border-soft)] px-2.5 pt-2 pb-5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+          <span className="font-serif text-[17px] leading-none text-[var(--accent-contrast)]">B</span>
+        </div>
+        <div className={`flex min-w-0 flex-col ${labelTransition} ${labelVisibility}`}>
+          <span className="whitespace-nowrap text-[14.5px] font-semibold tracking-[0.01em] text-[var(--text-1)]">
+            Budget Panel
+          </span>
+          {brandSubtitle ? (
+            <span className="whitespace-nowrap font-mono text-[9.5px] uppercase tracking-[0.18em] text-[var(--accent-text)]">
+              {brandSubtitle}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <p className={`shrink-0 overflow-hidden whitespace-nowrap px-2.5 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)] ${labelTransition} ${labelVisibility}`}>
+        {t("navigation")}
+      </p>
+
+      <nav className="flex shrink-0 flex-col gap-1" aria-label={t("navigation")}>{renderItems(navItems)}</nav>
+
+      {workspaceItems && workspaceItems.length > 0 ? (
+        <>
+          <p className={`shrink-0 overflow-hidden whitespace-nowrap px-2.5 pt-6 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)] ${labelTransition} ${labelVisibility}`}>
+            {t("workspaces")}
+          </p>
+          <nav className="flex shrink-0 flex-col gap-1" aria-label={t("workspaces")}>
+            {renderItems(workspaceItems)}
+          </nav>
+        </>
+      ) : null}
+
+      <div className="min-h-4 flex-1" />
 
       {profileHref ? (
         <Link
           href={profileHref}
           onClick={onNavigate}
-          className="flex items-center gap-2.5 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)] p-2.5 transition-colors hover:bg-[var(--bg-3)]"
+          aria-label={user?.name || user?.email || t("userAvatar")}
+          title={collapsed ? user?.name || user?.email || t("userAvatar") : undefined}
+          className={`flex shrink-0 items-center gap-2.5 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)] p-2.5 transition-colors hover:bg-[var(--bg-3)]`}
         >
-          <Avatar name={user?.name} avatarUrl={user?.avatarUrl} size="sm" />
-          <div className="min-w-0 flex-1">
+          <span className="shrink-0"><Avatar name={user?.name} avatarUrl={user?.avatarUrl} size="sm" /></span>
+          <div className={`min-w-0 flex-1 ${labelTransition} ${labelVisibility}`}>
             <div className="truncate text-[12.5px] font-medium text-[var(--text-1)]">
               {user?.name || user?.email}
             </div>
@@ -203,16 +252,17 @@ function SidebarContent({
             fill="none"
             stroke="currentColor"
             strokeWidth={1.6}
-            className="shrink-0 text-[var(--text-3)]"
+            aria-hidden="true"
+            className={`shrink-0 text-[var(--text-3)] ${labelTransition} ${labelVisibility}`}
           >
             <path d="M7 12h13M7 12l4-4M7 12l4 4" />
             <path d="M3 5v14" />
           </svg>
         </Link>
       ) : (
-        <div className="flex items-center gap-2.5 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)] p-2.5">
-          <Avatar name={user?.name} avatarUrl={user?.avatarUrl} size="sm" />
-          <div className="min-w-0 flex-1">
+        <div title={collapsed ? user?.name || user?.email : undefined} className={`relative shrink-0 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)] transition-[height] duration-300 ease-in-out motion-reduce:transition-none ${collapsed && onSignOut ? "h-[92px]" : "h-[54px]"}`}>
+          <span className="absolute top-2.5 left-2.5"><Avatar name={user?.name} avatarUrl={user?.avatarUrl} size="sm" /></span>
+          <div className={`absolute top-2.5 right-[50px] left-[52px] min-w-0 ${labelTransition} ${labelVisibility}`}>
             <div className="truncate text-[12.5px] font-medium text-[var(--text-1)]">
               {user?.name || user?.email}
             </div>
@@ -225,7 +275,8 @@ function SidebarContent({
               disabled={signingOut}
               aria-label={t("signOut")}
               title={t("signOut")}
-              className="flex h-[30px] w-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:border-[var(--rose)]/40 hover:bg-[var(--bg-3)] hover:text-[var(--rose)] disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ left: collapsed ? "11px" : "calc(100% - 41px)", top: collapsed ? "50px" : "11px" }}
+              className="absolute flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-[left,top,background-color,border-color,color] duration-300 ease-in-out hover:border-[var(--rose)]/40 hover:bg-[var(--bg-3)] hover:text-[var(--rose)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
               {signingOut ? (
                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -248,6 +299,7 @@ function SidebarContent({
 
 export function AppShell({
   navItems,
+  workspaceItems,
   pageTitles,
   defaultTitle,
   user,
@@ -256,9 +308,16 @@ export function AppShell({
   signingOut,
   headerActions,
   mainClassName = "mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8",
+  workspace,
+  brandSubtitle,
+  activeDot,
+  headerLead,
+  headerSearch,
   children,
 }: {
   navItems: AppShellNavItem[];
+  /** Optional links to the other workspaces, listed under their own heading. */
+  workspaceItems?: AppShellNavItem[];
   pageTitles?: Record<string, string>;
   defaultTitle?: string;
   user: AppShellUser;
@@ -267,6 +326,16 @@ export function AppShell({
   signingOut?: boolean;
   headerActions?: ReactNode;
   mainClassName?: string;
+  /** Accent theme for this shell; omitted keeps the default accent. */
+  workspace?: Workspace;
+  /** Small mono line under the brand name in the sidebar. */
+  brandSubtitle?: string;
+  /** Marks the active sidebar item with a trailing dot. */
+  activeDot?: boolean;
+  /** Replaces the page title on the left of the top bar (e.g. a breadcrumb). */
+  headerLead?: ReactNode;
+  /** Replaces the search icon button; the page then owns the Cmd+K shortcut. */
+  headerSearch?: ReactNode;
   children: ReactNode;
 }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -285,6 +354,7 @@ export function AppShell({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (headerSearch) return;
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setPaletteOpen((open) => !open);
@@ -292,29 +362,33 @@ export function AppShell({
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [headerSearch]);
 
-  return (
+  const shell = (
     <HeaderSlotContext.Provider value={{ setHeaderSlot }}>
-      <div className="relative flex h-screen w-full overflow-hidden bg-[var(--bg-0)] font-sans text-[var(--text-2)]">
-        <AmbientBackground />
+      <div className="relative grid h-dvh w-full grid-cols-[auto_minmax(0,1fr)] grid-rows-[72px_minmax(0,1fr)] overflow-hidden bg-[var(--shell-header-bg)] px-2 pb-2 font-sans text-[var(--text-2)] sm:px-3 sm:pb-3">
         <aside
-          className={`relative z-40 hidden shrink-0 overflow-hidden border-r border-[var(--border-soft)] bg-[var(--bg-1)] transition-[margin-left] duration-300 ease-in-out will-change-[margin-left] motion-reduce:transition-none md:flex md:w-[260px] ${
-            collapsed ? "md:ml-[-260px]" : "md:ml-0"
+          id="desktop-sidebar"
+          className={`relative z-40 col-start-1 row-start-2 hidden min-h-0 shrink-0 overflow-hidden rounded-l-[28px] border-r border-[var(--border-soft)] bg-[var(--bg-2)] transition-[width] duration-300 ease-in-out motion-reduce:transition-none md:flex ${
+            collapsed ? "md:w-[80px]" : "md:w-[260px]"
           }`}
         >
           <SidebarContent
             navItems={navItems}
+            workspaceItems={workspaceItems}
             user={user}
             profileHref={profileHref}
             onSignOut={onSignOut}
             signingOut={signingOut}
+            brandSubtitle={brandSubtitle}
+            activeDot={activeDot}
+            collapsed={collapsed}
           />
         </aside>
 
-        <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-y-auto">
-          <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-[var(--border-soft)] bg-[var(--bg-0)]/85 backdrop-blur-md px-4 sm:px-8">
-            <div className="flex items-center gap-x-4">
+        <div className="contents">
+          <header className="relative z-30 col-span-2 row-start-1 flex min-w-0 shrink-0 items-center justify-between gap-2 bg-[var(--shell-header-bg)] px-2 [--bg-1:#27213f] [--bg-2:#27213f] [--bg-3:#342e4c] [--text-1:var(--shell-header-text)] [--text-2:var(--shell-header-muted)] [--text-3:var(--shell-header-muted)] [--border:var(--shell-header-border)] [--border-soft:var(--shell-header-border)] [--accent-dim:#2c2054] [--accent-text:#c4b5fd] sm:gap-3 sm:px-6">
+            <div className="flex min-w-0 items-center gap-x-2 sm:gap-x-4">
               <button
                 onClick={() => setMobileSidebarOpen(true)}
                 className="cursor-pointer rounded-lg p-1 text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)] md:hidden"
@@ -326,6 +400,8 @@ export function AppShell({
               </button>
               <button
                 onClick={toggleCollapsed}
+                aria-expanded={!collapsed}
+                aria-controls="desktop-sidebar"
                 aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
                 title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
                 className="hidden cursor-pointer rounded-lg p-1 text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)] md:block"
@@ -334,12 +410,14 @@ export function AppShell({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              {title ? (
-                <h1 className="font-serif text-xl font-semibold text-[var(--text-1)] sm:text-[22px]">{title}</h1>
-              ) : null}
+              {headerLead ??
+                (title ? (
+                <h1 className="truncate font-serif text-lg font-semibold text-[var(--text-1)] sm:text-[22px]">{title}</h1>
+              ) : null)}
             </div>
 
-            <div className="flex items-center gap-x-3.5">
+            <div className="flex shrink-0 items-center gap-x-1.5 sm:gap-x-3.5">
+              {headerSearch ?? (
               <button
                 type="button"
                 onClick={() => setPaletteOpen(true)}
@@ -352,6 +430,7 @@ export function AppShell({
                   <path strokeLinecap="round" d="m21 21-4.3-4.3" />
                 </svg>
               </button>
+              )}
               <LanguageSwitcher />
               {headerSlot ? (
                 <>
@@ -363,7 +442,7 @@ export function AppShell({
             </div>
           </header>
 
-          <main className="flex-1">
+          <main className="relative z-10 col-start-2 row-start-2 min-h-0 min-w-0 overflow-y-auto rounded-[28px] bg-[var(--bg-0)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:rounded-l-none">
             <div className={mainClassName}>{children}</div>
           </main>
         </div>
@@ -388,11 +467,14 @@ export function AppShell({
               </div>
               <SidebarContent
                 navItems={navItems}
+                workspaceItems={workspaceItems}
                 user={user}
                 profileHref={profileHref}
                 onSignOut={onSignOut}
                 signingOut={signingOut}
                 onNavigate={() => setMobileSidebarOpen(false)}
+                brandSubtitle={brandSubtitle}
+                activeDot={activeDot}
               />
             </aside>
           </div>
@@ -402,4 +484,6 @@ export function AppShell({
       </div>
     </HeaderSlotContext.Provider>
   );
+
+  return workspace ? <WorkspaceTheme workspace={workspace}>{shell}</WorkspaceTheme> : shell;
 }

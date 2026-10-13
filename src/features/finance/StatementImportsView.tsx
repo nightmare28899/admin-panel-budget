@@ -107,16 +107,16 @@ export function StatementImportsView() {
     <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6 ${STATEMENT_FIELD_SCOPE}`}>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-semibold tracking-tight text-white">
+          <h1 className="font-serif text-2xl font-semibold tracking-tight text-[var(--text-1)]">
              {t("cardStatements")}
           </h1>
-          <p className="mt-0.5 text-sm text-slate-400">
+          <p className="mt-0.5 text-sm text-[var(--text-3)]">
              {t("statementsDescription")}
           </p>
         </div>
         <Link
           href="/finance/cards"
-          className="rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:bg-slate-800/80 focus-visible:outline-2 focus-visible:outline-emerald-400"
+          className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] px-3.5 py-2 text-xs font-medium text-[var(--text-2)] transition hover:bg-[var(--bg-3)]/80 focus-visible:outline-2 focus-visible:outline-emerald-400"
         >
            {t("manageCards")}
         </Link>
@@ -133,7 +133,7 @@ export function StatementImportsView() {
               type="button"
               onClick={() => feedback.setError(undefined)}
                aria-label={t("dismissError")}
-              className="shrink-0 cursor-pointer text-rose-300/70 transition-colors hover:text-rose-200"
+              className="shrink-0 cursor-pointer text-[var(--rose-text)]/70 transition-colors hover:text-[var(--rose-text)]"
             >
               ✕
             </button>
@@ -151,7 +151,7 @@ export function StatementImportsView() {
       </div>
 
        <StatementSectionCard title={t("creditCardRequired")} className="mb-4">
-        <p className="mb-3 text-xs text-slate-400">
+        <p className="mb-3 text-xs text-[var(--text-3)]">
            {t("cardRequiredTag")}
         </p>
         {creditCards.loading ? (
@@ -168,7 +168,7 @@ export function StatementImportsView() {
               />
             </div>
             {creditCards.cardsError && (
-              <p className="mt-1.5 text-xs text-amber-300">
+              <p className="mt-1.5 text-xs text-[var(--gold-text)]">
                  {t("cardsLoadFallback")}
               </p>
             )}
@@ -180,7 +180,7 @@ export function StatementImportsView() {
          <StatementSectionCard title={t("uploadStatement")}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="statement-file" className="mb-1.5 block text-sm text-slate-300">
+              <label htmlFor="statement-file" className="mb-1.5 block text-sm text-[var(--text-2)]">
                  {t("statementPdf")}
               </label>
               <input
@@ -192,26 +192,26 @@ export function StatementImportsView() {
                 onChange={(event) => upload.selectFile(event.target.files?.[0])}
                 className="peer sr-only"
               />
-              <div className="flex min-h-11 items-center gap-3 rounded-xl border border-slate-800 bg-[#0A0F19] p-2 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-400 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#0D1424]">
+              <div className="flex min-h-11 items-center gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-2 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-400 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-1)]">
                 <label
                   htmlFor="statement-file"
                   aria-disabled={upload.uploading}
-                  className={`shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-500/20 ${
+                  className={`shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-[var(--emerald-text)] transition hover:bg-emerald-500/20 ${
                     upload.uploading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
                   }`}
                 >
                   {t("choosePdfFile")}
                 </label>
-                <span className="min-w-0 truncate text-sm text-slate-300">
+                <span className="min-w-0 truncate text-sm text-[var(--text-2)]">
                   {upload.file ? upload.file.name : t("noFileSelected")}
                   {upload.file && (
-                    <span className="ml-2 font-mono text-xs text-slate-400">
+                    <span className="ml-2 font-mono text-xs text-[var(--text-3)]">
                       {formatNumber(upload.file.size / (1024 * 1024), { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MB
                     </span>
                   )}
                 </span>
               </div>
-              <p className="mt-1.5 text-xs text-slate-400">
+              <p className="mt-1.5 text-xs text-[var(--text-3)]">
                  {t("pdfHelp")}
               </p>
             </div>
@@ -229,12 +229,12 @@ export function StatementImportsView() {
         </StatementSectionCard>
 
          <StatementSectionCard title={t("reviewWorkflow")}>
-          <ol className="space-y-3 text-sm text-slate-300">
-             <li><span className="mr-2 font-mono font-semibold text-emerald-400">1.</span>{t("workflowStep1")}</li>
-             <li><span className="mr-2 font-mono font-semibold text-emerald-400">2.</span>{t("workflowStep2")}</li>
-             <li><span className="mr-2 font-mono font-semibold text-emerald-400">3.</span>{t("workflowStep3")}</li>
+          <ol className="space-y-3 text-sm text-[var(--text-2)]">
+             <li><span className="mr-2 font-mono font-semibold text-[var(--emerald-text)]">1.</span>{t("workflowStep1")}</li>
+             <li><span className="mr-2 font-mono font-semibold text-[var(--emerald-text)]">2.</span>{t("workflowStep2")}</li>
+             <li><span className="mr-2 font-mono font-semibold text-[var(--emerald-text)]">3.</span>{t("workflowStep3")}</li>
           </ol>
-          <p className="mt-4 text-xs leading-5 text-slate-400">
+          <p className="mt-4 text-xs leading-5 text-[var(--text-3)]">
              {t("workflowNotice")}
           </p>
         </StatementSectionCard>
@@ -248,7 +248,7 @@ export function StatementImportsView() {
        <StatementSectionCard title={t("importHistory")}>
         {creditCards.cards.length > 0 && (
           <div className="mb-4 flex items-center gap-2">
-            <label htmlFor="statement-history-card-filter" className="text-xs text-slate-400">
+            <label htmlFor="statement-history-card-filter" className="text-xs text-[var(--text-3)]">
                {t("filterByCard")}
             </label>
             <Select
@@ -279,7 +279,7 @@ export function StatementImportsView() {
                 return (
                   <li key={statementImport.id} className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0">
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-white">
+                      <p className="truncate font-medium text-[var(--text-1)]">
                          {statementImport.sourceFileName || t("statementPdfFallback")}
                       </p>
 
@@ -293,7 +293,7 @@ export function StatementImportsView() {
                           </span>
                         </span>
                       ) : (
-                        <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-slate-400">
+                        <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-[var(--text-3)]">
                           <CreditCardOutlined className="shrink-0" />
                           {t("noCard")}
                         </span>
@@ -310,7 +310,7 @@ export function StatementImportsView() {
                            {statementImport.paymentStatus === "PAID" ? t("paid") : statementImport.paymentStatus === "PARTIAL" ? t("partial") : t("unpaid")}
                         </StatementBadge>
                       </div>
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="mt-1 text-xs text-[var(--text-3)]">
                          {statementImport.periodStart && statementImport.periodEnd
                            ? `${formatDate(statementImport.periodStart, { dateStyle: "medium" })}–${formatDate(statementImport.periodEnd, { dateStyle: "medium" })}`
                            : "—"} · {t("uploadedAt", { date: formatDate(statementImport.createdAt, { dateStyle: "medium", timeStyle: "short" }) })}
@@ -365,8 +365,8 @@ export function StatementImportsView() {
             </ul>
 
             {imports.totalPages > 1 && (
-              <div className="mt-5 flex items-center justify-between border-t border-slate-800/60 pt-4 text-sm">
-                <span className="text-slate-400">
+              <div className="mt-5 flex items-center justify-between border-t border-[var(--border-soft)]/60 pt-4 text-sm">
+                <span className="text-[var(--text-3)]">
                    {t("pageOf", { page: formatNumber(imports.history.page), total: formatNumber(imports.totalPages) })}
                 </span>
                 <div className="flex gap-2">
@@ -390,8 +390,8 @@ export function StatementImportsView() {
           </>
         ) : (
           <div className="py-8 text-center">
-             <p className="text-sm font-medium text-slate-300">{t("noStatements")}</p>
-             <p className="mt-1 text-xs text-slate-400">{t("noStatementsHelp")}</p>
+             <p className="text-sm font-medium text-[var(--text-2)]">{t("noStatements")}</p>
+             <p className="mt-1 text-xs text-[var(--text-3)]">{t("noStatementsHelp")}</p>
           </div>
         )}
       </StatementSectionCard>

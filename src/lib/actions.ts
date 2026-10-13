@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 import { api, LoginResponse } from "./api";
+import { userApi } from "./userApi";
+import { userGoogleAuthEnabled } from "./userSession";
 import {
     ActionResult,
     SESSION_EXPIRED_MESSAGE,
@@ -54,6 +56,34 @@ export async function loginAction(email: string, password: string) {
         return { success: true };
     } catch (err) {
         return { error: err instanceof Error ? err.message : "loginFailed" };
+    }
+}
+
+export async function googleLoginAction(firebaseToken: string) {
+    if (!userGoogleAuthEnabled()) {
+        return { error: "userGoogleSignInUnavailable" };
+    }
+
+    try {
+        // Admin sign-in never creates accounts.
+        const res = await userApi.google(firebaseToken, { existingUserOnly: true });
+
+        if (!isAdminRole(res.user?.role)) {
+            // The backend already issued a session for this account; revoke it.
+            try {
+                await userApi.logout(res.accessToken);
+            } catch {
+                // Best effort: no admin cookie is set either way.
+            }
+            return { error: "noPlatformAccess" };
+        }
+
+        const cookieStore = await cookies();
+        setSessionCookies(cookieStore, res);
+
+        return { success: true };
+    } catch (err) {
+        return { error: err instanceof Error ? err.message : "googleFailed" };
     }
 }
 

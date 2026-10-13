@@ -9,10 +9,10 @@ export type TrendDirection = "up" | "down" | "flat";
 
 // Static class strings so Tailwind can see every utility.
 const ICON_CLASS: Record<ReportKpiAccent, string> = {
-  emerald: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
-  amber: "border-amber-500/20 bg-amber-500/10 text-amber-400",
-  teal: "border-teal-500/20 bg-teal-500/10 text-teal-400",
-  purple: "border-purple-500/20 bg-purple-500/10 text-purple-400",
+  emerald: "border-emerald-500/20 bg-emerald-500/10 text-[var(--emerald-text)]",
+  amber: "border-amber-500/20 bg-amber-500/10 text-[var(--gold-text)]",
+  teal: "border-teal-500/20 bg-teal-500/10 text-[var(--info-text)]",
+  purple: "border-purple-500/20 bg-purple-500/10 text-[var(--accent-text)]",
 };
 
 const ICON_PATH: Record<ReportKpiAccent, string> = {
@@ -26,9 +26,9 @@ const ICON_PATH: Record<ReportKpiAccent, string> = {
 
 const CHIP_CLASS: Record<TrendDirection, string> = {
   // Spending went down: good news, green. Up: red. Flat: neutral.
-  down: "border-emerald-800/40 bg-emerald-950/60 text-emerald-400",
-  up: "border-rose-800/40 bg-rose-950/60 text-rose-400",
-  flat: "border-slate-700/60 bg-slate-800/60 text-slate-300",
+  down: "border-emerald-800/40 bg-[var(--emerald-dim)] text-[var(--emerald-text)]",
+  up: "border-rose-800/40 bg-[var(--rose-dim)] text-[var(--rose-text)]",
+  flat: "border-[var(--border-soft)]/60 bg-[var(--bg-3)]/60 text-[var(--text-2)]",
 };
 
 const ARROW: Record<TrendDirection, string> = { down: "▼", up: "▲", flat: "•" };
@@ -67,7 +67,7 @@ export function ReportSparkline({
   tone: "emerald" | "rose";
 }) {
   const samples = sparklineSamples(values, 24);
-  const colorClass = tone === "rose" ? "text-rose-400" : "text-emerald-400";
+  const colorClass = tone === "rose" ? "text-[var(--rose-text)]" : "text-[var(--emerald-text)]";
   const flat = samples.length < 2 || samples.every((v) => v === samples[0]);
   let line: string;
   if (flat) {
@@ -139,7 +139,7 @@ export function ReportKpiTile({
   footer?: ReactNode;
 }) {
   return (
-    <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[#18262E] bg-[#0D1418] p-5 transition-all duration-300 hover:border-[#243742]">
+    <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-5 transition-all duration-300 hover:border-[var(--border-soft)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span
@@ -155,7 +155,7 @@ export function ReportKpiTile({
               />
             </svg>
           </span>
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
             {label}
           </span>
         </div>
@@ -164,16 +164,16 @@ export function ReportKpiTile({
       <div className="mt-4 flex items-baseline justify-between gap-2">
         <div className="min-w-0">
           {unit && (
-            <span className="mr-1.5 text-xs font-semibold text-slate-500">{unit}</span>
+            <span className="mr-1.5 text-xs font-semibold text-[var(--text-3)]">{unit}</span>
           )}
-          <span className="text-2xl font-bold tracking-tight text-white">{value}</span>
+          <span className="text-2xl font-bold tracking-tight text-[var(--text-1)]">{value}</span>
           {suffix && (
-            <span className="ml-1.5 text-xs font-normal text-slate-400">{suffix}</span>
+            <span className="ml-1.5 text-xs font-normal text-[var(--text-3)]">{suffix}</span>
           )}
         </div>
         {right}
       </div>
-      <div className="mt-2 flex min-h-4 items-center gap-1 text-[11px] text-slate-500">
+      <div className="mt-2 flex min-h-4 items-center gap-1 text-[11px] text-[var(--text-3)]">
         {footer}
       </div>
     </div>
@@ -191,11 +191,11 @@ export function ReportKpiSkeleton({ count = 4 }: { count?: number }) {
         <div
           key={index}
           aria-hidden="true"
-          className="rounded-2xl border border-[#18262E] bg-[#0D1418] p-5"
+          className="rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-5"
         >
-          <div className="h-8 w-32 animate-pulse rounded-lg bg-[#121C22] motion-reduce:animate-none" />
-          <div className="mt-4 h-7 w-36 animate-pulse rounded-lg bg-[#121C22] motion-reduce:animate-none" />
-          <div className="mt-3 h-3 w-28 animate-pulse rounded-lg bg-[#121C22] motion-reduce:animate-none" />
+          <div className="h-8 w-32 animate-pulse rounded-lg bg-[var(--bg-3)] motion-reduce:animate-none" />
+          <div className="mt-4 h-7 w-36 animate-pulse rounded-lg bg-[var(--bg-3)] motion-reduce:animate-none" />
+          <div className="mt-3 h-3 w-28 animate-pulse rounded-lg bg-[var(--bg-3)] motion-reduce:animate-none" />
         </div>
       ))}
     </div>

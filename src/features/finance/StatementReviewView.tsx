@@ -720,7 +720,7 @@ export function StatementReviewView({
         return (
           <div className="space-y-3">
             <div>
-              <label htmlFor={dateId} className="mb-1 block text-xs font-medium text-slate-400">{t("transactionDate")}</label>
+              <label htmlFor={dateId} className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("transactionDate")}</label>
               <Input
                 id={dateId}
                 type="date"
@@ -734,7 +734,7 @@ export function StatementReviewView({
                 }}
               />
               {!sameInstant(row.transactionDate, row.parsedTransactionDate) && (
-                <p className="mt-1 text-xs text-amber-300">
+                <p className="mt-1 text-xs text-[var(--gold-text)]">
                   {t("originalReviewedValue", {
                     original: toCalendarDate(row.parsedTransactionDate) || "—",
                     reviewed: toCalendarDate(row.transactionDate) || "—",
@@ -743,7 +743,7 @@ export function StatementReviewView({
               )}
             </div>
             <div>
-              <label htmlFor={descriptionId} className="mb-1 block text-xs font-medium text-slate-400">{t("statementDescription")}</label>
+              <label htmlFor={descriptionId} className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("statementDescription")}</label>
               <Input
                 id={descriptionId}
                 value={row.description}
@@ -754,14 +754,14 @@ export function StatementReviewView({
             </div>
             <div>
               {showMerchantInput ? (
-                <label htmlFor={merchantId} className="mb-1 block text-xs font-medium text-slate-400">{t("normalizedMerchant")}</label>
+                <label htmlFor={merchantId} className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("normalizedMerchant")}</label>
               ) : (
-                <span className="mb-1 block text-xs font-medium text-slate-400">{t("normalizedMerchant")}</span>
+                <span className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("normalizedMerchant")}</span>
               )}
               <div
                 className={showMerchantInput
                   ? "flex items-center gap-2"
-                  : "flex min-h-8 items-center justify-between gap-2 rounded-lg border border-slate-800 bg-[#0A0F19] px-3 py-1.5"}
+                  : "flex min-h-8 items-center justify-between gap-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-1)] px-3 py-1.5"}
               >
                 <div id={merchantRegionId} className="min-w-0 flex-1">
                   {showMerchantInput ? (
@@ -775,7 +775,7 @@ export function StatementReviewView({
                       onChange={(event) => patchRow(row.id, { merchantName: event.target.value || null })}
                     />
                   ) : (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-[var(--text-3)]">
                       {merchantMatchesDescription
                         ? t("sameAsDescription")
                         : normalizedMerchant
@@ -817,9 +817,9 @@ export function StatementReviewView({
           <StatementBadge tone={canIncludeAsExpense(row) ? "sky" : "slate"} dot={false}>
             {rowKindLabel(row.kind)}
           </StatementBadge>
-          <p className="text-xs text-slate-400">{sectionLabel(row.section)}</p>
+          <p className="text-xs text-[var(--text-3)]">{sectionLabel(row.section)}</p>
           {row.kind !== row.parsedKind && (
-            <p className="text-xs text-amber-300">
+            <p className="text-xs text-[var(--gold-text)]">
               {t("originalReviewedValue", {
                 original: rowKindLabel(row.parsedKind),
                 reviewed: rowKindLabel(row.kind),
@@ -837,7 +837,7 @@ export function StatementReviewView({
           {row.warningCodes
             ?.filter((warning) => warning !== "MATCHES_REGISTERED_EXPENSE")
             .map((warning) => (
-            <p key={warning} className="text-xs text-amber-300">{warningLabel(warning)}</p>
+            <p key={warning} className="text-xs text-[var(--gold-text)]">{warningLabel(warning)}</p>
           ))}
         </div>
       ),
@@ -870,7 +870,7 @@ export function StatementReviewView({
             />
           </div>
           {(!sameMoney(row.amount, row.parsedAmount) || row.currency !== row.parsedCurrency) && (
-            <p className="mt-1 text-xs text-amber-300">
+            <p className="mt-1 text-xs text-[var(--gold-text)]">
               {t("originalReviewedValue", {
                 original: formatMoney(row.parsedAmount, row.parsedCurrency),
                 reviewed: formatMoney(row.amount, row.currency),
@@ -935,7 +935,7 @@ export function StatementReviewView({
 
   if (loading && !statementImport) {
     return (
-      <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6 [&_.animate-pulse]:!bg-slate-800/80`}>
+      <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6 [&_.animate-pulse]:!bg-[var(--bg-3)]/80`}>
         <TableSkeleton rows={7} columns={6} />
       </div>
     );
@@ -945,7 +945,7 @@ export function StatementReviewView({
     return (
       <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6`}>
         <StatementSectionCard>
-          <p role="alert" className="text-sm text-rose-300">{error ?? t("statementNotFound")}</p>
+          <p role="alert" className="text-sm text-[var(--rose-text)]">{error ?? t("statementNotFound")}</p>
           <StatementButton className="mt-4" onClick={() => router.push("/finance/statements")}>{t("backToStatements")}</StatementButton>
         </StatementSectionCard>
       </div>
@@ -956,16 +956,16 @@ export function StatementReviewView({
   const reconciliationDifferenceTone = statementImport.reconciliation?.status === "PASSED"
     ? {
         surface: "border-emerald-500/30 bg-emerald-500/10",
-        text: "text-emerald-400",
+        text: "text-[var(--emerald-text)]",
       }
     : statementImport.reconciliation?.status === "PENDING"
       ? {
           surface: "border-amber-500/30 bg-amber-500/10",
-          text: "text-amber-400",
+          text: "text-[var(--gold-text)]",
         }
       : {
           surface: "border-rose-500/30 bg-rose-500/10",
-          text: "text-rose-400",
+          text: "text-[var(--rose-text)]",
         };
 
   return (
@@ -976,12 +976,12 @@ export function StatementReviewView({
             ← {t("backToStatements")}
           </StatementButton>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="min-w-0 break-words font-serif text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
+            <h1 className="min-w-0 break-words font-serif text-2xl font-semibold leading-tight tracking-tight text-[var(--text-1)] sm:text-3xl">
               {statementImport.sourceFileName || t("statementReview")}
             </h1>
             <StatementBadge tone={toneFromVariant(status.variant)}>{statusLabels[statementImport.status]}</StatementBadge>
           </div>
-          <p className="mt-1.5 text-xs text-slate-400 sm:text-sm">
+          <p className="mt-1.5 text-xs text-[var(--text-3)] sm:text-sm">
             {t("versionUploaded", { version: statementImport.version, date: formatDate(statementImport.createdAt, { dateStyle: "medium", timeStyle: "short" }) })}
           </p>
         </div>
@@ -1046,7 +1046,7 @@ export function StatementReviewView({
           ) : undefined}
         >
           {statementImport.reconciliation?.message && (
-            <p className="mb-4 max-w-2xl text-xs text-slate-400">
+            <p className="mb-4 max-w-2xl text-xs text-[var(--text-3)]">
               {statementImport.reconciliation.message}
             </p>
           )}
@@ -1066,7 +1066,7 @@ export function StatementReviewView({
               />
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-slate-800 px-4 py-8 text-center text-sm text-slate-400">
+            <div className="rounded-xl border border-dashed border-[var(--border-soft)] px-4 py-8 text-center text-sm text-[var(--text-3)]">
               {t("reconciliationUnavailable")}
             </div>
           )}
@@ -1076,21 +1076,21 @@ export function StatementReviewView({
           title={t("reviewAdjustments")}
           aside={<StatementBadge tone={toneFromVariant(status.variant)}>{statusLabels[statementImport.status]}</StatementBadge>}
         >
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2.5">
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/80 px-3 py-2.5">
             <div>
               <StatementBadge tone={paymentStatusTone(statementImport.paymentStatus)}>
                 {statementImport.paymentStatus === "PAID" ? t("paid") : statementImport.paymentStatus === "PARTIAL" ? t("partial") : t("unpaid")}
               </StatementBadge>
               {statementImport.paidAt && (
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-xs text-[var(--text-3)]">
                   {t("paidAt", { date: formatDate(statementImport.paidAt, { dateStyle: "medium", timeStyle: "short" }) })}
                 </p>
               )}
             </div>
             {statementImport.paymentStatus === "PAID" ? (
-              <p className="max-w-[14rem] text-right text-xs text-slate-400">{t("statementPaidUseHistory")}</p>
+              <p className="max-w-[14rem] text-right text-xs text-[var(--text-3)]">{t("statementPaidUseHistory")}</p>
             ) : statementImport.status !== "CONFIRMED" ? (
-              <p className="max-w-[14rem] text-right text-xs text-slate-400">{t("confirmBeforePayment")}</p>
+              <p className="max-w-[14rem] text-right text-xs text-[var(--text-3)]">{t("confirmBeforePayment")}</p>
             ) : (
               <StatementButton
                 variant="pay"
@@ -1101,25 +1101,25 @@ export function StatementReviewView({
               </StatementButton>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
-            <p className="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
-            <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-emerald-400">{t("expensesSelected", { count: formatNumber(includedRows.length) })}</p>
-            <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-amber-400">{t("pendingDecisions", { count: formatNumber(pendingCount) })}</p>
-            <p className="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5">{t("parserWarnings", { count: formatNumber(statementImport.warningCount) })}</p>
-            <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-amber-400">{t("reviewAdjustmentsCount", { count: formatNumber(adjustedRows.length) })}</p>
+          <div className="grid grid-cols-2 gap-2 text-xs text-[var(--text-2)]">
+            <p className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/80 px-3 py-2.5">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
+            <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-[var(--emerald-text)]">{t("expensesSelected", { count: formatNumber(includedRows.length) })}</p>
+            <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-[var(--gold-text)]">{t("pendingDecisions", { count: formatNumber(pendingCount) })}</p>
+            <p className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)]/80 px-3 py-2.5">{t("parserWarnings", { count: formatNumber(statementImport.warningCount) })}</p>
+            <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-[var(--gold-text)]">{t("reviewAdjustmentsCount", { count: formatNumber(adjustedRows.length) })}</p>
             {alreadyRegisteredCount > 0 && (
-              <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-emerald-400">{t("alreadyRegisteredCount", { count: formatNumber(alreadyRegisteredCount) })}</p>
+              <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-[var(--emerald-text)]">{t("alreadyRegisteredCount", { count: formatNumber(alreadyRegisteredCount) })}</p>
             )}
           </div>
           {editable && blockers.length > 0 && (
             <div className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-              <ul className="space-y-1.5 text-xs leading-relaxed text-amber-300">
+              <ul className="space-y-1.5 text-xs leading-relaxed text-[var(--gold-text)]">
                 {blockers.map((blocker) => <li key={blocker}>• {blocker}</li>)}
               </ul>
             </div>
           )}
           {editable && blockers.length === 0 && (
-            <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5 text-xs text-emerald-300">
+            <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5 text-xs text-[var(--emerald-text)]">
               {t("readyToConfirm")}
             </div>
           )}
@@ -1141,10 +1141,10 @@ export function StatementReviewView({
         >
           <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
             {statementImport.paymentTargets.map((target) => (
-              <div key={target.id} className="rounded-xl border border-slate-800/80 bg-[#0A0F19] p-3">
-                <p className="truncate text-xs font-medium text-slate-300" title={target.label}>{paymentTargetLabel(target)}</p>
-                <p className="mt-1.5 break-words font-mono text-sm font-bold text-white">{formatMoney(target.amount, target.currency)}</p>
-                {target.dueDate && <p className="mt-1 text-[11px] text-slate-400">{t("dueDate", { date: formatDate(target.dueDate, { dateStyle: "medium" }) })}</p>}
+              <div key={target.id} className="rounded-xl border border-[var(--border-soft)]/80 bg-[var(--bg-1)] p-3">
+                <p className="truncate text-xs font-medium text-[var(--text-2)]" title={target.label}>{paymentTargetLabel(target)}</p>
+                <p className="mt-1.5 break-words font-mono text-sm font-bold text-[var(--text-1)]">{formatMoney(target.amount, target.currency)}</p>
+                {target.dueDate && <p className="mt-1 text-[11px] text-[var(--text-3)]">{t("dueDate", { date: formatDate(target.dueDate, { dateStyle: "medium" }) })}</p>}
               </div>
             ))}
           </div>
@@ -1152,10 +1152,10 @@ export function StatementReviewView({
       )}
 
       <StatementSectionCard bodyClassName="p-3 sm:p-4">
-        <div className="mb-3 flex flex-col gap-3 border-b border-slate-800/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-3 flex flex-col gap-3 border-b border-[var(--border-soft)]/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-sm font-bold tracking-tight text-white">{t("statementRows")}</h2>
-            <p className="mt-1 text-xs text-slate-400">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
+            <h2 className="text-sm font-bold tracking-tight text-[var(--text-1)]">{t("statementRows")}</h2>
+            <p className="mt-1 text-xs text-[var(--text-3)]">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
             <StatementBadge tone="emerald">{t("readyToConfirm")}</StatementBadge>
@@ -1163,9 +1163,9 @@ export function StatementReviewView({
             <StatementBadge tone="rose">{t("missingRequiredData")}</StatementBadge>
           </div>
         </div>
-        <div className="mb-3 flex flex-col gap-3 rounded-xl border border-slate-800 bg-[#0A0F19] p-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="mb-3 flex flex-col gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-3 sm:flex-row sm:flex-wrap sm:items-end">
           <div className="min-w-0 sm:w-56">
-            <label htmlFor="statement-row-filter" className="mb-1 block text-xs font-medium text-slate-400">
+            <label htmlFor="statement-row-filter" className="mb-1 block text-xs font-medium text-[var(--text-3)]">
               {t("filterStatementRows")}
             </label>
             <Select<StatementRowFilter>
@@ -1186,7 +1186,7 @@ export function StatementReviewView({
               }}
             />
           </div>
-          <p role="status" aria-live="polite" className="text-xs text-slate-400 sm:mr-auto sm:pb-2">
+          <p role="status" aria-live="polite" className="text-xs text-[var(--text-3)] sm:mr-auto sm:pb-2">
             {t("filteredStatementRowsCount", {
               filtered: formatNumber(filteredRows.length),
               total: formatNumber(rows.length),
@@ -1221,12 +1221,12 @@ export function StatementReviewView({
           )}
         </div>
         {editable && (
-          <div className="mb-3 flex flex-col gap-3 rounded-xl border border-slate-800 bg-[#0A0F19]/95 p-3 shadow-sm backdrop-blur md:flex-row md:items-center">
+          <div className="mb-3 flex flex-col gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-1)]/95 p-3 shadow-sm backdrop-blur md:flex-row md:items-center">
             <div className="md:mr-auto">
-              <p role="status" aria-live="polite" className="text-xs font-medium text-slate-200 md:text-sm">
+              <p role="status" aria-live="polite" className="text-xs font-medium text-[var(--text-2)] md:text-sm">
                 {t("statementRowsSelected", { count: formatNumber(selectedRows.length) })}
               </p>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-[var(--text-3)]">
                 {t("bulkCategorizationEligibility", {
                   eligible: formatNumber(selectedIncludableRows.length),
                   selected: formatNumber(selectedRows.length),
@@ -1272,7 +1272,7 @@ export function StatementReviewView({
             </div>
           </div>
         )}
-        <div className="min-w-0 overflow-hidden rounded-xl border border-slate-800 bg-[#0A0F19]/60">
+        <div className="min-w-0 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-1)]/60">
           <Table<StatementRow>
             rowKey="id"
             dataSource={filteredRows}
@@ -1286,7 +1286,7 @@ export function StatementReviewView({
             }}
             scroll={{ x: 1050, y: STATEMENT_ROWS_SCROLL_HEIGHT }}
             size="small"
-            className="[&_.ant-table]:!bg-transparent [&_.ant-table-container]:!border-0 [&_.ant-table-row-selected>td]:!bg-transparent [&_.ant-table-row-selected>td]:shadow-[inset_0_1px_0_rgba(16,185,129,0.55),inset_0_-1px_0_rgba(16,185,129,0.55)] [&_.ant-table-thead>tr>th]:!border-slate-800 [&_.ant-table-thead>tr>th]:!text-[11px] [&_.ant-table-thead>tr>th]:!uppercase [&_.ant-table-thead>tr>th]:!tracking-wider [&_.ant-table-thead>tr>th]:!text-slate-400 [&_.ant-table-tbody>tr>td]:!border-slate-800/60 [&_.ant-table-pagination]:!px-3"
+            className="[&_.ant-table]:!bg-transparent [&_.ant-table-container]:!border-0 [&_.ant-table-row-selected>td]:!bg-transparent [&_.ant-table-row-selected>td]:shadow-[inset_0_1px_0_rgba(16,185,129,0.55),inset_0_-1px_0_rgba(16,185,129,0.55)] [&_.ant-table-thead>tr>th]:!border-[var(--border-soft)] [&_.ant-table-thead>tr>th]:!text-[11px] [&_.ant-table-thead>tr>th]:!uppercase [&_.ant-table-thead>tr>th]:!tracking-wider [&_.ant-table-thead>tr>th]:!text-[var(--text-3)] [&_.ant-table-tbody>tr>td]:!border-[var(--border-soft)]/60 [&_.ant-table-pagination]:!px-3"
             onRow={(row) => ({
               style: { backgroundColor: rowTint(row, hasDefaultCard) },
             })}

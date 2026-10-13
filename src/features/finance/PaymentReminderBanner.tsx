@@ -91,15 +91,15 @@ export function PaymentReminderBanner({ cards }: { cards: CreditCardOverviewItem
   return (
     <aside
       aria-label={t("smartReminderTitle")}
-      className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950/20 via-slate-900 to-slate-900 p-4"
+      className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-500/20 bg-[var(--bg-1)] p-4"
     >
       <div className="flex min-w-0 flex-1 items-center gap-3.5">
-        <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-lg text-emerald-400">
+        <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-lg text-[var(--emerald-text)]">
           {urgent ? "🔔" : "✓"}
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-white">{title}</p>
-          <p className="mt-0.5 text-xs text-slate-400">{message}</p>
+          <p className="text-sm font-semibold text-[var(--text-1)]">{title}</p>
+          <p className="mt-0.5 text-xs text-[var(--text-3)]">{message}</p>
         </div>
       </div>
       {urgent && (
@@ -107,7 +107,7 @@ export function PaymentReminderBanner({ cards }: { cards: CreditCardOverviewItem
           <button
             type="button"
             onClick={() => schedule([urgent])}
-            className="cursor-pointer whitespace-nowrap rounded-xl border border-emerald-500/30 bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/30 focus-visible:outline-2 focus-visible:outline-emerald-400"
+            className="cursor-pointer whitespace-nowrap rounded-xl border border-emerald-500/30 bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-[var(--emerald-text)] transition hover:bg-emerald-500/30 focus-visible:outline-2 focus-visible:outline-emerald-400"
           >
             {t("scheduleReminder")}
           </button>
@@ -115,7 +115,7 @@ export function PaymentReminderBanner({ cards }: { cards: CreditCardOverviewItem
             <button
               type="button"
               onClick={() => schedule(dated)}
-              className="cursor-pointer whitespace-nowrap rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-xs font-medium text-slate-300 transition hover:bg-slate-800/80 focus-visible:outline-2 focus-visible:outline-emerald-400"
+              className="cursor-pointer whitespace-nowrap rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] px-4 py-2 text-xs font-medium text-[var(--text-2)] transition hover:bg-[var(--bg-3)]/80 focus-visible:outline-2 focus-visible:outline-emerald-400"
             >
               {t("scheduleAllReminders", { count: formatNumber(dated.length) })}
             </button>

@@ -1,0 +1,321 @@
+- generic [ref=e1]:
+  - alert [ref=e77]
+  - iframe [aria-hidden] [ref=e107]
+  - generic [ref=e109]:
+    - complementary [ref=e110]:
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]: B
+          - generic [ref=e115]: Budget Panel
+        - paragraph [ref=e116]: Navigation
+        - navigation [ref=e117]:
+          - link "Expenses" [ref=e118] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=e125] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=e129]: My Cards
+            - generic "3" [ref=e130]
+          - link "Statements" [ref=e131] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=e137] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=e143] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=e151] [cursor=pointer]:
+            - /url: /finance/reports
+        - paragraph [ref=e156]: Workspaces
+        - navigation "Workspaces" [ref=e157]:
+          - link "Personal nutrition" [ref=e158] [cursor=pointer]:
+            - /url: /nutrition/today
+        - generic [ref=e165]:
+          - img "Kevin" [ref=e166]
+          - generic [ref=e167]:
+            - generic [ref=e168]: Kevin
+            - generic [ref=e169]: nightmare28899@gmail.com
+          - button "Sign out" [ref=e170] [cursor=pointer]
+    - generic [ref=e174]:
+      - banner [ref=e175]:
+        - button "Expand sidebar" [ref=e177] [cursor=pointer]
+        - generic [ref=e180]:
+          - button "Search (Cmd+K)" [ref=e181]
+          - button "Language" [ref=e185] [cursor=pointer]:
+            - img "global" [ref=e186]
+          - button "Subscription alerts" [ref=e189] [cursor=pointer]
+      - main [ref=e193]:
+        - generic [ref=e195]:
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - heading "Your expenses" [level=1] [ref=e198]
+              - paragraph [ref=e199]: Live data from your Budget account.
+            - generic [ref=e200]:
+              - generic [ref=e201]: Updated 11:14 PM
+              - button "Refresh" [ref=e202] [cursor=pointer]
+              - button "New expense" [ref=e206] [cursor=pointer]
+          - generic [ref=e207]:
+            - generic [ref=e210]:
+              - generic [ref=e211]:
+                - img "wallet" [ref=e213]
+                - paragraph [ref=e216]: Spent this month
+              - generic [ref=e217]: "0.00"
+              - generic [ref=e220]: October 2026
+            - generic [ref=e225]:
+              - generic [ref=e226]:
+                - img "safety" [ref=e228]
+                - paragraph [ref=e232]: No budget configured
+              - generic [ref=e233]: —
+              - generic [ref=e237]:
+                - paragraph [ref=e238]: Set a budget to track how much you have left each period.
+                - button "Configure budget" [ref=e239] [cursor=pointer]
+          - generic [ref=e241]:
+            - heading "Expense history" [level=3] [ref=e242]
+            - generic [ref=e243]:
+              - generic [ref=e244]:
+                - searchbox "Search expenses" [ref=e246]
+                - button [ref=e248] [cursor=pointer]:
+                  - img "search" [ref=e250]
+              - generic [ref=e253]:
+                - textbox "Filter by date range" [ref=e255]:
+                  - /placeholder: From
+                  - text: 2026-09-01
+                - generic "to" [ref=e257]:
+                  - img "swap-right" [ref=e258]
+                - textbox "Filter by date range" [active] [ref=e262]:
+                  - /placeholder: To
+                  - text: 2026-09-30
+                - generic:
+                  - img "calendar"
+                - button [ref=e650] [cursor=pointer]:
+                  - img "close-circle" [ref=e651]
+              - generic [ref=e263] [cursor=pointer]:
+                - generic [ref=e264]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=e265]
+                - img "down" [ref=e267]
+              - generic [ref=e270] [cursor=pointer]:
+                - generic "Rappi Card · Rappi •••• 5969" [ref=e569]:
+                  - text: Rappi Card · Rappi •••• 5969
+                  - combobox "Filter by card" [ref=e272]
+                - img "down" [ref=e274]
+                - img "close-circle" [ref=e571]
+              - generic [ref=e277] [cursor=pointer]:
+                - generic "All" [ref=e278]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=e279]
+                - img "down" [ref=e281]
+            - generic [ref=e284]:
+              - generic [ref=e285]:
+                - generic [ref=e839]:
+                  - generic [ref=e840]:
+                    - generic [ref=e841]: 🛒
+                    - generic [ref=e842]:
+                      - paragraph [ref=e843]: La Comer
+                      - paragraph [ref=e844]:
+                        - generic [ref=e845]: Sep 30, 2026
+                        - generic [aria-hidden] [ref=e846]: ·
+                        - generic [ref=e847]: Supermercado
+                      - paragraph [ref=e848]:
+                        - generic [ref=e849]:
+                          - img "credit-card" [ref=e850]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e853]:
+                    - generic [ref=e854]: "-MXN 1,428.01"
+                    - generic [ref=e855]:
+                      - button "Edit La Comer" [ref=e856] [cursor=pointer]:
+                        - img "edit" [ref=e857]
+                      - button "Delete La Comer" [ref=e860] [cursor=pointer]:
+                        - img "delete" [ref=e861]
+                - generic [ref=e864]:
+                  - generic [ref=e865]:
+                    - generic [ref=e866]: 🧩
+                    - generic [ref=e867]:
+                      - paragraph [ref=e868]: Farmacias Guadalajara
+                      - paragraph [ref=e869]:
+                        - generic [ref=e870]: Sep 28, 2026
+                        - generic [aria-hidden] [ref=e871]: ·
+                        - generic [ref=e872]: Otros gastos
+                      - paragraph [ref=e873]:
+                        - generic [ref=e874]:
+                          - img "credit-card" [ref=e875]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e878]:
+                    - generic [ref=e879]: "-MXN 462.89"
+                    - generic [ref=e880]:
+                      - button "Edit Farmacias Guadalajara" [ref=e881] [cursor=pointer]:
+                        - img "edit" [ref=e882]
+                      - button "Delete Farmacias Guadalajara" [ref=e885] [cursor=pointer]:
+                        - img "delete" [ref=e886]
+                - generic [ref=e889]:
+                  - generic [ref=e890]:
+                    - generic [ref=e891]: 🎮
+                    - generic [ref=e892]:
+                      - paragraph [ref=e893]: Google Clash Of Clans
+                      - paragraph [ref=e894]:
+                        - generic [ref=e895]: Sep 26, 2026
+                        - generic [aria-hidden] [ref=e896]: ·
+                        - generic [ref=e897]: Juegos y apps
+                      - paragraph [ref=e898]:
+                        - generic [ref=e899]:
+                          - img "credit-card" [ref=e900]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e903]:
+                    - generic [ref=e904]: "-MXN 39.00"
+                    - generic [ref=e905]:
+                      - button "Edit Google Clash Of Clans" [ref=e906] [cursor=pointer]:
+                        - img "edit" [ref=e907]
+                      - button "Delete Google Clash Of Clans" [ref=e910] [cursor=pointer]:
+                        - img "delete" [ref=e911]
+                - generic [ref=e914]:
+                  - generic [ref=e915]:
+                    - generic [ref=e916]: 🎮
+                    - generic [ref=e917]:
+                      - paragraph [ref=e918]: Google Clash Of Clans
+                      - paragraph [ref=e919]:
+                        - generic [ref=e920]: Sep 26, 2026
+                        - generic [aria-hidden] [ref=e921]: ·
+                        - generic [ref=e922]: Juegos y apps
+                      - paragraph [ref=e923]:
+                        - generic [ref=e924]:
+                          - img "credit-card" [ref=e925]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e928]:
+                    - generic [ref=e929]: "-MXN 39.00"
+                    - generic [ref=e930]:
+                      - button "Edit Google Clash Of Clans" [ref=e931] [cursor=pointer]:
+                        - img "edit" [ref=e932]
+                      - button "Delete Google Clash Of Clans" [ref=e935] [cursor=pointer]:
+                        - img "delete" [ref=e936]
+                - generic [ref=e939]:
+                  - generic [ref=e940]:
+                    - generic [ref=e941]: 🎮
+                    - generic [ref=e942]:
+                      - paragraph [ref=e943]: Google Clash Of Clans
+                      - paragraph [ref=e944]:
+                        - generic [ref=e945]: Sep 26, 2026
+                        - generic [aria-hidden] [ref=e946]: ·
+                        - generic [ref=e947]: Juegos y apps
+                      - paragraph [ref=e948]:
+                        - generic [ref=e949]:
+                          - img "credit-card" [ref=e950]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e953]:
+                    - generic [ref=e954]: "-MXN 39.00"
+                    - generic [ref=e955]:
+                      - button "Edit Google Clash Of Clans" [ref=e956] [cursor=pointer]:
+                        - img "edit" [ref=e957]
+                      - button "Delete Google Clash Of Clans" [ref=e960] [cursor=pointer]:
+                        - img "delete" [ref=e961]
+                - generic [ref=e964]:
+                  - generic [ref=e965]:
+                    - generic [ref=e966]: 🎮
+                    - generic [ref=e967]:
+                      - paragraph [ref=e968]: Google Clash Of Clans
+                      - paragraph [ref=e969]:
+                        - generic [ref=e970]: Sep 26, 2026
+                        - generic [aria-hidden] [ref=e971]: ·
+                        - generic [ref=e972]: Juegos y apps
+                      - paragraph [ref=e973]:
+                        - generic [ref=e974]:
+                          - img "credit-card" [ref=e975]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e978]:
+                    - generic [ref=e979]: "-MXN 55.00"
+                    - generic [ref=e980]:
+                      - button "Edit Google Clash Of Clans" [ref=e981] [cursor=pointer]:
+                        - img "edit" [ref=e982]
+                      - button "Delete Google Clash Of Clans" [ref=e985] [cursor=pointer]:
+                        - img "delete" [ref=e986]
+                - generic [ref=e989]:
+                  - generic [ref=e990]:
+                    - generic [ref=e991]: 🍽️
+                    - generic [ref=e992]:
+                      - paragraph [ref=e993]: D Local Rest Didifood
+                      - paragraph [ref=e994]:
+                        - generic [ref=e995]: Sep 22, 2026
+                        - generic [aria-hidden] [ref=e996]: ·
+                        - generic [ref=e997]: Restaurantes
+                      - paragraph [ref=e998]:
+                        - generic [ref=e999]:
+                          - img "credit-card" [ref=e1000]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e1003]:
+                    - generic [ref=e1004]: "-MXN 249.20"
+                    - generic [ref=e1005]:
+                      - button "Edit D Local Rest Didifood" [ref=e1006] [cursor=pointer]:
+                        - img "edit" [ref=e1007]
+                      - button "Delete D Local Rest Didifood" [ref=e1010] [cursor=pointer]:
+                        - img "delete" [ref=e1011]
+                - generic [ref=e1014]:
+                  - generic [ref=e1015]:
+                    - generic [ref=e1016]: 🛍️
+                    - generic [ref=e1017]:
+                      - paragraph [ref=e1018]: Amazoncom Inc Amzn
+                      - paragraph [ref=e1019]:
+                        - generic [ref=e1020]: Sep 19, 2026
+                        - generic [aria-hidden] [ref=e1021]: ·
+                        - generic [ref=e1022]: Compras en línea
+                      - paragraph [ref=e1023]:
+                        - generic [ref=e1024]:
+                          - img "credit-card" [ref=e1025]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e1028]:
+                    - generic [ref=e1029]: "-MXN 39.00"
+                    - generic [ref=e1030]:
+                      - button "Edit Amazoncom Inc Amzn" [ref=e1031] [cursor=pointer]:
+                        - img "edit" [ref=e1032]
+                      - button "Delete Amazoncom Inc Amzn" [ref=e1035] [cursor=pointer]:
+                        - img "delete" [ref=e1036]
+                - generic [ref=e1039]:
+                  - generic [ref=e1040]:
+                    - generic [ref=e1041]: 🍽️
+                    - generic [ref=e1042]:
+                      - paragraph [ref=e1043]: Clip Mx Rest Atelierxx
+                      - paragraph [ref=e1044]:
+                        - generic [ref=e1045]: Sep 19, 2026
+                        - generic [aria-hidden] [ref=e1046]: ·
+                        - generic [ref=e1047]: Restaurantes
+                      - paragraph [ref=e1048]:
+                        - generic [ref=e1049]: Installment 1/3
+                        - generic [ref=e1050]:
+                          - img "credit-card" [ref=e1051]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e1054]:
+                    - generic [ref=e1055]: "-MXN 207.33"
+                    - generic [ref=e1056]:
+                      - button "Edit Clip Mx Rest Atelierxx" [ref=e1057] [cursor=pointer]:
+                        - img "edit" [ref=e1058]
+                      - button "Delete Clip Mx Rest Atelierxx" [ref=e1061] [cursor=pointer]:
+                        - img "delete" [ref=e1062]
+                - generic [ref=e1065]:
+                  - generic [ref=e1066]:
+                    - generic [ref=e1067]: 🛍️
+                    - generic [ref=e1068]:
+                      - paragraph [ref=e1069]: Amazon Mexico
+                      - paragraph [ref=e1070]:
+                        - generic [ref=e1071]: Sep 18, 2026
+                        - generic [aria-hidden] [ref=e1072]: ·
+                        - generic [ref=e1073]: Compras en línea
+                      - paragraph [ref=e1074]:
+                        - generic [ref=e1075]:
+                          - img "credit-card" [ref=e1076]
+                          - text: Rappi •••• 5969
+                  - generic [ref=e1079]:
+                    - generic [ref=e1080]: "-MXN 498.00"
+                    - generic [ref=e1081]:
+                      - button "Edit Amazon Mexico" [ref=e1082] [cursor=pointer]:
+                        - img "edit" [ref=e1083]
+                      - button "Delete Amazon Mexico" [ref=e1086] [cursor=pointer]:
+                        - img "delete" [ref=e1087]
+              - generic [ref=e541]:
+                - generic [ref=e542]: Showing 1–10 of 40 records
+                - generic [ref=e543]:
+                  - generic [ref=e544] [cursor=pointer]:
+                    - generic "10 / page" [ref=e545]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=e546]
+                    - img "down" [ref=e548]
+                  - generic [ref=e551]:
+                    - button "Previous" [disabled]:
+                      - img "left"
+                    - generic [ref=e552]: Page 1 of 4
+                    - button "Next" [ref=e553] [cursor=pointer]:
+                      - img "right" [ref=e554]

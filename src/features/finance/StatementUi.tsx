@@ -6,41 +6,38 @@
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-/** Full-bleed #080C14 backdrop (same shadow / clip-path trick as the cards page). */
+/** Use the workspace surface without painting outside its rounded content frame. */
 export const STATEMENT_BACKDROP_CLASS =
-  "mx-auto min-h-full w-full bg-[#080C14] shadow-[0_0_0_100vmax_#080C14] [clip-path:inset(0_-100vmax)]";
+  "mx-auto min-h-full w-full bg-[var(--bg-1)] ";
 
 /**
  * Scoped restyle of antd fields (inputs, selects, number inputs, table) so they
- * sit on the dark navy surfaces. Applied on the view wrapper only.
+ * inherit readable workspace surfaces. Applied on the view wrapper only.
  */
 export const STATEMENT_FIELD_SCOPE = [
-  "[&_.ant-input]:!border-slate-800 [&_.ant-input]:!bg-[#0A0F19] [&_.ant-input]:!text-slate-200",
-  "[&_.ant-input-affix-wrapper]:!border-slate-800 [&_.ant-input-affix-wrapper]:!bg-[#0A0F19]",
-  "[&_.ant-input-number]:!border-slate-800 [&_.ant-input-number]:!bg-[#0A0F19]",
-  "[&_.ant-input-number-input]:!text-slate-200",
-  "[&_.ant-select]:!border-slate-800 [&_.ant-select]:!bg-[#0A0F19] [&_.ant-select-selector]:!bg-transparent",
+  "[&_.ant-input]:!border-[var(--border-soft)] [&_.ant-input]:!bg-[var(--bg-1)] [&_.ant-input]:!text-[var(--text-2)]",
+  "[&_.ant-input-affix-wrapper]:!border-[var(--border-soft)] [&_.ant-input-affix-wrapper]:!bg-[var(--bg-1)]",
+  "[&_.ant-input-number]:!border-[var(--border-soft)] [&_.ant-input-number]:!bg-[var(--bg-1)]",
+  "[&_.ant-input-number-input]:!text-[var(--text-2)]",
+  "[&_.ant-select]:!border-[var(--border-soft)] [&_.ant-select]:!bg-[var(--bg-1)] [&_.ant-select-selector]:!bg-transparent",
   "[&_.ant-input:focus]:!border-emerald-500/60 [&_.ant-input-focused]:!border-emerald-500/60",
   "[&_.ant-input-number-focused]:!border-emerald-500/60 [&_.ant-select-focused]:!border-emerald-500/60",
   "[&_.ant-input[disabled]]:!opacity-70",
-  "[&_.animate-pulse]:!bg-slate-800/80",
+  "[&_.animate-pulse]:!bg-[var(--bg-3)]/80",
 ].join(" ");
 
-// Variables read by the shared CreditCardPicker (empty message, focus ring,
-// selected ring). Redefining them in a wrapper re-tones it without editing it.
-export const STATEMENT_PICKER_SCOPE =
-  "[--emerald:#10b981] [--emerald-dim:rgba(16,185,129,0.1)] [--emerald-text:#34d399] [--border-soft:rgba(30,41,59,0.9)] [--border:#334155] [--text-2:#cbd5e1] [--text-3:#94a3b8] [--bg-1:#080C14]";
+export const STATEMENT_PICKER_SCOPE = "";
 
 export type StatementTone = "emerald" | "amber" | "rose" | "sky" | "slate" | "indigo" | "teal";
 
 const BADGE_CLASS: Record<StatementTone, string> = {
-  emerald: "border-emerald-500/30 bg-emerald-500/15 text-emerald-400",
-  amber: "border-amber-500/30 bg-amber-500/15 text-amber-400",
-  rose: "border-rose-500/30 bg-rose-500/15 text-rose-400",
-  sky: "border-sky-500/30 bg-sky-500/15 text-sky-400",
-  slate: "border-slate-700 bg-slate-800 text-slate-300",
-  indigo: "border-indigo-500/30 bg-indigo-500/15 text-indigo-400",
-  teal: "border-teal-500/30 bg-teal-500/15 text-teal-400",
+  emerald: "border-emerald-500/30 bg-emerald-500/15 text-[var(--emerald-text)]",
+  amber: "border-amber-500/30 bg-amber-500/15 text-[var(--gold-text)]",
+  rose: "border-rose-500/30 bg-rose-500/15 text-[var(--rose-text)]",
+  sky: "border-sky-500/30 bg-sky-500/15 text-[var(--info-text)]",
+  slate: "border-[var(--border-soft)] bg-[var(--bg-3)] text-[var(--text-2)]",
+  indigo: "border-indigo-500/30 bg-indigo-500/15 text-[var(--accent-text)]",
+  teal: "border-teal-500/30 bg-teal-500/15 text-[var(--info-text)]",
 };
 
 const DOT_CLASS: Record<StatementTone, string> = {
@@ -78,13 +75,13 @@ export function StatementBadge({
 /** Square-ish count chip (replaces Badge ring). */
 export function StatementCountChip({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border border-slate-700 bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-300">
+    <span className="rounded-full border border-[var(--border-soft)] bg-[var(--bg-3)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-2)]">
       {children}
     </span>
   );
 }
 
-/** Dark navy section card (same gradient surface as CardKpiTile). */
+/** Section card that follows the active workspace theme. */
 export function StatementSectionCard({
   title,
   aside,
@@ -100,11 +97,11 @@ export function StatementSectionCard({
 }) {
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl border border-slate-800/80 bg-gradient-to-b from-[#111A2C] to-[#0D1424] ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-[var(--border-soft)]/80 bg-[var(--bg-1)] ${className}`}
     >
       {title && (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/60 px-5 py-4">
-          <h2 className="text-sm font-bold tracking-tight text-white">{title}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-soft)]/60 px-5 py-4">
+          <h2 className="text-sm font-bold tracking-tight text-[var(--text-1)]">{title}</h2>
           {aside}
         </div>
       )}
@@ -116,12 +113,12 @@ export function StatementSectionCard({
 export type StatementAccent = "teal" | "amber" | "rose" | "indigo" | "emerald" | "slate";
 
 const CHIP_CLASS: Record<StatementAccent, string> = {
-  teal: "border-teal-500/20 bg-teal-500/10 text-teal-400",
-  amber: "border-amber-500/20 bg-amber-500/10 text-amber-400",
-  rose: "border-rose-500/20 bg-rose-500/10 text-rose-400",
-  indigo: "border-indigo-500/20 bg-indigo-500/10 text-indigo-400",
-  emerald: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
-  slate: "border-slate-700 bg-slate-800 text-slate-400",
+  teal: "border-teal-500/20 bg-teal-500/10 text-[var(--info-text)]",
+  amber: "border-amber-500/20 bg-amber-500/10 text-[var(--gold-text)]",
+  rose: "border-rose-500/20 bg-rose-500/10 text-[var(--rose-text)]",
+  indigo: "border-indigo-500/20 bg-indigo-500/10 text-[var(--accent-text)]",
+  emerald: "border-emerald-500/20 bg-emerald-500/10 text-[var(--emerald-text)]",
+  slate: "border-[var(--border-soft)] bg-[var(--bg-3)] text-[var(--text-3)]",
 };
 
 const ICON_PATH: Record<StatementAccent, string> = {
@@ -138,8 +135,8 @@ export function StatementTile({
   accent,
   label,
   value,
-  valueClassName = "text-white",
-  surfaceClassName = "border-slate-800/80 bg-gradient-to-b from-[#111A2C] to-[#0D1424]",
+  valueClassName = "text-[var(--text-1)]",
+  surfaceClassName = "border-[var(--border-soft)]/80 bg-[var(--bg-1)]",
 }: {
   accent: StatementAccent;
   label: string;
@@ -148,9 +145,9 @@ export function StatementTile({
   surfaceClassName?: string;
 }) {
   return (
-    <div className={`rounded-2xl border p-3.5 transition hover:border-slate-700/80 sm:p-4 ${surfaceClassName}`}>
+    <div className={`rounded-2xl border p-3.5 transition hover:border-[var(--border-soft)]/80 sm:p-4 ${surfaceClassName}`}>
       <div className="flex items-start justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)]">{label}</span>
         <span aria-hidden="true" className={`shrink-0 rounded-lg border p-1.5 ${CHIP_CLASS[accent]}`}>
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d={ICON_PATH[accent]} strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
@@ -169,12 +166,12 @@ const BUTTON_BASE =
 
 const BUTTON_VARIANT: Record<StatementButtonVariant, string> = {
   primary:
-    "bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20 hover:from-emerald-400 hover:to-teal-400",
+    "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm hover:brightness-110",
   pay: "bg-gradient-to-r from-cyan-600 to-sky-600 font-bold text-white shadow-sm hover:from-cyan-500 hover:to-sky-500 focus-visible:outline-sky-400",
-  secondary: "bg-slate-800/90 text-slate-200 hover:bg-slate-700",
-  danger: "border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 focus-visible:outline-rose-400",
-  ghost: "text-slate-400 hover:bg-slate-800/80 hover:text-slate-200",
-  tint: "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
+  secondary: "bg-[var(--bg-3)]/90 text-[var(--text-2)] hover:bg-[var(--bg-3)]",
+  danger: "border border-rose-500/20 bg-rose-500/10 text-[var(--rose-text)] hover:bg-rose-500/20 focus-visible:outline-rose-400",
+  ghost: "text-[var(--text-3)] hover:bg-[var(--bg-3)]/80 hover:text-[var(--text-2)]",
+  tint: "border border-emerald-500/30 bg-emerald-500/10 text-[var(--emerald-text)] hover:bg-emerald-500/20",
 };
 
 const BUTTON_SIZE = {
@@ -224,11 +221,11 @@ export function StatementButton({
 
 /** Banners (error / success notice) in the rose / emerald palette. */
 export const STATEMENT_ERROR_BANNER_CLASS =
-  "rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300";
+  "rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-[var(--rose-text)]";
 export const STATEMENT_NOTICE_BANNER_CLASS =
-  "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300";
+  "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-[var(--emerald-text)]";
 export const STATEMENT_WARNING_BANNER_CLASS =
-  "rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2.5 text-xs text-amber-300";
+  "rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2.5 text-xs text-[var(--gold-text)]";
 
 /** Maps the shared BadgeVariant of STATUS_META onto the cards-page badge tones. */
 export function toneFromVariant(variant: "neutral" | "success" | "warning" | "danger" | "info"): StatementTone {

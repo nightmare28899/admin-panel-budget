@@ -93,7 +93,7 @@ export function ChargeGroupDetail({
             setExpanded((current) => !current);
           }
         }}
-        className="flex cursor-pointer flex-wrap items-center justify-between gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-[var(--emerald)]"
+        className="flex cursor-pointer flex-wrap items-center justify-between gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
       >
         <div className="min-w-0">
           {variant === "standalone" && (
