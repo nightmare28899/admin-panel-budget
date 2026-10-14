@@ -103,7 +103,7 @@ export default function LoginPage() {
 
     return (
         <WorkspaceTheme workspace="admin">
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] p-6">
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--auth-bg)] p-6">
             <AmbientBackground variant="auth" />
 
             <div className="absolute top-6 right-6 z-20">

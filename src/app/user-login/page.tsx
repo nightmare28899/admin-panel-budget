@@ -118,7 +118,7 @@ function UserLoginForm() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-0)] p-6">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--auth-bg)] p-6">
       <AmbientBackground variant="auth" />
       {redirecting && <PostLoginLoader />}
 

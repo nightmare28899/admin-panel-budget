@@ -6,6 +6,7 @@
   color-scheme: dark;
 
   --bg-0: oklch(15% 0.013 258);
+  --auth-bg: oklch(15% 0.013 258);
   --bg-1: oklch(18% 0.015 258);
   --bg-2: oklch(23% 0.019 258);
   --bg-3: oklch(30% 0.024 258);
