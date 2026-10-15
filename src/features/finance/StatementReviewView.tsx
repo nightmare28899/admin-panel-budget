@@ -5,6 +5,7 @@ import { cloneElement, useCallback, useEffect, useMemo, useRef, useState, type A
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { TableSkeleton } from "@/components/ui/ContentSkeleton";
+import styles from "./StatementReviewTable.module.css";
 import { MarkStatementPaidModal } from "./MarkStatementPaidModal";
 import type { StatementPaymentFormValue } from "./MarkStatementPaidModal";
 import { StatementPaymentHistory } from "./StatementPaymentHistory";
@@ -124,21 +125,6 @@ function isIncludedRowValid(row: StatementRow, hasDefaultCard: boolean) {
     Number(row.amount) > 0 &&
     /^[A-Z]{3}$/.test(row.currency)
   );
-}
-
-// Inline style beats antd's own row/cell CSS without fighting specificity,
-// so a row's review state (needs a decision, ready to confirm, missing
-// required data) reads at a glance across a table of dozens of rows.
-function rowTint(row: StatementRow, hasDefaultCard: boolean): string | undefined {
-  if (row.decision === "INCLUDE_EXPENSE") {
-    return isIncludedRowValid(row, hasDefaultCard)
-      ? "rgba(16, 185, 129, 0.07)"
-      : "rgba(244, 63, 94, 0.09)";
-  }
-  if (row.decision === "PENDING") {
-    return "rgba(245, 158, 11, 0.07)";
-  }
-  return undefined;
 }
 
 export function StatementReviewView({
@@ -719,6 +705,13 @@ export function StatementReviewView({
 
         return (
           <div className="space-y-3">
+            {row.decision === "INCLUDE_EXPENSE" ? (
+              <StatementBadge tone={isIncludedRowValid(row, hasDefaultCard) ? "emerald" : "rose"}>
+                {t(isIncludedRowValid(row, hasDefaultCard) ? (editable ? "readyToConfirm" : "includeExpense") : "missingRequiredData")}
+              </StatementBadge>
+            ) : row.decision === "PENDING" ? (
+              <StatementBadge tone="amber">{t("pendingDecision")}</StatementBadge>
+            ) : null}
             <div>
               <label htmlFor={dateId} className="mb-1 block text-xs font-medium text-[var(--text-3)]">{t("transactionDate")}</label>
               <Input
@@ -856,6 +849,7 @@ export function StatementReviewView({
               disabled={!editable}
               aria-label={t("amountFor", { description: row.description })}
               className="min-w-0 flex-1"
+              classNames={{ root: !editable ? styles.readonlyField : styles.field, prefix: styles.fieldValue }}
               onChange={(value) => {
                 if (typeof value === "number") patchRow(row.id, { amount: value });
               }}
@@ -888,6 +882,7 @@ export function StatementReviewView({
           allowClear
           value={row.categoryId ?? undefined}
           disabled={!editable || row.decision !== "INCLUDE_EXPENSE"}
+          classNames={{ root: !editable || row.decision !== "INCLUDE_EXPENSE" ? styles.readonlyField : styles.field, content: styles.fieldValue }}
           placeholder={t("selectCategory")}
           aria-label={t("categoryFor", { description: row.description })}
           className="w-full"
@@ -908,6 +903,7 @@ export function StatementReviewView({
           <Select
             value={row.decision}
             disabled={!editable}
+            classNames={{ root: !editable ? styles.readonlyField : styles.field, content: styles.fieldValue }}
             aria-label={t("reviewDecisionFor", { description: row.description })}
             className="w-full"
             options={decisionOptions.map((option) => ({
@@ -1286,10 +1282,13 @@ export function StatementReviewView({
             }}
             scroll={{ x: 1050, y: STATEMENT_ROWS_SCROLL_HEIGHT }}
             size="small"
-            className="[&_.ant-table]:!bg-transparent [&_.ant-table-container]:!border-0 [&_.ant-table-row-selected>td]:!bg-transparent [&_.ant-table-row-selected>td]:shadow-[inset_0_1px_0_rgba(16,185,129,0.55),inset_0_-1px_0_rgba(16,185,129,0.55)] [&_.ant-table-thead>tr>th]:!border-[var(--border-soft)] [&_.ant-table-thead>tr>th]:!text-[11px] [&_.ant-table-thead>tr>th]:!uppercase [&_.ant-table-thead>tr>th]:!tracking-wider [&_.ant-table-thead>tr>th]:!text-[var(--text-3)] [&_.ant-table-tbody>tr>td]:!border-[var(--border-soft)]/60 [&_.ant-table-pagination]:!px-3"
-            onRow={(row) => ({
-              style: { backgroundColor: rowTint(row, hasDefaultCard) },
-            })}
+            classNames={{
+              root: styles.table,
+              header: { cell: styles.headerCell },
+              body: { row: styles.row, cell: styles.cell },
+              pagination: { root: styles.pagination },
+            }}
+            onRow={(row) => ({ "aria-selected": selectedRowIds.includes(row.id) })}
           />
         </div>
       </StatementSectionCard>

@@ -4,53 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Popover } from "antd";
 import { getSubscriptionsAction } from "@/lib/userActions";
-import { daysUntil, type Subscription } from "./subscriptions.types";
-import { toCalendarDate } from "./finance.types";
+import { loadSubscriptionAlerts, type SubscriptionAlert, type SubscriptionAlertsState } from "./subscriptionAlerts";
 import { useLocale } from "@/i18n/LocaleProvider";
 
-export type SubscriptionAlert = {
-  key: string;
-  title: string;
-  amount: number;
-  currency: string;
-  nextPaymentDate: string;
-  daysUntil: number;
-  status: "overdue" | "due-soon";
-};
-
-const ALERT_HORIZON_DAYS = 7;
-
-/**
- * Builds "due soon"/"overdue" alerts straight from each active
- * subscription's real nextPaymentDate. No more heuristic average-interval
- * prediction now that the backend returns a real recurrence date — this is
- * an exact calendar-day computation, not an estimate.
- */
-export function buildSubscriptionAlerts(
-  subscriptions: Subscription[],
-  today: Date = new Date(),
-): SubscriptionAlert[] {
-  const alerts: SubscriptionAlert[] = [];
-
-  for (const subscription of subscriptions) {
-    if (!subscription.isActive) continue;
-
-    const remaining = daysUntil(subscription.nextPaymentDate, today);
-    if (remaining > ALERT_HORIZON_DAYS) continue;
-
-    alerts.push({
-      key: subscription.id,
-      title: subscription.name,
-      amount: Number(subscription.cost),
-      currency: subscription.currency,
-      nextPaymentDate: toCalendarDate(subscription.nextPaymentDate),
-      daysUntil: remaining,
-      status: remaining < 0 ? "overdue" : "due-soon",
-    });
-  }
-
-  return alerts.sort((a, b) => a.daysUntil - b.daysUntil);
-}
+export { buildSubscriptionAlerts, type SubscriptionAlert } from "./subscriptionAlerts";
 
 export function formatDue(alert: SubscriptionAlert, t: ReturnType<typeof useLocale>["t"], formatNumber: ReturnType<typeof useLocale>["formatNumber"]) {
   if (alert.status === "overdue") {
@@ -63,13 +20,13 @@ export function formatDue(alert: SubscriptionAlert, t: ReturnType<typeof useLoca
 
 export function SubscriptionAlertsBell() {
   const { t, formatNumber } = useLocale();
-  const [alerts, setAlerts] = useState<SubscriptionAlert[]>([]);
+  const [{ alerts, status }, setAlertsState] = useState<SubscriptionAlertsState>({ alerts: [], status: "loading" });
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
-    void getSubscriptionsAction().then((result) => {
-      if (active && result.data) setAlerts(buildSubscriptionAlerts(result.data));
+    void loadSubscriptionAlerts(getSubscriptionsAction).then((state) => {
+      if (active) setAlertsState(state);
     });
     return () => {
       active = false;
@@ -82,10 +39,11 @@ export function SubscriptionAlertsBell() {
       aria-label={
          alerts.length ? t("subscriptionAlertsCount", { count: formatNumber(alerts.length) }) : t("subscriptionAlerts")
       }
-       title={t("subscriptionAlerts")}
+      aria-expanded={open}
+      title={t("subscriptionAlerts")}
       className="relative flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)]"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
         <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
       </svg>
@@ -96,8 +54,6 @@ export function SubscriptionAlertsBell() {
       )}
     </button>
   );
-
-  if (alerts.length === 0) return bell;
 
   return (
     <Popover
@@ -114,61 +70,67 @@ export function SubscriptionAlertsBell() {
                {t("alertsEstimate")}
             </p>
           </div>
-          <ul>
-            {alerts.map((alert) => {
-              const overdue = alert.status === "overdue";
-              return (
-                <li
-                  key={alert.key}
-                  className={`border-l-2 px-3.5 py-2.5 transition-colors last:border-b-0 hover:bg-[var(--bg-3)] ${
-                    overdue ? "border-l-[var(--rose)]" : "border-l-[var(--gold)]"
-                  } ${alert !== alerts[alerts.length - 1] ? "border-b border-b-[var(--border-soft)]" : ""}`}
-                >
-                  <div className="flex items-start gap-2">
-                    <svg
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      className={`mt-[3px] shrink-0 ${overdue ? "text-[var(--rose)]" : "text-[var(--gold-text)]"}`}
-                    >
-                      {overdue ? (
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A1 1 0 0 0 3 19.5h18a1 1 0 0 0 .87-1.46L13.71 3.86a1 1 0 0 0-1.73 0Z"
-                        />
-                      ) : (
-                        <>
-                          <circle cx="12" cy="12" r="9" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 3" />
-                        </>
-                      )}
-                    </svg>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-medium text-[var(--text-1)]">
-                        {alert.title}
-                      </div>
-                      <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5">
-                        <span
-                          className={`text-xs font-medium ${
-                            overdue ? "text-[var(--rose)]" : "text-[var(--gold-text)]"
-                          }`}
-                        >
-                           {formatDue(alert, t, formatNumber)}
-                        </span>
-                        <span className="text-xs text-[var(--text-3)]">
-                           · ~{alert.currency} {formatNumber(alert.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
+          {status !== "ready" || alerts.length === 0 ? (
+            <p role="status" className="px-4 py-3 text-xs text-[var(--text-3)]">
+              {t(status === "loading" ? "subscriptionAlertsLoading" : status === "error" ? "subscriptionAlertsUnavailable" : "subscriptionAlertsEmpty")}
+            </p>
+          ) : (
+            <ul aria-label={t("subscriptionAlerts")}>
+              {alerts.map((alert) => {
+                const overdue = alert.status === "overdue";
+                return (
+                  <li
+                    key={alert.key}
+                    className={`border-l-2 px-3.5 py-2.5 transition-colors last:border-b-0 hover:bg-[var(--bg-3)] ${
+                      overdue ? "border-l-[var(--rose)]" : "border-l-[var(--gold)]"
+                    } ${alert !== alerts[alerts.length - 1] ? "border-b border-b-[var(--border-soft)]" : ""}`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        className={`mt-[3px] shrink-0 ${overdue ? "text-[var(--rose)]" : "text-[var(--gold-text)]"}`}
+                      >
+                        {overdue ? (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A1 1 0 0 0 3 19.5h18a1 1 0 0 0 .87-1.46L13.71 3.86a1 1 0 0 0-1.73 0Z"
+                          />
+                        ) : (
+                          <>
+                            <circle cx="12" cy="12" r="9" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 3" />
+                          </>
+                        )}
+                      </svg>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[13px] font-medium text-[var(--text-1)]">
+                          {alert.title}
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5">
+                          <span
+                            className={`text-xs font-medium ${
+                              overdue ? "text-[var(--rose)]" : "text-[var(--gold-text)]"
+                            }`}
+                          >
+                             {formatDue(alert, t, formatNumber)}
+                          </span>
+                          <span className="text-xs text-[var(--text-3)]">
+                             · ~{alert.currency} {formatNumber(alert.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <Link
             href="/finance/subscriptions"
             onClick={() => setOpen(false)}

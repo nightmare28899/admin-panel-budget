@@ -175,3 +175,14 @@ export type DeleteCreditCardPermanentlyResponse = {
   unlinkedExpenses: number;
   unlinkedSubscriptions: number;
 };
+
+export type CardPaymentDate =
+  | { kind: "statement" | "scheduled"; date: string }
+  | { kind: "missing" };
+
+export type CardPaymentAlert = {
+  card: CreditCardOverviewItem;
+  dueDate: string;
+  amount: number;
+  daysUntilDue: number;
+};

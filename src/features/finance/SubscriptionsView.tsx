@@ -65,9 +65,9 @@ const monoFont = JetBrains_Mono({
 
 // Local aliases inherit the active workspace palette, including portaled forms.
 const THEME_STYLE = {
-  "--sub-canvas": "var(--bg-1)",
+  "--sub-canvas": "var(--bg-0)",
   "--sub-surface-base": "var(--bg-1)",
-  "--sub-surface-raised": "var(--bg-2)",
+  "--sub-surface-raised": "var(--bg-1)",
   "--sub-surface-overlay": "var(--bg-3)",
   "--sub-surface-tint-emerald": "var(--accent-dim)",
   "--sub-primary": "var(--accent)",
@@ -82,15 +82,6 @@ const THEME_STYLE = {
   "--sub-border-subtle": "var(--border-soft)",
   "--sub-border-active": "var(--accent)",
 } as CSSProperties;
-
-const PILL_PRIMARY =
-  "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-transparent bg-[var(--sub-primary)] font-semibold text-[var(--accent-contrast)] transition-colors hover:bg-[var(--sub-primary-light)] disabled:cursor-not-allowed disabled:opacity-40";
-
-const PILL_SECONDARY =
-  "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--sub-surface-overlay)]/40 font-medium text-[var(--sub-text-high)] transition-colors hover:border-[var(--sub-text-medium)] hover:bg-[var(--bg-3)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[var(--border)] disabled:hover:bg-[var(--sub-surface-overlay)]/40";
-
-const PILL_DESTRUCTIVE =
-  "inline-flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-full border border-[var(--sub-danger)]/30 bg-[var(--sub-danger)]/[0.15] font-medium text-[var(--sub-danger)] transition-colors hover:bg-[var(--sub-danger)] hover:text-white disabled:cursor-not-allowed disabled:opacity-40";
 
 const SUBSCRIPTION_ROWS_SCROLL_HEIGHT = 460;
 
@@ -637,13 +628,15 @@ export function SubscriptionsView() {
           <h1 className="font-[family-name:var(--font-sub-jakarta)] text-[28px] font-semibold leading-9 tracking-[-0.02em] text-[var(--sub-text-high)]">
             {t("yourSubscriptions")}
           </h1>
-          <button
+          <Button
+            variant="tinted"
+            size="sm"
             type="button"
             onClick={openCreate}
-            className={`${PILL_PRIMARY} h-9 px-4 font-[family-name:var(--font-sub-inter)] text-xs`}
+            className="!h-9 !px-4 font-[family-name:var(--font-sub-inter)] text-xs"
           >
             {t("newSubscription")}
-          </button>
+          </Button>
         </div>
         <p className="mb-6 max-w-2xl font-[family-name:var(--font-sub-inter)] text-sm leading-6 text-[var(--sub-text-medium)]">
           {t("subscriptionsPageDescription")}
@@ -841,39 +834,47 @@ export function SubscriptionsView() {
                       </div>
 
                       <div className="mt-2.5 flex justify-end gap-2 border-t border-[var(--sub-border-subtle)] pt-2.5">
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           type="button"
                           onClick={() => openEdit(subscription)}
-                          className={`${PILL_SECONDARY} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                          className="!h-8 !px-3.5 font-[family-name:var(--font-sub-inter)] text-xs"
                         >
                           {t("edit")}
-                        </button>
+                        </Button>
                         {subscription.isActive ? (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             type="button"
                             disabled={busy}
                             onClick={() => void pauseSubscription(subscription.id)}
-                            className={`${PILL_DESTRUCTIVE} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                            className="!h-8 !px-3.5 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--rose)] hover:text-[var(--rose)]"
                           >
                             {busy ? t("pausing") : t("pause")}
-                          </button>
+                          </Button>
                         ) : (
-                          <button
+                          <Button
+                            variant="outline"
+                            size="sm"
                             type="button"
                             disabled={busy}
                             onClick={() => void resumeSubscription(subscription.id)}
-                            className={`${PILL_SECONDARY} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                            className="!h-8 !px-3.5 font-[family-name:var(--font-sub-inter)] text-xs"
                           >
                             {busy ? t("resuming") : t("resume")}
-                          </button>
+                          </Button>
                         )}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           type="button"
                           onClick={() => setDeleteTarget(subscription)}
-                          className={`${PILL_DESTRUCTIVE} h-8 px-3.5 font-[family-name:var(--font-sub-inter)] text-xs`}
+                          className="!h-8 !px-3.5 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--rose)] hover:text-[var(--rose)]"
                         >
                           {t("deleteSubscription")}
-                        </button>
+                        </Button>
                       </div>
                       {matchedGroup && (
                         <div className="mt-2.5 rounded-xl border border-[var(--sub-border-subtle)] bg-[var(--sub-surface-base)]/60 p-2.5">
@@ -928,27 +929,31 @@ export function SubscriptionsView() {
                     ))}
                   </select>
                   <div className="flex items-center gap-1">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
                       type="button"
                       disabled={safePage <= 1}
                       onClick={() => setPage(safePage - 1)}
                       aria-label={t("previous")}
-                      className={`${PILL_SECONDARY} h-8 w-8`}
+                      className="!h-8 w-8 !px-0"
                     >
                       <LeftOutlined />
-                    </button>
+                    </Button>
                     <span className="px-2 font-[family-name:var(--font-sub-inter)] text-xs font-medium text-[var(--sub-text-medium)]">
                       {t("pageOf", { page: formatNumber(safePage), total: formatNumber(totalPages) })}
                     </span>
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
                       type="button"
                       disabled={safePage >= totalPages}
                       onClick={() => setPage(safePage + 1)}
                       aria-label={t("next")}
-                      className={`${PILL_SECONDARY} h-8 w-8`}
+                      className="!h-8 w-8 !px-0"
                     >
                       <RightOutlined />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

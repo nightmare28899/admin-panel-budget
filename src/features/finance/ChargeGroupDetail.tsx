@@ -80,7 +80,7 @@ export function ChargeGroupDetail({
   };
 
   return (
-    <div className={variant === "standalone" ? "rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/40 p-3" : ""}>
+    <div className={variant === "standalone" ? "rounded-xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-3" : ""}>
       <div
         role="button"
         tabIndex={0}
@@ -133,7 +133,7 @@ export function ChargeGroupDetail({
           {group.charges.map((charge) => (
             <li
               key={charge.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--bg-2)]/60 px-3 py-2 text-xs"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--bg-3)]/40 px-3 py-2 text-xs"
             >
               <span className="text-[var(--text-3)]">{displayDate(charge.date)}</span>
               <span className="min-w-0 flex-1 truncate text-[var(--text-2)]">{charge.title}</span>

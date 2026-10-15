@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { getCreditCardsAction, userLogoutAction } from "@/lib/userActions";
 import { AppShell, type AppShellNavItem } from "@/components/layout/AppShell";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { CardPaymentAlertsBell } from "./CardPaymentAlertsBell";
 import { SubscriptionAlertsBell } from "./SubscriptionAlertsBell";
 import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -147,7 +148,7 @@ export function FinanceShell({
         signingOut={loggingOut}
         mainClassName=""
         workspace="finance"
-        headerActions={<SubscriptionAlertsBell />}
+        headerActions={<div className="flex items-center gap-2"><CardPaymentAlertsBell /><SubscriptionAlertsBell /></div>}
       >
         {children}
       </AppShell>

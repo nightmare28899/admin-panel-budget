@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { CreditCardsSkeleton, ListSkeleton } from "@/components/ui/ContentSkeleton";
 import { CreditCardPicker } from "./CreditCardPicker";
+import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
 import { creditCardTheme } from "./creditCardVisuals";
 import { MarkStatementPaidModal } from "./MarkStatementPaidModal";
 import { useCreditCards } from "./hooks/useCreditCards";
@@ -426,6 +427,7 @@ export function StatementImportsView() {
             feedback.setError(frontendError(result.error, t, "paidStatusFailed"));
             return;
           }
+          window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
           await Promise.all([imports.reload(), loadOverview()]);
           feedback.setNotice(t("paymentRecorded"));
           setPendingPaidId(undefined);

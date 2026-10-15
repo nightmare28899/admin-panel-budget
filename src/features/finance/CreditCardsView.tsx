@@ -49,7 +49,10 @@ export function CreditCardsView() {
       return;
     }
     if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
-    else await load();
+    else {
+      window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
+      await load();
+    }
   };
 
   const deletePermanently = async (id: string) => {

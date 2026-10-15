@@ -13,6 +13,7 @@ import {
   CreditCardEmvChip,
   creditCardTheme,
 } from "./creditCardVisuals";
+import { cardPaymentDate } from "./cardPaymentAlerts";
 import { daysUntilDueDate, hasPaymentPending } from "./cardPaymentSchedule";
 import type { CreditCardOverviewItem } from "./credit-cards.types";
 import { CreditCardInstallmentPlans } from "./CreditCardInstallmentPlans";
@@ -105,7 +106,8 @@ export function CreditCardTile({
   const statementPaymentStatus = summary.paymentStatus;
   const statementId = summary.statementImportId;
   const pending = card.isActive && hasPaymentPending(card);
-  const daysUntilDue = pending && summary.dueDate ? daysUntilDueDate(summary.dueDate) : null;
+  const paymentDate = cardPaymentDate(card);
+  const daysUntilDue = paymentDate.kind === "statement" ? daysUntilDueDate(paymentDate.date) : null;
   const overdue = daysUntilDue !== null && daysUntilDue < 0;
   const detailsId = useId();
   const detailsToggleId = `credit-card-details-toggle-${detailsId}`;
@@ -294,17 +296,26 @@ export function CreditCardTile({
                 <span className="font-mono font-bold">{formatMoney(paymentAmount)}</span>
               </div>
             )}
-            {summary.dueDate && (
-              <Row label={t("paymentDeadline")} valueClassName="font-semibold text-[var(--rose-text)]">
-                {formatDate(summary.dueDate, { dateStyle: "medium" })}
-                {daysUntilDue !== null && <> ({dueDistance(daysUntilDue)})</>}
-              </Row>
-            )}
           </div>
         ) : (
           <Row label={t("currentPaymentDue")} valueClassName="font-semibold text-[var(--emerald-text)]">
             {summary.currentPaymentDue == null ? "—" : formatMoney(summary.currentPaymentDue)}
           </Row>
+        )}
+
+        <Row
+          label={t(paymentDate.kind === "scheduled" ? "scheduledPaymentDate" : "paymentDeadline")}
+          valueClassName={paymentDate.kind === "statement" && pending ? "font-semibold text-[var(--rose-text)]" : "text-[var(--text-2)]"}
+        >
+          {paymentDate.kind === "missing" ? t("paymentDateNotConfigured") : (
+            <>
+              {formatDate(paymentDate.date, { dateStyle: "medium" })}
+              {daysUntilDue !== null && <> ({dueDistance(daysUntilDue)})</>}
+            </>
+          )}
+        </Row>
+        {paymentDate.kind === "scheduled" && (
+          <p className="text-[11px] text-[var(--text-3)]">{t("scheduledPaymentDateHelp")}</p>
         )}
 
         <CreditCardInstallmentPlans plans={card.installmentPlans ?? []} currency={card.currency} />

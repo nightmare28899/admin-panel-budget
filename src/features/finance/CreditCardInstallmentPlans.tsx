@@ -42,7 +42,11 @@ export function CreditCardInstallmentPlans({ plans, currency }: { plans: CreditC
       </button>
       {open && (
         <div id={regionId} role="region" aria-label={t("planPurchasesTitle")} className="border-t border-[var(--border-soft)]/80 px-3 pb-3 pt-1">
-          <ul className="divide-y divide-slate-800/60">
+          <ul
+            tabIndex={0}
+            aria-label={t("planPurchasesTitle")}
+            className="max-h-[min(20rem,50dvh)] divide-y divide-slate-800/60 overflow-y-auto overscroll-contain pr-2 [scrollbar-width:thin] focus-visible:outline-2 focus-visible:outline-sky-400"
+          >
             {sorted.map((plan) => {
               const badge = TYPE_BADGE[plan.type];
               const hasProgress = plan.installmentNumber != null && plan.installmentCount != null && plan.installmentCount > 0;

@@ -88,6 +88,7 @@ function SidebarContent({
   brandSubtitle,
   activeDot,
   collapsed = false,
+  onToggleCollapsed,
 }: {
   navItems: AppShellNavItem[];
   workspaceItems?: AppShellNavItem[];
@@ -99,6 +100,7 @@ function SidebarContent({
   brandSubtitle?: string;
   activeDot?: boolean;
   collapsed?: boolean;
+  onToggleCollapsed?: () => void;
 }) {
   const pathname = usePathname();
   const { t } = useLocale();
@@ -195,11 +197,16 @@ function SidebarContent({
 
   return (
     <div className={`flex h-full w-full flex-col overflow-x-hidden overflow-y-auto bg-[var(--bg-2)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-[padding] duration-300 ease-in-out motion-reduce:transition-none ${collapsed ? "px-3" : "px-4"}`}>
-      <div title={collapsed ? "Budget Panel" : undefined} className="mb-4 flex shrink-0 items-center gap-2.5 overflow-hidden border-b border-[var(--border-soft)] px-2.5 pt-2 pb-5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-          <span className="font-serif text-[17px] leading-none text-[var(--accent-contrast)]">B</span>
+      <div className="relative mb-4 flex shrink-0 items-center gap-2.5 overflow-hidden border-b border-[var(--border-soft)] px-2.5 pt-2 pb-5">
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] shadow-[0_2px_8px_rgba(0,0,0,0.25)] ${labelTransition} ${collapsed && onToggleCollapsed ? "opacity-0" : "opacity-100"}`}>
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--accent-contrast)]" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 7V5a2 2 0 0 1 2-2h10v4" />
+            <rect x="3" y="7" width="18" height="14" rx="3" />
+            <path d="M21 11h-5a3 3 0 0 0 0 6h5" />
+            <circle cx="16" cy="14" r=".8" fill="currentColor" stroke="none" />
+          </svg>
         </div>
-        <div className={`flex min-w-0 flex-col ${labelTransition} ${labelVisibility}`}>
+        <div className={`flex min-w-0 flex-1 flex-col ${onToggleCollapsed ? "pr-8" : ""} ${labelTransition} ${labelVisibility}`}>
           <span className="whitespace-nowrap text-[14.5px] font-semibold tracking-[0.01em] text-[var(--text-1)]">
             Budget Panel
           </span>
@@ -209,6 +216,23 @@ function SidebarContent({
             </span>
           ) : null}
         </div>
+        {onToggleCollapsed && (
+          <button
+            type="button"
+            onClick={onToggleCollapsed}
+            aria-expanded={!collapsed}
+            aria-controls="desktop-sidebar"
+            aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
+            title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
+            className={`absolute right-0 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-[var(--text-2)] transition-[transform,background-color,color] duration-300 ease-in-out hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] focus-visible:outline-2 focus-visible:outline-[var(--accent)] motion-reduce:transition-none ${collapsed ? "-translate-x-3" : "translate-x-0"}`}
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M9 4v16" />
+              <path d={collapsed ? "m13 9 3 3-3 3" : "m16 9-3 3 3 3"} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <p className={`shrink-0 overflow-hidden whitespace-nowrap px-2.5 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)] ${labelTransition} ${labelVisibility}`}>
@@ -383,6 +407,7 @@ export function AppShell({
             brandSubtitle={brandSubtitle}
             activeDot={activeDot}
             collapsed={collapsed}
+            onToggleCollapsed={toggleCollapsed}
           />
         </aside>
 
@@ -393,18 +418,6 @@ export function AppShell({
                 onClick={() => setMobileSidebarOpen(true)}
                 className="cursor-pointer rounded-lg p-1 text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)] md:hidden"
                 aria-label={t("openSidebar")}
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <button
-                onClick={toggleCollapsed}
-                aria-expanded={!collapsed}
-                aria-controls="desktop-sidebar"
-                aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-                title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-                className="hidden cursor-pointer rounded-lg p-1 text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)] md:block"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -442,7 +455,7 @@ export function AppShell({
             </div>
           </header>
 
-          <main className="relative z-10 col-start-2 row-start-2 min-h-0 min-w-0 overflow-y-auto rounded-[28px] bg-[var(--bg-0)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:rounded-l-none">
+          <main className={`relative z-10 col-start-2 row-start-2 min-h-0 min-w-0 overflow-y-auto rounded-[28px] bg-[var(--bg-0)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:rounded-l-none ${collapsed ? "md:bg-[var(--bg-1)]" : ""}`}>
             <div className={mainClassName}>{children}</div>
           </main>
         </div>
