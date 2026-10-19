@@ -105,7 +105,7 @@ export function StatementImportsView() {
   );
 
   return (
-    <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6 ${STATEMENT_FIELD_SCOPE}`}>
+    <div className={`${STATEMENT_BACKDROP_CLASS} p-4 sm:p-6 ${STATEMENT_FIELD_SCOPE}`}>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-serif text-2xl font-semibold tracking-tight text-[var(--text-1)]">

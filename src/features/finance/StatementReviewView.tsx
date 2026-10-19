@@ -934,7 +934,7 @@ export function StatementReviewView({
 
   if (loading && !statementImport) {
     return (
-      <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6 [&_.animate-pulse]:!bg-[var(--bg-3)]/80`}>
+      <div className={`${STATEMENT_BACKDROP_CLASS} p-4 sm:p-6 [&_.animate-pulse]:!bg-[var(--bg-3)]/80`}>
         <TableSkeleton rows={7} columns={6} />
       </div>
     );
@@ -942,7 +942,7 @@ export function StatementReviewView({
 
   if (!statementImport) {
     return (
-      <div className={`${STATEMENT_BACKDROP_CLASS} max-w-7xl p-4 sm:p-6`}>
+      <div className={`${STATEMENT_BACKDROP_CLASS} p-4 sm:p-6`}>
         <StatementSectionCard>
           <p role="alert" className="text-sm text-[var(--rose-text)]">{error ?? t("statementNotFound")}</p>
           <StatementButton className="mt-4" onClick={() => router.push("/finance/statements")}>{t("backToStatements")}</StatementButton>

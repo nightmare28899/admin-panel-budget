@@ -603,7 +603,7 @@ export function SubscriptionsView() {
       style={THEME_STYLE}
       className={`${headlineFont.variable} ${bodyFont.variable} ${monoFont.variable} min-h-screen w-full bg-[var(--sub-canvas)] font-[family-name:var(--font-sub-inter)] text-[var(--sub-text-high)]`}
     >
-      <div className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+      <div className="w-full p-4 sm:p-6 lg:p-8">
         <nav aria-label={t("financeBreadcrumb")} className="mb-2 flex items-center gap-1.5">
           <Link
             href="/finance"

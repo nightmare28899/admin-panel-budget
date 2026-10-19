@@ -8,7 +8,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /** Use the workspace surface without painting outside its rounded content frame. */
 export const STATEMENT_BACKDROP_CLASS =
-  "mx-auto min-h-full w-full bg-[var(--bg-1)] ";
+  "min-h-full w-full ";
 
 /**
  * Scoped restyle of antd fields (inputs, selects, number inputs, table) so they

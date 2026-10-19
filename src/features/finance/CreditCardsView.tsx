@@ -124,7 +124,7 @@ export function CreditCardsView() {
   ) : null;
 
   return (
-    <div className="mx-auto min-h-full w-full max-w-7xl bg-[var(--bg-1)] p-4  sm:p-6">
+    <div className="min-h-full w-full p-4 sm:p-6">
       {!overview && !loading && (
         <div className="mb-4">
           <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("myCards")}</h1>

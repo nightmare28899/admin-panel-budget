@@ -544,7 +544,7 @@ export function ReportsView() {
   }
 
   return (
-    <div className="mx-auto min-h-full w-full max-w-7xl space-y-7 bg-[var(--bg-1)] p-4  sm:p-6">
+    <div className="min-h-full w-full space-y-7 p-4 sm:p-6">
       <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--text-1)]">

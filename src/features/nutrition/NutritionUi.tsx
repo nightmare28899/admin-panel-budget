@@ -21,7 +21,7 @@ export function useMealLabel() {
 
 /** Same page frame finance views use. */
 export function PageContainer({ children }: { children: ReactNode }) {
-  return <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">{children}</div>;
+  return <div className="w-full p-4 sm:p-6">{children}</div>;
 }
 
 export function PageHeader({

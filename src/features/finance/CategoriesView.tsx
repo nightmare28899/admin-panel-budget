@@ -85,7 +85,7 @@ export function CategoriesView() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+    <div className="w-full p-4 sm:p-6">
       <div className="mb-4">
         <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">
           {t("yourCategories")}
