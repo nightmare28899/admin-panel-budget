@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { theme } from "antd";
-import { antdSharedTheme, workspaceReferenceTheme, workspaceAccent } from "./antdTheme";
+import { antdSharedTheme, workspaceReferenceTheme, workspaceAccent, workspaceDarkTheme, getWorkspaceTheme } from "./antdTheme";
 
 function luminance(hex: string) {
   const channels = hex.match(/[a-f\d]{2}/gi)!.map((channel) => {
@@ -80,5 +80,46 @@ describe("workspace reference theme", () => {
     };
     expect(workspaceTokens).toContain("color-scheme: light");
     for (const [token, value] of Object.entries(pairs)) expect(workspaceTokens).toContain(`--${token}: ${value};`);
+  });
+});
+
+
+describe("workspace dark theme", () => {
+  it("selects the requested palette without changing the light reference or public theme", () => {
+    for (const workspace of ["finance", "nutrition", "admin"] as const) {
+      expect(getWorkspaceTheme(workspace, "light").algorithm).toBe(theme.defaultAlgorithm);
+      expect(getWorkspaceTheme(workspace, "light").token!.colorPrimary).toBe(workspaceAccent[workspace]);
+      expect(getWorkspaceTheme(workspace, "dark").algorithm).toBe(theme.darkAlgorithm);
+      expect(getWorkspaceTheme(workspace, "dark").inherit).toBe(false);
+    }
+    expect(antdSharedTheme.token!.colorPrimary).toBe("#00c77f");
+    expect(workspaceReferenceTheme.token!.colorBgContainer).toBe("#ffffff");
+  });
+
+  it("keeps CSS and Ant Design dark surfaces in sync and readable", () => {
+    const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+    const tokens = css.match(/\[data-workspace\]\[data-appearance="dark"\]\s*\{([^}]+)\}/)![1];
+    const themeTokens = workspaceDarkTheme.token!;
+    const pairs = {
+      "bg-0": themeTokens.colorBgBase,
+      "bg-1": themeTokens.colorBgContainer,
+      "bg-3": themeTokens.colorBgElevated,
+      "text-1": themeTokens.colorText,
+      "text-2": themeTokens.colorTextSecondary,
+      "text-3": themeTokens.colorTextTertiary,
+      accent: themeTokens.colorPrimary,
+    };
+    for (const [token, value] of Object.entries(pairs)) expect(tokens).toContain(`--${token}: ${value};`);
+    for (const background of ["#080b11", "#111620", "#171d26", "#262e3a"]) {
+      for (const foreground of ["#e8ebf1", "#b6beca", "#8f99a9", "#b5a0ff"])
+        expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
+    }
+    for (const semantic of ["emerald", "gold", "rose", "info"]) {
+      const background = tokens.match(new RegExp(`--${semantic}-dim: (#[a-f\\d]{6});`, "i"))![1];
+      const foreground = tokens.match(new RegExp(`--${semantic}-text: (#[a-f\\d]{6});`, "i"))![1];
+      expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(workspaceDarkTheme.components!.Modal!.contentBg).toBe(themeTokens.colorBgContainer);
+    expect(workspaceDarkTheme.components!.Table!.colorBgContainer).toBe(themeTokens.colorBgContainer);
   });
 });

@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState, useSyncExternalStore, t
 import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { CommandPalette } from "@/components/ui/CommandPalette";
+import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { WorkspaceTheme, type Workspace } from "@/components/layout/WorkspaceTheme";
@@ -105,8 +106,8 @@ function SidebarContent({
   const pathname = usePathname();
   const { t } = useLocale();
   const labelVisibility = collapsed ? "opacity-0" : "opacity-100";
-  const labelTransition = "transition-opacity duration-300 ease-in-out motion-reduce:transition-none";
-  const itemSpacing = `transition-[padding,gap,background-color,border-color,color] duration-300 ease-in-out motion-reduce:transition-none ${collapsed ? "gap-0 px-2.5" : "gap-3 px-2.5"}`;
+  const labelTransition = "transition-opacity duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
+  const itemSpacing = `transition-[padding,gap,background-color,border-color,color] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${collapsed ? "gap-0 px-2.5" : "gap-3 px-2.5"}`;
   const renderItems = (items: AppShellNavItem[]) =>
     items.map((item) => {
         const active = item.href
@@ -196,7 +197,7 @@ function SidebarContent({
     });
 
   return (
-    <div className={`flex h-full w-full flex-col overflow-x-hidden overflow-y-auto bg-[var(--bg-2)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-[padding] duration-300 ease-in-out motion-reduce:transition-none ${collapsed ? "px-3" : "px-4"}`}>
+    <div className={`flex h-full w-full flex-col overflow-x-hidden overflow-y-auto bg-[var(--bg-2)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-[padding] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${collapsed ? "px-3" : "px-4"}`}>
       <div className="relative mb-4 flex shrink-0 items-center gap-2.5 overflow-hidden border-b border-[var(--border-soft)] px-2.5 pt-2 pb-5">
         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] shadow-[0_2px_8px_rgba(0,0,0,0.25)] ${labelTransition} ${collapsed && onToggleCollapsed ? "opacity-0" : "opacity-100"}`}>
           <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--accent-contrast)]" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
@@ -224,7 +225,7 @@ function SidebarContent({
             aria-controls="desktop-sidebar"
             aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
             title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-            className={`absolute right-0 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-[var(--text-2)] transition-[transform,background-color,color] duration-300 ease-in-out hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] focus-visible:outline-2 focus-visible:outline-[var(--accent)] motion-reduce:transition-none ${collapsed ? "-translate-x-3" : "translate-x-0"}`}
+            className={`absolute right-0 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-[var(--text-2)] transition-[transform,background-color,color] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] focus-visible:outline-2 focus-visible:outline-[var(--accent)] motion-reduce:transition-none ${collapsed ? "-translate-x-3" : "translate-x-0"}`}
           >
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}>
               <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -284,7 +285,7 @@ function SidebarContent({
           </svg>
         </Link>
       ) : (
-        <div title={collapsed ? user?.name || user?.email : undefined} className={`relative shrink-0 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)] transition-[height] duration-300 ease-in-out motion-reduce:transition-none ${collapsed && onSignOut ? "h-[92px]" : "h-[54px]"}`}>
+        <div title={collapsed ? user?.name || user?.email : undefined} className={`relative shrink-0 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-2)] transition-[height] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${collapsed && onSignOut ? "h-[92px]" : "h-[54px]"}`}>
           <span className="absolute top-2.5 left-2.5"><Avatar name={user?.name} avatarUrl={user?.avatarUrl} size="sm" /></span>
           <div className={`absolute top-2.5 right-[50px] left-[52px] min-w-0 ${labelTransition} ${labelVisibility}`}>
             <div className="truncate text-[12.5px] font-medium text-[var(--text-1)]">
@@ -300,7 +301,7 @@ function SidebarContent({
               aria-label={t("signOut")}
               title={t("signOut")}
               style={{ left: collapsed ? "11px" : "calc(100% - 41px)", top: collapsed ? "50px" : "11px" }}
-              className="absolute flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-[left,top,background-color,border-color,color] duration-300 ease-in-out hover:border-[var(--rose)]/40 hover:bg-[var(--bg-3)] hover:text-[var(--rose)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+              className="absolute flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-[left,top,background-color,border-color,color] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[var(--rose)]/40 hover:bg-[var(--bg-3)] hover:text-[var(--rose)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
               {signingOut ? (
                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -331,7 +332,7 @@ export function AppShell({
   onSignOut,
   signingOut,
   headerActions,
-  mainClassName = "mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8",
+  mainClassName = "w-full px-4 py-8 sm:px-6 lg:px-8",
   workspace,
   brandSubtitle,
   activeDot,
@@ -393,7 +394,7 @@ export function AppShell({
       <div className="relative grid h-dvh w-full grid-cols-[auto_minmax(0,1fr)] grid-rows-[72px_minmax(0,1fr)] overflow-hidden bg-[var(--shell-header-bg)] px-2 pb-2 font-sans text-[var(--text-2)] sm:px-3 sm:pb-3">
         <aside
           id="desktop-sidebar"
-          className={`relative z-40 col-start-1 row-start-2 hidden min-h-0 shrink-0 overflow-hidden rounded-l-[28px] border-r border-[var(--border-soft)] bg-[var(--bg-2)] transition-[width] duration-300 ease-in-out motion-reduce:transition-none md:flex ${
+          className={`relative z-40 col-start-1 row-start-2 hidden min-h-0 shrink-0 overflow-hidden rounded-l-[28px] border-r border-[var(--border-soft)] bg-[var(--bg-2)] transition-[width] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:flex ${
             collapsed ? "md:w-[80px]" : "md:w-[260px]"
           }`}
         >
@@ -444,6 +445,7 @@ export function AppShell({
                 </svg>
               </button>
               )}
+              {workspace ? <ThemeSwitcher /> : null}
               <LanguageSwitcher />
               {headerSlot ? (
                 <>
@@ -455,19 +457,22 @@ export function AppShell({
             </div>
           </header>
 
-          <main className={`relative z-10 col-start-2 row-start-2 min-h-0 min-w-0 overflow-y-auto rounded-[28px] bg-[var(--bg-0)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:rounded-l-none ${collapsed ? "md:bg-[var(--bg-1)]" : ""}`}>
-            <div className={mainClassName}>{children}</div>
+          <main className="relative z-10 col-start-2 row-start-2 min-h-0 min-w-0 overflow-y-auto rounded-[28px] bg-[var(--bg-0)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:rounded-l-none">
+            <div className={`min-h-full w-full ${mainClassName}`}>{children}</div>
           </main>
         </div>
 
-        {mobileSidebarOpen && (
-          <div className="fixed inset-0 z-50 md:hidden">
+        <div
+          aria-hidden={!mobileSidebarOpen}
+          inert={!mobileSidebarOpen}
+          className={`workspace-mobile-sidebar fixed inset-0 z-50 md:hidden ${mobileSidebarOpen ? "visible opacity-100" : "invisible pointer-events-none opacity-0"}`}
+        >
             <button
               aria-label={t("closeSidebarBackdrop")}
               className="absolute inset-0 cursor-pointer bg-black/60 backdrop-blur-sm"
               onClick={() => setMobileSidebarOpen(false)}
             />
-            <aside className="relative my-3 ml-3 flex h-[calc(100%-1.5rem)] w-80 max-w-[88vw] flex-col overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-4 shadow-2xl">
+            <aside className={`relative my-3 ml-3 flex h-[calc(100%-1.5rem)] w-80 max-w-[88vw] flex-col overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-4 shadow-2xl transition-transform duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"}`}>
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-sm font-medium text-[var(--text-2)]">{t("navigation")}</p>
                 <button
@@ -490,8 +495,7 @@ export function AppShell({
                 activeDot={activeDot}
               />
             </aside>
-          </div>
-        )}
+        </div>
 
         <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       </div>

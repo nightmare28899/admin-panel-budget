@@ -72,6 +72,53 @@
   --shell-header-border: #342e4c;
 }
 
+@media screen {
+  [data-workspace][data-appearance="dark"] {
+    color-scheme: dark;
+    --bg-0: #080b11;
+    --bg-1: #111620;
+    --bg-2: #171d26;
+    --bg-3: #262e3a;
+    --bg-hover: #262e3a;
+    --border: #323b48;
+    --border-soft: #262d38;
+    --text-1: #e8ebf1;
+    --text-2: #b6beca;
+    --text-3: #8f99a9;
+    --emerald: #00c77f;
+    --emerald-dim: #0b3025;
+    --emerald-text: #65e6ad;
+    --gold: #f69e0b;
+    --gold-dim: #38280d;
+    --gold-text: #ffd27a;
+    --rose: #ef4444;
+    --rose-dim: #381b22;
+    --rose-text: #ffa2aa;
+    --info: #22d3ee;
+    --info-dim: #10313a;
+    --info-text: #83e7f5;
+    --accent: #b5a0ff;
+    --accent-dim: #30234e;
+    --accent-text: #c4b5fd;
+    --accent-contrast: #080b11;
+  }
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg-0);
+}
+
+.workspace-mobile-sidebar {
+  transition: visibility 450ms, opacity 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-mobile-sidebar { transition: none; }
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

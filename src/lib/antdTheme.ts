@@ -1,4 +1,5 @@
 import { theme as antdTheme, type ThemeConfig } from "antd";
+import type { WorkspaceAppearance } from "./workspaceAppearance";
 
 // Hex values derived from the oklch tokens in src/app/globals.css
 // (resolved via canvas pixel readback — do not eyeball these, re-derive
@@ -156,3 +157,38 @@ export const antdSharedTheme: ThemeConfig = {
     },
   },
 };
+
+
+export const workspaceDarkTheme: ThemeConfig = {
+  ...antdSharedTheme,
+  token: {
+    ...antdSharedTheme.token,
+    colorPrimary: "#b5a0ff",
+    colorBgBase: "#080b11",
+    colorBgContainer: "#111620",
+    colorBgElevated: "#262e3a",
+    colorTextPlaceholder: "#8f99a9",
+  },
+  components: {
+    ...antdSharedTheme.components,
+    Table: {
+      ...antdSharedTheme.components?.Table,
+      colorBgContainer: "#111620",
+      headerBg: "#262e3a",
+      footerBg: "#262e3a",
+    },
+    Modal: { contentBg: "#111620", headerBg: "#111620" },
+  },
+};
+
+export function getWorkspaceTheme(workspace: Workspace, appearance: WorkspaceAppearance): ThemeConfig {
+  const selected = appearance === "dark" ? workspaceDarkTheme : workspaceReferenceTheme;
+  return {
+    ...selected,
+    inherit: false,
+    token: {
+      ...selected.token,
+      colorPrimary: appearance === "dark" ? workspaceDarkTheme.token!.colorPrimary : workspaceAccent[workspace],
+    },
+  };
+}
