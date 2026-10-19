@@ -7,6 +7,8 @@ import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { CardKpiTile } from "./CardKpiTile";
 import { CreditCardTile } from "./CreditCardTile";
+import { CreditCardStack } from "./CreditCardStack";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type {
   CreditCardOverviewItem,
   CreditCardOverviewResponse,
@@ -52,6 +54,8 @@ export function CreditCardManager({
   const [deleting, setDeleting] = useState(false);
   const [filter, setFilter] = useState<FilterTab>("active");
   const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(() => new Set());
+  const [selectedCardId, setSelectedCardId] = useState<string>();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [form] = Form.useForm<CreditCardWritePayload>();
 
   const { portfolio, cards } = overview;
@@ -69,6 +73,7 @@ export function CreditCardManager({
     if (filter === "inactive") return !card.isActive;
     return true;
   });
+  const selectedIndex = Math.max(0, visibleCards.findIndex((card) => card.id === selectedCardId));
   const allVisibleDetailsExpanded = visibleCards.length > 0
     && visibleCards.every((card) => expandedCardIds.has(card.id));
 
@@ -91,6 +96,35 @@ export function CreditCardManager({
       return next;
     });
   };
+
+  const renderTile = (card: CreditCardOverviewItem, hideFace = false) => (
+    <CreditCardTile
+      key={card.id}
+      card={card}
+      hideFace={hideFace}
+      detailsExpanded={expandedCardIds.has(card.id)}
+      onToggleDetails={() => toggleCardDetails(card.id)}
+      onEdit={() => {
+        setEditing(card);
+        form.setFieldsValue({
+          name: card.name,
+          bank: card.bank,
+          brand: card.brand,
+          last4: card.last4,
+          color: card.color ?? undefined,
+          creditLimit: card.creditLimit ?? undefined,
+          closingDay: card.closingDay ?? undefined,
+          paymentDueDay: card.paymentDueDay ?? undefined,
+          currency: card.currency,
+        });
+        setOpen(true);
+      }}
+      onDeactivate={() => setDeactivateTarget(card)}
+      onReactivate={() => void onReactivate(card.id)}
+      onDeletePermanently={() => setDeleteTarget(card)}
+      onStatementPaymentChanged={onStatementPaymentChanged}
+    />
+  );
 
   const closeModal = () => {
     setOpen(false);
@@ -287,35 +321,20 @@ export function CreditCardManager({
           </p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleCards.map((card) => (
-            <CreditCardTile
-              key={card.id}
-              card={card}
-              detailsExpanded={expandedCardIds.has(card.id)}
-              onToggleDetails={() => toggleCardDetails(card.id)}
-              onEdit={() => {
-                setEditing(card);
-                form.setFieldsValue({
-                  name: card.name,
-                  bank: card.bank,
-                  brand: card.brand,
-                  last4: card.last4,
-                  color: card.color ?? undefined,
-                  creditLimit: card.creditLimit ?? undefined,
-                  closingDay: card.closingDay ?? undefined,
-                  paymentDueDay: card.paymentDueDay ?? undefined,
-                  currency: card.currency,
-                });
-                setOpen(true);
-              }}
-              onDeactivate={() => setDeactivateTarget(card)}
-              onReactivate={() => void onReactivate(card.id)}
-              onDeletePermanently={() => setDeleteTarget(card)}
-              onStatementPaymentChanged={onStatementPaymentChanged}
+        isDesktop ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleCards.map((card) => renderTile(card))}
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <CreditCardStack
+              cards={visibleCards}
+              selectedIndex={selectedIndex}
+              onSelect={(index) => setSelectedCardId(visibleCards[index]?.id)}
             />
-          ))}
-        </div>
+            <div className="mx-auto max-w-sm">{renderTile(visibleCards[selectedIndex], true)}</div>
+          </div>
+        )
       )}
 
       <PaymentReminderBanner cards={cards} />

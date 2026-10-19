@@ -51,6 +51,7 @@ import { canIncludeAsExpense, STATUS_META } from "./statement-import.utils";
 import { categoryKeyOf, planStatementCategorization } from "./statementCategorization";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { buildPagination } from "@/lib/pagination";
 import type { MessageKey } from "@/i18n/messages";
 
 const ROW_KIND_KEYS: Record<StatementRowKind, MessageKey> = {
@@ -188,6 +189,8 @@ export function StatementReviewView({
   const [notice, setNotice] = useState<string>();
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
   const [rowFilter, setRowFilter] = useState<StatementRowFilter>("ALL");
+  const [statementPage, setStatementPage] = useState(1);
+  const [statementPageSize, setStatementPageSize] = useState(20);
   const [bulkCategoryId, setBulkCategoryId] = useState<string>();
   const [revealedMerchantIds, setRevealedMerchantIds] = useState<Set<string>>(() => new Set());
 
@@ -1148,9 +1151,9 @@ export function StatementReviewView({
       )}
 
       <StatementSectionCard bodyClassName="p-3 sm:p-4">
-        <div className="mb-3 flex flex-col gap-3 border-b border-[var(--border-soft)]/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold tracking-tight text-[var(--text-1)]">{t("statementRows")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--text-1)]">{t("statementRows")}</h2>
             <p className="mt-1 text-xs text-[var(--text-3)]">{t("sourceRows", { count: formatNumber(rows.length) })}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
@@ -1178,6 +1181,7 @@ export function StatementReviewView({
               ]}
               onChange={(nextFilter) => {
                 setRowFilter(nextFilter);
+                setStatementPage(1);
                 setSelectedRowIds([]);
               }}
             />
@@ -1268,24 +1272,24 @@ export function StatementReviewView({
             </div>
           </div>
         )}
-        <div className="min-w-0 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-1)]/60">
+        <div className="min-w-0">
           <Table<StatementRow>
             rowKey="id"
             dataSource={filteredRows}
             columns={columns}
             rowSelection={rowSelection}
-            pagination={{
-              defaultPageSize: 20,
-              showSizeChanger: true,
-              pageSizeOptions: ["10", "20", "50", "100"],
-              showTotal: (total) => t("sourceRows", { count: formatNumber(total) }),
-            }}
+            pagination={buildPagination({
+              t, formatNumber, current: statementPage, pageSize: statementPageSize,
+              recordKeys: { one: "statementRowRecord", other: "statementRowRecords" },
+              onChange: (nextPage, nextPageSize) => { setStatementPageSize(nextPageSize); setStatementPage(nextPage); },
+            })}
             scroll={{ x: 1050, y: STATEMENT_ROWS_SCROLL_HEIGHT }}
             size="small"
             classNames={{
               root: styles.table,
               header: { cell: styles.headerCell },
               body: { row: styles.row, cell: styles.cell },
+              section: styles.section,
               pagination: { root: styles.pagination },
             }}
             onRow={(row) => ({ "aria-selected": selectedRowIds.includes(row.id) })}

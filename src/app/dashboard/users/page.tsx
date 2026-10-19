@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Table } from "antd";
+import type { TableColumnsType } from "antd";
+import { buildPagination, clampPage } from "@/lib/pagination";
 import { UserRow } from "@/lib/api";
 import {
   getUsersAction,
@@ -61,6 +64,7 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [confirmingUser, setConfirmingUser] = useState<UserRow | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage, setUsersPerPage] = useState(10);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -68,7 +72,6 @@ export default function UsersPage() {
 
   const setHeaderSlot = useHeaderSlot();
 
-  const USERS_PER_PAGE = 10;
 
   const showToast = (message: string, type: ToastType = "success") => {
     setToast({ message, type });
@@ -284,11 +287,111 @@ export default function UsersPage() {
     return true;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const startIndex = (safeCurrentPage - 1) * USERS_PER_PAGE;
-  const endIndex = startIndex + USERS_PER_PAGE;
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
+  const safeCurrentPage = clampPage(currentPage, filteredUsers.length, usersPerPage);
+
+  const headerCell = (label: string) => (
+    <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">{label}</span>
+  );
+
+  const columns: TableColumnsType<UserRow> = [
+    {
+      key: "user",
+      title: headerCell(t("users")),
+      render: (_, u) => (
+        <div className="flex min-w-0 items-center gap-3">
+          <Avatar name={u.name} avatarUrl={u.avatarUrl} size={34} />
+          <div className="min-w-0">
+            <div className="truncate text-[13.5px] font-medium text-[var(--text-1)]">{u.name}</div>
+            <div className="truncate font-mono text-[11.5px] text-[var(--text-3)]">{u.email}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "role",
+      title: headerCell(t("role")),
+      render: (_, u) => <Badge ring>{u.role}</Badge>,
+    },
+    {
+      key: "status",
+      title: headerCell(t("status")),
+      render: (_, u) => (
+        <div className="flex items-center gap-[7px]">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${u.isActive ? "bg-[var(--emerald)]" : "bg-[var(--text-3)]"}`}
+            style={{ boxShadow: `0 0 0 3px ${u.isActive ? "var(--emerald-dim)" : "var(--bg-3)"}` }}
+          />
+          <span className="text-[12.5px] text-[var(--text-2)]">{u.isActive ? t("active") : t("disabled")}</span>
+        </div>
+      ),
+    },
+    {
+      key: "plan",
+      title: headerCell(t("plan")),
+      render: (_, u) =>
+        u.isPremium ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--gold-dim)] px-[9px] py-[3px] text-[11.5px] font-medium text-[var(--gold-text)]">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2 9.5 8.5 3 9.3l5 4.4L6.4 20 12 16.3 17.6 20 16 13.7l5-4.4-6.5-.8Z" />
+            </svg>
+            {t("premium")}
+          </span>
+        ) : (
+          <span className="text-[12.5px] text-[var(--text-3)]">{t("free")}</span>
+        ),
+    },
+    {
+      key: "dailyBudget",
+      align: "right",
+      title: headerCell(t("dailyBudget")),
+      render: (_, u) => (
+        <span className="font-mono text-[13px] tabular-nums text-[var(--text-1)]">
+          {u.currency ? `${u.currency} ` : ""}
+          {formatDailyBudget(u.dailyBudget, formatNumber)}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      align: "right",
+      title: headerCell(t("actions")),
+      render: (_, u) => (
+        <div className="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={() => openEdit(u)}
+            disabled={actionLoading}
+            title={t("editUser", { name: u.name })}
+            aria-label={t("editUser", { name: u.name })}
+            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}>
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            ref={openMenuId === u.id ? menuButtonRef : undefined}
+            onClick={(e) => toggleMenu(u.id, e)}
+            disabled={actionLoading}
+            title={t("moreActions")}
+            aria-label={t("moreActions")}
+            aria-haspopup="menu"
+            aria-expanded={openMenuId === u.id}
+            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}>
+              <circle cx="12" cy="5" r="1.4" />
+              <circle cx="12" cy="12" r="1.4" />
+              <circle cx="12" cy="19" r="1.4" />
+            </svg>
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -351,9 +454,9 @@ export default function UsersPage() {
         </div>
       )}
 
-      <div className="mb-3.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-[14.5px] font-medium text-[var(--text-1)]">{t("allUsers")}</span>
+          <h2 className="text-lg font-semibold text-[var(--text-1)]">{t("allUsers")}</h2>
           {loading ? (
             <SkeletonBlock className="h-3 w-6" aria-hidden="true" />
           ) : (
@@ -383,162 +486,19 @@ export default function UsersPage() {
       {loading ? (
         <TableSkeleton rows={7} columns={6} />
       ) : (
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--accent)]/25 bg-[var(--bg-2)]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_0%_0%,var(--accent-dim),transparent_55%)]"
-            aria-hidden="true"
-          />
-        <div className="relative overflow-x-auto">
-          <table className="min-w-full whitespace-nowrap text-left text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border-soft)]">
-                <th scope="col" className="px-6 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                   {t("users")}
-                </th>
-                <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                   {t("role")}
-                </th>
-                <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                   {t("status")}
-                </th>
-                <th scope="col" className="px-3 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                   {t("plan")}
-                </th>
-                <th scope="col" className="px-3 py-3 text-right text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                   {t("dailyBudget")}
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                   {t("actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {!loading && filteredUsers.length === 0 ? (
-                <tr>
-                  <td className="px-6 py-8 text-center text-[var(--text-3)]" colSpan={6}>
-                     {t("noUsersFound")}
-                  </td>
-                </tr>
-              ) : (
-                paginatedUsers.map((u) => {
-                  return (
-                    <tr
-                      key={u.id}
-                      className="group border-b border-[var(--border-soft)] transition-colors last:border-b-0 hover:bg-[var(--bg-3)]/40"
-                    >
-                      <td className="px-6 py-3.5">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <Avatar name={u.name} avatarUrl={u.avatarUrl} size={34} />
-                          <div className="min-w-0">
-                            <div className="truncate text-[13.5px] font-medium text-[var(--text-1)]">{u.name}</div>
-                            <div className="truncate font-mono text-[11.5px] text-[var(--text-3)]">{u.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-3.5">
-                        <Badge ring>{u.role}</Badge>
-                      </td>
-                      <td className="px-3 py-3.5">
-                        <div className="flex items-center gap-[7px]">
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${u.isActive ? "bg-[var(--emerald)]" : "bg-[var(--text-3)]"}`}
-                            style={{
-                              boxShadow: `0 0 0 3px ${u.isActive ? "var(--emerald-dim)" : "var(--bg-3)"}`,
-                            }}
-                          />
-                           <span className="text-[12.5px] text-[var(--text-2)]">{u.isActive ? t("active") : t("disabled")}</span>
-                        </div>
-                      </td>
-                      <td className="px-3 py-3.5">
-                        {u.isPremium ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--gold-dim)] px-[9px] py-[3px] text-[11.5px] font-medium text-[var(--gold-text)]">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 2 9.5 8.5 3 9.3l5 4.4L6.4 20 12 16.3 17.6 20 16 13.7l5-4.4-6.5-.8Z" />
-                            </svg>
-                             {t("premium")}
-                          </span>
-                        ) : (
-                           <span className="text-[12.5px] text-[var(--text-3)]">{t("free")}</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-3.5 text-right font-mono text-[13px] tabular-nums text-[var(--text-1)]">
-                        {u.currency ? `${u.currency} ` : ""}
-                         {formatDailyBudget(u.dailyBudget, formatNumber)}
-                      </td>
-                      <td className="px-6 py-3.5">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => openEdit(u)}
-                            disabled={actionLoading}
-                             title={t("editUser", { name: u.name })}
-                             aria-label={t("editUser", { name: u.name })}
-                            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}>
-                              <path d="M12 20h9" />
-                              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                            </svg>
-                          </button>
-                          <button
-                            type="button"
-                            ref={openMenuId === u.id ? menuButtonRef : undefined}
-                            onClick={(e) => toggleMenu(u.id, e)}
-                            disabled={actionLoading}
-                             title={t("moreActions")}
-                             aria-label={t("moreActions")}
-                            aria-haspopup="menu"
-                            aria-expanded={openMenuId === u.id}
-                            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-[var(--text-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-40"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}>
-                              <circle cx="12" cy="5" r="1.4" />
-                              <circle cx="12" cy="12" r="1.4" />
-                              <circle cx="12" cy="19" r="1.4" />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {!loading && filteredUsers.length > 0 && (
-          <div className="relative flex flex-col items-start justify-between gap-3 px-6 py-3.5 text-xs text-[var(--text-3)] sm:flex-row sm:items-center">
-            <p>
-               {t("showingUsers", { start: startIndex + 1, end: Math.min(endIndex, filteredUsers.length), total: filteredUsers.length })}
-            </p>
-
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={safeCurrentPage === 1}
-              >
-                 {t("previous")}
-              </Button>
-              <span className="px-2 text-[var(--text-2)]">
-                 {t("pageOf", { page: safeCurrentPage, total: totalPages })}
-              </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={safeCurrentPage === totalPages}
-              >
-                 {t("next")}
-              </Button>
-            </div>
-          </div>
-        )}
-        </div>
+        <Table<UserRow>
+          bordered
+          rowKey="id"
+          dataSource={filteredUsers}
+          columns={columns}
+          scroll={{ x: "max-content" }}
+          locale={{ emptyText: t("noUsersFound") }}
+          pagination={buildPagination({
+            t, formatNumber, current: safeCurrentPage, pageSize: usersPerPage, total: filteredUsers.length,
+            recordKeys: { one: "userRecord", other: "userRecords" },
+            onChange: (nextPage, nextPageSize) => { setUsersPerPage(nextPageSize); setCurrentPage(nextPage); },
+          })}
+        />
       )}
 
       {openMenuId &&

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Empty, Popconfirm, Select } from "antd";
-import { CreditCardOutlined, DeleteOutlined, EditOutlined, LeftOutlined, PictureOutlined, RightOutlined } from "@ant-design/icons";
+import { Empty, List, Popconfirm } from "antd";
+import { CreditCardOutlined, DeleteOutlined, EditOutlined, PictureOutlined } from "@ant-design/icons";
 import type { Expense } from "./finance.types";
 import { toCalendarDate } from "./finance.types";
 import { categoryTokens } from "./categoryVisuals";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { InstallmentPlanBadge } from "./InstallmentPlanBadge";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { buildPagination } from "@/lib/pagination";
 
 function TransactionRow({
   expense,
@@ -37,7 +38,7 @@ function TransactionRow({
   const deletionPending = deletingExpenseId !== undefined;
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-[var(--bg-3)]/40 sm:px-3">
+    <List.Item className="!items-center !justify-between !gap-3">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <span
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg"
@@ -143,30 +144,22 @@ function TransactionRow({
           </Popconfirm>
         </div>
       </div>
-    </div>
+    </List.Item>
   );
 }
 
 type Props = {
   expenses: Expense[];
-  loadingMore: boolean;
-  hasMore: boolean;
   page: number;
   pageSize: number;
   total: number;
   onPage: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
-  onLoadMore: () => void;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => Promise<void>;
   deletingExpenseId?: string;
   onReceipt: (expense: Expense) => void;
 };
-
-// Sized so the whole /finance/expenses page fits close to one MacBook viewport
-// (~1512x900 window, ~806px usable height) without stacking an outer page
-// scrollbar on top of the list's own internal scroll.
-const VISIBLE_ROWS_HEIGHT = 460;
 
 export function ExpenseList({
   expenses,
@@ -181,78 +174,27 @@ export function ExpenseList({
   onReceipt,
 }: Props) {
   const { t, formatNumber } = useLocale();
-  const pageSizeOptions = [10, 20, 50, 100].map((size) => ({ value: size, label: t("rowsPerPageOption", { count: formatNumber(size) }) }));
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const startIndex = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const endIndex = startIndex === 0 ? 0 : startIndex + expenses.length - 1;
 
   return (
-    <div>
-      <div
-        className="divide-y divide-[var(--border)] overflow-y-auto"
-        style={{ maxHeight: VISIBLE_ROWS_HEIGHT }}
-      >
-        {expenses.length === 0 ? (
-          <Empty description={t("noExpensesMatch")} className="py-10" />
-        ) : (
-          expenses.map((expense) => (
-            <TransactionRow
-              key={expense.id}
-              expense={expense}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              deletingExpenseId={deletingExpenseId}
-              onReceipt={onReceipt}
-            />
-          ))
-        )}
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-3">
-        <span className="text-xs text-[var(--text-3)]">
-          {total === 0
-            ? t("noRecords")
-            : t("showingRecords", { start: formatNumber(startIndex), end: formatNumber(endIndex), total: formatNumber(total), records: t(total === 1 ? "record" : "records") })}
-        </span>
-
-        <div className="flex items-center gap-2">
-          <Select
-            aria-label={t("rowsPerPage")}
-            size="small"
-            value={pageSize}
-            style={{ width: 110 }}
-            options={pageSizeOptions}
-            onChange={onPageSizeChange}
-          />
-          <div className="flex items-center gap-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="!h-8 !w-8 !px-0"
-              disabled={page <= 1}
-              onClick={() => onPage(page - 1)}
-              aria-label={t("previous")}
-            >
-              <LeftOutlined />
-            </Button>
-            <span className="px-2 text-xs font-medium text-[var(--text-2)]">
-              {t("pageOf", { page: formatNumber(page), total: formatNumber(totalPages) })}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="!h-8 !w-8 !px-0"
-              disabled={page >= totalPages}
-              onClick={() => onPage(page + 1)}
-              aria-label={t("next")}
-            >
-              <RightOutlined />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <List
+      bordered
+      dataSource={expenses}
+      rowKey="id"
+      locale={{ emptyText: <Empty description={t("noExpensesMatch")} className="py-10" /> }}
+      pagination={buildPagination({
+        t, formatNumber, current: page, pageSize, total,
+        recordKeys: { one: "record", other: "records" },
+        onChange: (nextPage, nextPageSize) => (nextPageSize !== pageSize ? onPageSizeChange(nextPageSize) : onPage(nextPage)),
+      })}
+      renderItem={(expense) => (
+        <TransactionRow
+          expense={expense}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          deletingExpenseId={deletingExpenseId}
+          onReceipt={onReceipt}
+        />
+      )}
+    />
   );
 }

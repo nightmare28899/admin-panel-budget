@@ -31,7 +31,6 @@ import {
 } from "@/lib/userActions";
 import { Button } from "@/components/ui/Button";
 import { BudgetRing } from "@/components/ui/BudgetRing";
-import { Card } from "@/components/ui/Card";
 import { StatCard } from "@/components/ui/StatCard";
 import { MetricCardsSkeleton, TableSkeleton } from "@/components/ui/ContentSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -100,7 +99,6 @@ export function ExpensesView() {
   const [budgetError, setBudgetError] = useState<string>();
   const [list, setList] = useState<ExpenseListResponse>();
   const [rows, setRows] = useState<Expense[]>([]);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -227,7 +225,7 @@ export function ExpensesView() {
     testDataConfirmationOpen ||
     Boolean(receiptUrl || receiptLoading || receiptError);
   const mutationPending =
-    saving || budgetSaving || testDataPending || loadingMore || Boolean(deletingExpenseId);
+    saving || budgetSaving || testDataPending || Boolean(deletingExpenseId);
 
   // Refetch the current page with the active filters; never touches filter,
   // pagination or dialog state. Pauses while a dialog/form is open or a write is running.
@@ -247,27 +245,6 @@ export function ExpensesView() {
     }
   };
   const refreshing = checking || manualRefreshing;
-
-  const loadMore = async () => {
-    if (loadingMore) return;
-    const nextPage = page + 1;
-    setLoadingMore(true);
-
-    const params = new URLSearchParams({ page: String(nextPage), limit: String(pageSize) });
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
-
-    const result = await getExpensesAction(params.toString());
-    if (result.error) {
-      setError(frontendError(result.error, t, "requestFailedGeneric"));
-    } else if (result.data) {
-      setRows((current) => [...current, ...result.data!.expenses]);
-      setList(result.data);
-      setPage(nextPage);
-    }
-    setLoadingMore(false);
-  };
 
   const saveExpense = async (values: ExpenseWritePayload, receipt?: File) => {
     if (saving) return;
@@ -477,7 +454,7 @@ export function ExpensesView() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+      <div className="w-full p-4 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("yourExpenses")}</h1>
@@ -648,7 +625,10 @@ export function ExpensesView() {
           </div>
         )}
 
-        <Card className="!p-4 mb-4" title={t("expenseHistory")}>
+        <section className="mb-4">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-[var(--text-1)]">{t("expenseHistory")}</h2>
+          </div>
           <div className="mb-3 flex flex-wrap gap-2">
             <Input.Search
               aria-label={t("searchExpenses")}
@@ -727,14 +707,11 @@ export function ExpensesView() {
           ) : (
             <ExpenseList
               expenses={rows}
-              loadingMore={loadingMore}
-              hasMore={rows.length < (list?.pagination.totalCount ?? 0)}
               page={page}
               pageSize={pageSize}
               total={list?.pagination.totalCount ?? 0}
               onPage={(next) => void reload(next)}
               onPageSizeChange={(size) => setPageSize(size)}
-              onLoadMore={() => void loadMore()}
               onEdit={(expense) => {
                 setEditing(expense);
                 setFormError(undefined);
@@ -745,7 +722,7 @@ export function ExpensesView() {
               onReceipt={(expense) => void openReceipt(expense)}
             />
           )}
-        </Card>
+        </section>
       </div>
 
       <Modal

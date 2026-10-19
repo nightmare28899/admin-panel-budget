@@ -6,13 +6,8 @@ import { useRouter } from "next/navigation";
 import { useId, type ButtonHTMLAttributes } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import type { MessageKey } from "@/i18n/messages";
-import {
-  creditCardArtworkImage,
-  CreditCardBrandMark,
-  CreditCardContactlessIcon,
-  CreditCardEmvChip,
-  creditCardTheme,
-} from "./creditCardVisuals";
+import { creditCardTheme } from "./creditCardVisuals";
+import { CreditCardFace } from "./CreditCardFace";
 import { cardPaymentDate } from "./cardPaymentAlerts";
 import { daysUntilDueDate, hasPaymentPending } from "./cardPaymentSchedule";
 import type { CreditCardOverviewItem } from "./credit-cards.types";
@@ -79,6 +74,7 @@ function FooterButton({
 export function CreditCardTile({
   card,
   detailsExpanded,
+  hideFace = false,
   onToggleDetails,
   onEdit,
   onDeactivate,
@@ -88,6 +84,8 @@ export function CreditCardTile({
 }: {
   card: CreditCardOverviewItem;
   detailsExpanded: boolean;
+  /** The card face is rendered elsewhere (stacked view). */
+  hideFace?: boolean;
   onToggleDetails: () => void;
   onEdit: () => void;
   onDeactivate: () => void;
@@ -99,8 +97,6 @@ export function CreditCardTile({
   const { t, formatNumber, formatDate } = useLocale();
   const formatMoney = (value: number) => `${card.currency} ${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const theme = creditCardTheme(card);
-  const artwork = creditCardArtworkImage(card);
-  const faceBackground = artwork ?? theme.background;
   const tone = usageTone(card);
   const summary = card.statementSummary;
   const statementPaymentStatus = summary.paymentStatus;
@@ -116,9 +112,6 @@ export function CreditCardTile({
   const paymentAmount = summary.currentPaymentDue ?? summary.noInterestTarget;
 
   const emphasisClass = !pending ? "" : overdue ? "ring-1 ring-rose-500/30" : "ring-1 ring-amber-500/20";
-  const bankWords = card.bank.trim().split(/\s+/);
-  const accentBankWord = theme.key === "rappi" ? bankWords[0] : null;
-  const bankRest = accentBankWord ? bankWords.slice(1).join(" ") : "";
 
   const dueDistance = (days: number): string => {
     const key: MessageKey =
@@ -142,68 +135,7 @@ export function CreditCardTile({
 
   return (
     <div className={`flex flex-col overflow-hidden rounded-3xl border border-[var(--border-soft)]/90 bg-[var(--bg-1)] transition-all duration-300 hover:border-[var(--border-soft)] hover:shadow-2xl ${emphasisClass} ${card.isActive ? "" : "opacity-60"}`}>
-      <div
-        style={{ background: faceBackground, boxShadow: theme.glow }}
-        className={`relative m-3 flex h-44 select-none flex-col justify-between overflow-hidden rounded-2xl border p-4 ${theme.borderClass}`}
-      >
-        {theme.key === "banamex" && (
-          <>
-            <div className="pointer-events-none absolute -bottom-8 -right-8 h-44 w-44 rounded-full bg-white/10 blur-xl" />
-            <div className="pointer-events-none absolute right-0 top-0 h-36 w-36 bg-gradient-to-bl from-rose-400/20 to-transparent" />
-          </>
-        )}
-        {theme.key === "bbva" && (
-          <>
-            <div className="pointer-events-none absolute -right-6 -top-6 h-40 w-40 rounded-full bg-cyan-300/15 blur-lg" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
-          </>
-        )}
-        {theme.key === "rappi" && (
-          <>
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "radial-gradient(120% 90% at 90% 10%, rgba(56, 189, 248, 0.35) 0%, rgba(139, 92, 246, 0.45) 50%, rgba(15, 23, 42, 0) 100%)" }}
-            />
-            <div className="pointer-events-none absolute -bottom-10 -right-10 h-44 w-44 rounded-full bg-violet-600/20 blur-2xl" />
-          </>
-        )}
-        {theme.key === "default" && !artwork && (
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/30" />
-        )}
-
-        <div className="relative flex items-start justify-between">
-          <span className="truncate text-sm font-extrabold uppercase tracking-widest text-white drop-shadow">
-            {accentBankWord ? (
-              <>
-                <span className="text-orange-400">{accentBankWord}</span>
-                {bankRest && <> {bankRest}</>}
-              </>
-            ) : (
-              card.bank
-            )}
-          </span>
-          <div className="flex items-center gap-2">
-            {!card.isActive && (
-              <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/85">
-                {t("inactive")}
-              </span>
-            )}
-            <CreditCardContactlessIcon />
-          </div>
-        </div>
-
-        <div className="relative">
-          <CreditCardEmvChip />
-          <p className="mt-2 font-mono text-[15px] font-semibold tracking-[0.15em] text-white/95 drop-shadow-sm">
-            •••• •••• •••• {card.last4}
-          </p>
-        </div>
-
-        <div className="relative flex items-end justify-between gap-2">
-          <span className="truncate font-mono text-[11px] font-medium uppercase tracking-wider text-white/80">{card.name}</span>
-          {card.brand && <CreditCardBrandMark brand={card.brand} />}
-        </div>
-      </div>
+      {!hideFace && <CreditCardFace card={card} className="m-3" />}
 
       <div className="flex-1 space-y-3 px-4 pb-4">
         {card.creditStatus.limit != null ? (

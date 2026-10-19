@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
-import { DatePicker, Form, Input, InputNumber, Select } from "antd";
+import { DatePicker, Form, Input, InputNumber, List, Select } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
-import { CalendarOutlined, LeftOutlined, RightOutlined, RocketOutlined, WalletOutlined } from "@ant-design/icons";
+import { CalendarOutlined, RocketOutlined, WalletOutlined } from "@ant-design/icons";
 import type { Category } from "./finance.types";
 import { toCalendarDate } from "./finance.types";
 import type { CreditCardSummary } from "./statement-import.types";
@@ -40,6 +40,7 @@ import { fetchAllExpensesForCategory, groupCharges, type ChargeGroup } from "./s
 import { useCreditCards } from "./hooks/useCreditCards";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { buildPagination } from "@/lib/pagination";
 
 // Fonts are loaded (and their CSS variables scoped) only for this view — see
 // the "Obsidian Mint Fintech" design system note on the root wrapper below.
@@ -83,7 +84,6 @@ const THEME_STYLE = {
   "--sub-border-active": "var(--accent)",
 } as CSSProperties;
 
-const SUBSCRIPTION_ROWS_SCROLL_HEIGHT = 460;
 
 const BILLING_CYCLE_LABEL_KEYS = {
   DAILY: "daily",
@@ -558,11 +558,6 @@ export function SubscriptionsView() {
     { key: "paused", label: t("subsTabPaused", { count: formatNumber(pausedSubscriptions.length) }) },
   ];
 
-  const pageSizeOptions = [5, 10, 20, 50].map((size) => ({
-    value: size,
-    label: t("rowsPerPageOption", { count: formatNumber(size) }),
-  }));
-
   // A subscription plan and its charge history are linked by Expense.subscriptionId
   // (set once someone runs "Convertir en suscripción" on a detected group).
   // Charges still missing that link have no active/paused state, so they ride
@@ -573,6 +568,8 @@ export function SubscriptionsView() {
   type SubscriptionRow =
     | { type: "subscription"; subscription: Subscription }
     | { type: "chargeOnly"; group: ChargeGroup };
+  type SubscriptionListEntry = SubscriptionRow | { type: "skeleton"; index: number };
+  const SKELETON_ENTRIES: SubscriptionListEntry[] = Array.from({ length: 5 }, (_, index) => ({ type: "skeleton", index }));
   const combinedRows: SubscriptionRow[] = [
     ...filteredSubscriptions.map((subscription): SubscriptionRow => ({ type: "subscription", subscription })),
     ...unmatchedChargeGroups.map((group): SubscriptionRow => ({ type: "chargeOnly", group })),
@@ -582,8 +579,6 @@ export function SubscriptionsView() {
   // pattern used by ExpenseList/the previous version of this view.
   const totalPages = Math.max(1, Math.ceil(combinedRows.length / pageSize));
   const safePage = Math.min(page, totalPages);
-  const pageStartIndex = combinedRows.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
-  const pageEndIndex = pageStartIndex === 0 ? 0 : Math.min(pageStartIndex + pageSize - 1, combinedRows.length);
   const pagedRows = combinedRows.slice((safePage - 1) * pageSize, (safePage - 1) * pageSize + pageSize);
   const batchSum = pagedRows.reduce(
     (sum, row) => (row.type === "subscription" ? sum + Number(row.subscription.cost) : sum),
@@ -723,49 +718,50 @@ export function SubscriptionsView() {
           ))}
         </div>
 
-        <div className="rounded-[16px] border border-[var(--sub-border-subtle)] bg-[var(--sub-surface-raised)] p-3.5 sm:p-4">
-          {loading ? (
-            <div aria-busy="true">
-              <span className="sr-only" role="status" aria-live="polite">
-                {t("loadingList")}
+        <List<SubscriptionListEntry>
+          bordered
+          dataSource={loading ? SKELETON_ENTRIES : pagedRows}
+          rowKey={(entry) => (entry.type === "skeleton" ? `skeleton-${entry.index}` : entry.type === "chargeOnly" ? `charge-${entry.group.key}` : entry.subscription.id)}
+          locale={{
+            emptyText: (
+              <p className="mx-auto max-w-sm py-8 font-[family-name:var(--font-sub-inter)] text-sm text-[var(--sub-text-medium)]">
+                {subscriptions.length === 0 && chargeGroups.length === 0 ? t("noSubscriptionsYetHelp") : t("noSubscriptionsForFilter")}
+              </p>
+            ),
+          }}
+          footer={
+            !loading && pagedRows.some((row) => row.type === "subscription") ? (
+              <span className="font-[family-name:var(--font-sub-mono)] text-xs text-[var(--sub-text-low)]">
+                {t("visibleBatchTotal", {
+                  amount: `${currencyLabel} ${formatNumber(batchSum, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                })}
               </span>
-              <div aria-hidden="true">
-                {Array.from({ length: 5 }, (_, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between gap-5 border-b border-[var(--sub-border-subtle)] py-4 last:border-b-0"
-                  >
-                    <div className="flex-1">
-                      <div className="h-4 w-40 max-w-[70%] animate-pulse rounded bg-[var(--bg-3)]" />
-                      <div className="mt-2 h-3 w-28 max-w-[50%] animate-pulse rounded bg-[var(--bg-3)]" />
-                    </div>
-                    <div className="h-8 w-20 shrink-0 animate-pulse rounded-full bg-[var(--bg-3)]" />
+            ) : undefined
+          }
+          pagination={
+            loading || combinedRows.length === 0
+              ? false
+              : buildPagination({
+                  t, formatNumber, current: safePage, pageSize, total: combinedRows.length,
+                  recordKeys: { one: "subscriptionRecord", other: "subscriptionRecords" },
+                  onChange: (nextPage, nextPageSize) => { setPageSize(nextPageSize); setPage(nextPage); },
+                })
+          }
+          renderItem={(row) => {
+            if (row.type === "skeleton") {
+              return (
+                <List.Item key={`skeleton-${row.index}`} aria-hidden="true">
+                  <div className="flex-1">
+                    <div className="h-4 w-40 max-w-[70%] animate-pulse rounded bg-[var(--bg-3)]" />
+                    <div className="mt-2 h-3 w-28 max-w-[50%] animate-pulse rounded bg-[var(--bg-3)]" />
                   </div>
-                ))}
-              </div>
-            </div>
-          ) : subscriptions.length === 0 && chargeGroups.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-14 text-center">
-              <p className="max-w-sm font-[family-name:var(--font-sub-inter)] text-sm text-[var(--sub-text-medium)]">
-                {t("noSubscriptionsYetHelp")}
-              </p>
-            </div>
-          ) : combinedRows.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-14 text-center">
-              <p className="max-w-sm font-[family-name:var(--font-sub-inter)] text-sm text-[var(--sub-text-medium)]">
-                {t("noSubscriptionsForFilter")}
-              </p>
-            </div>
-          ) : (
-            <>
-              <ul
-                className="overflow-y-auto"
-                style={{ maxHeight: SUBSCRIPTION_ROWS_SCROLL_HEIGHT }}
-              >
-                {pagedRows.map((row) => {
+                  <div className="h-8 w-20 shrink-0 animate-pulse rounded-full bg-[var(--bg-3)]" />
+                </List.Item>
+              );
+            }
                   if (row.type === "chargeOnly") {
                     return (
-                      <li key={`charge-${row.group.key}`} className="border-b border-[var(--sub-border-subtle)] py-3 last:border-b-0">
+                      <List.Item key={`charge-${row.group.key}`} className="!block">
                         <ChargeGroupDetail
                           group={row.group}
                           categories={categories}
@@ -773,7 +769,7 @@ export function SubscriptionsView() {
                           onChanged={() => void reload()}
                           onConvert={() => startConvert(row.group)}
                         />
-                      </li>
+                      </List.Item>
                     );
                   }
 
@@ -785,10 +781,7 @@ export function SubscriptionsView() {
                   const matchedGroup = linkedChargesBySubscriptionId.get(subscription.id);
 
                   return (
-                    <li
-                      key={subscription.id}
-                      className="border-b border-[var(--sub-border-subtle)] py-3 last:border-b-0"
-                    >
+                    <List.Item key={subscription.id} className="!block">
                       <div className="flex flex-wrap items-center justify-between gap-2.5">
                         <div className="flex min-w-0 flex-1 items-center gap-2.5">
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[var(--sub-surface-base)] text-lg text-[var(--sub-primary-light)]">
@@ -886,80 +879,16 @@ export function SubscriptionsView() {
                           />
                         </div>
                       )}
-                    </li>
+                    </List.Item>
                   );
-                })}
-              </ul>
-
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2.5 border-t border-[var(--sub-border-subtle)] pt-2.5">
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-text-medium)]">
-                    {combinedRows.length === 0
-                      ? t("noRecords")
-                      : t("showingRecords", {
-                          start: formatNumber(pageStartIndex),
-                          end: formatNumber(pageEndIndex),
-                          total: formatNumber(combinedRows.length),
-                          records: t(combinedRows.length === 1 ? "record" : "records"),
-                        })}
-                  </span>
-                  {pagedRows.some((row) => row.type === "subscription") && (
-                    <span className="font-[family-name:var(--font-sub-mono)] text-xs text-[var(--sub-text-low)]">
-                      {t("visibleBatchTotal", {
-                        amount: `${currencyLabel} ${formatNumber(batchSum, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                      })}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <select
-                    aria-label={t("rowsPerPage")}
-                    value={pageSize}
-                    onChange={(event) => {
-                      setPageSize(Number(event.target.value));
-                      setPage(1);
-                    }}
-                    className="h-8 rounded-[8px] border border-[var(--border-soft)] bg-[var(--sub-surface-base)] px-2 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-text-high)] outline-none transition-colors focus:border-[var(--sub-primary)] focus:ring-1 focus:ring-[var(--sub-primary)]"
-                  >
-                    {pageSizeOptions.map((option) => (
-                      <option key={option.value} value={option.value} className="bg-[var(--sub-surface-base)] text-[var(--sub-text-high)]">
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      type="button"
-                      disabled={safePage <= 1}
-                      onClick={() => setPage(safePage - 1)}
-                      aria-label={t("previous")}
-                      className="!h-8 w-8 !px-0"
-                    >
-                      <LeftOutlined />
-                    </Button>
-                    <span className="px-2 font-[family-name:var(--font-sub-inter)] text-xs font-medium text-[var(--sub-text-medium)]">
-                      {t("pageOf", { page: formatNumber(safePage), total: formatNumber(totalPages) })}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      type="button"
-                      disabled={safePage >= totalPages}
-                      onClick={() => setPage(safePage + 1)}
-                      aria-label={t("next")}
-                      className="!h-8 w-8 !px-0"
-                    >
-                      <RightOutlined />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+                
+          }}
+        />
+        {loading && (
+          <span className="sr-only" role="status" aria-live="polite">
+            {t("loadingList")}
+          </span>
+        )}
 
         {chargesError && (
           <p className="mt-3 font-[family-name:var(--font-sub-inter)] text-xs text-[var(--sub-danger)]">{chargesError}</p>

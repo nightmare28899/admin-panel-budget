@@ -38,4 +38,11 @@ describe("statement review table palette", () => {
     expect(css).not.toContain(".ant-");
     expect(css).not.toMatch(/background: var\(--(?:emerald|gold|rose)/);
   });
+
+  it("frames the table like the Categories list and keeps pagination outside the border", () => {
+    expect(css).toMatch(/\.table \.section\s*\{[^}]*border: 1px solid var\(--border-soft\)/);
+    expect(css).toMatch(/\.table \.section\s*\{[^}]*border-radius: var\(--radius-md/);
+    expect(css).toMatch(/\.table \.pagination\s*\{[^}]*margin-block-start: 24px/);
+    expect(css).not.toMatch(/\.pagination\s*\{[^}]*padding-inline/);
+  });
 });
