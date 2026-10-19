@@ -8,6 +8,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { CardPaymentAlertsBell } from "./CardPaymentAlertsBell";
 import { SubscriptionAlertsBell } from "./SubscriptionAlertsBell";
 import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
+import { usePendingPurchases } from "./hooks/usePendingPurchases";
 import { useLocale } from "@/i18n/LocaleProvider";
 
 type FinanceUser = {
@@ -33,6 +34,7 @@ function createWorkspaceItems(t: ReturnType<typeof useLocale>["t"]): AppShellNav
 function createNavItems(
   t: ReturnType<typeof useLocale>["t"],
   activeCardCount: number | null,
+  pendingCount?: number,
 ): AppShellNavItem[] {
   return [
   {
@@ -45,6 +47,12 @@ function createNavItems(
         <path d="M8 12h8M8 16h8M8 8h4" />
       </>
     ),
+  },
+  {
+    label: t("pendingPurchasesNav"),
+    href: "/finance/pending-expenses",
+    badge: pendingCount,
+    icon: <><path d="M4 4h16v16H4zM8 9h8M8 13h4" /><path d="m13 16 2 2 4-4" /></>,
   },
   {
     label: t("myCards"),
@@ -112,6 +120,7 @@ export function FinanceShell({
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
   const pathname = usePathname();
+  const pending = usePendingPurchases({ limit: 1 });
   const [activeCardCount, setActiveCardCount] = useState<number | null>(null);
 
   // Refreshed on navigation and on card changes so the sidebar count follows
@@ -141,7 +150,7 @@ export function FinanceShell({
   return (
     <>
       <AppShell
-        navItems={createNavItems(t, activeCardCount)}
+        navItems={createNavItems(t, activeCardCount, pending.error ? undefined : pending.data?.pagination.totalCount)}
         workspaceItems={createWorkspaceItems(t)}
         user={user}
         onSignOut={() => setLogoutConfirmationOpen(true)}

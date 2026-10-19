@@ -1,3 +1,4 @@
+import type { DetectedPurchase, DetectedPurchaseListResponse } from "@/features/finance/interfaces/detected-purchases";
 import { API_BASE_URL, request } from "./api";
 import type { BudgetWritePayload, CardExpenseBreakdownResponse, Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
 import type {
@@ -63,6 +64,12 @@ const nutritionApi = {
 
 export const userApi = {
   ...nutritionApi,
+  detectedPurchases: (token: string, query: string) =>
+    request<DetectedPurchaseListResponse>(`/detected-purchases?${query}`, { method: "GET" }, token),
+  confirmDetectedPurchase: (token: string, id: string, expense: ExpenseWritePayload) =>
+    request<DetectedPurchase>(`/detected-purchases/${encodeURIComponent(id)}/confirm`, { method: "POST", body: JSON.stringify({ expense }) }, token),
+  discardDetectedPurchase: (token: string, id: string) =>
+    request<DetectedPurchase>(`/detected-purchases/${encodeURIComponent(id)}/discard`, { method: "POST", body: JSON.stringify({}) }, token),
   login: (email: string, password: string) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
   // existingUserOnly=false registers a new account for an unknown Google email.
   google: (token: string, options: { existingUserOnly?: boolean } = {}) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/google", { method: "POST", body: JSON.stringify({ firebaseIdToken: token, existingUserOnly: options.existingUserOnly ?? false }) }),

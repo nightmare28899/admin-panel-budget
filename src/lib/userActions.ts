@@ -22,6 +22,9 @@ import type {
   CreateSubscriptionPayload,
   UpdateSubscriptionPayload,
 } from "@/features/finance/subscriptions.types";
+import { z } from "zod";
+import type { DetectedPurchase, DetectedPurchaseListResponse } from "@/features/finance/interfaces/detected-purchases";
+import { pendingPurchaseQuery } from "@/features/finance/utils/detected-purchases";
 import { ApiError } from "./api";
 import { userApi } from "./userApi";
 import {
@@ -549,4 +552,40 @@ export async function createExpenseAction(
     if (receipt) form.append("image", receipt, receipt.name);
     return userApi.createExpense(token, form);
   });
+}
+
+const purchaseIdSchema = z.string().uuid();
+const purchaseExpenseSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  cost: z.string().regex(/^\d+(?:\.\d{1,2})?$/).refine((value) => Number(value) > 0),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  categoryId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  note: z.string().max(1000).optional(),
+  merchantName: z.string().max(120).optional(),
+  locationLabel: z.string().max(120).optional(),
+  paymentMethod: z.enum(["CASH", "CREDIT_CARD", "DEBIT_CARD", "TRANSFER"]).optional(),
+  creditCardId: z.string().uuid().optional(),
+  isInstallment: z.boolean().optional(),
+  installmentCount: z.number().int().min(2).max(120).optional(),
+  installmentFrequency: z.literal("MONTHLY").optional(),
+  installmentPurchaseDate: z.string().optional(),
+  installmentFirstPaymentDate: z.string().optional(),
+});
+
+export async function getDetectedPurchasesAction(page = 1, limit = 20): Promise<Result<DetectedPurchaseListResponse>> {
+  const parsed = z.object({ page: z.number().int().min(1), limit: z.number().int().min(1).max(100) }).safeParse({ page, limit });
+  if (!parsed.success) return { error: "requestFailedGeneric" };
+  return withUser((token) => userApi.detectedPurchases(token, pendingPurchaseQuery(page, limit)), true);
+}
+
+export async function confirmDetectedPurchaseAction(id: string, expense: ExpenseWritePayload): Promise<Result<DetectedPurchase>> {
+  const parsed = purchaseExpenseSchema.safeParse(expense);
+  if (!purchaseIdSchema.safeParse(id).success || !parsed.success) return { error: "requestFailedGeneric" };
+  return withFreshUser((token) => userApi.confirmDetectedPurchase(token, id, parsed.data));
+}
+
+export async function discardDetectedPurchaseAction(id: string): Promise<Result<DetectedPurchase>> {
+  if (!purchaseIdSchema.safeParse(id).success) return { error: "requestFailedGeneric" };
+  return withFreshUser((token) => userApi.discardDetectedPurchase(token, id));
 }

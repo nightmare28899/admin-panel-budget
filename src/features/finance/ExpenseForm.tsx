@@ -50,7 +50,7 @@ function buildPayload(values: ExpenseFormValues, creating: boolean): ExpenseWrit
   };
 }
 
-export function ExpenseForm({ categories, creditCards = [], expense, loading, error, onSubmit, onCancel }: { categories: Category[]; creditCards?: CreditCardSummary[]; expense?: Expense; loading?: boolean; error?: string; onSubmit: (values: ExpenseWritePayload, receipt?: File) => void; onCancel: () => void }) {
+export function ExpenseForm({ categories, creditCards = [], expense, initialValues, submitLabel, hideReceipt = false, loading, error, onSubmit, onCancel }: { categories: Category[]; creditCards?: CreditCardSummary[]; expense?: Expense; initialValues?: Partial<ExpenseWritePayload>; submitLabel?: string; hideReceipt?: boolean; loading?: boolean; error?: string; onSubmit: (values: ExpenseWritePayload, receipt?: File) => void; onCancel: () => void }) {
   const { t } = useLocale();
   const [form] = Form.useForm<ExpenseFormValues>(); const [receipt, setReceipt] = useState<File>();
   const watchedPaymentMethod = Form.useWatch("paymentMethod", form) ?? expense?.paymentMethod ?? "CASH";
@@ -62,7 +62,7 @@ export function ExpenseForm({ categories, creditCards = [], expense, loading, er
   const syncFirstPaymentDate = (nextDate?: string) => {
     if (!form.isFieldTouched("installmentFirstPaymentDate")) form.setFieldValue("installmentFirstPaymentDate", nextDate || todayCalendarDate());
   };
-  return <Form form={form} layout="vertical" initialValues={expense ? { ...expense, cost: String(editingInstallment ? (expense.installmentTotalAmount ?? expense.cost) : expense.cost), categoryId: expense.categoryId ?? expense.category?.id, date: toCalendarDate(expense.date), paymentMethod: expense.paymentMethod ?? "CASH", creditCardId: expense.creditCardId ?? undefined } : { currency: "MXN", paymentMethod: "CASH" }} onValuesChange={(changed: Partial<ExpenseFormValues>) => { if (changed.date !== undefined || changed.isInstallment) syncFirstPaymentDate(form.getFieldValue("date") as string | undefined); }} onFinish={(values) => onSubmit(buildPayload(values, !expense), receipt)}>
+  return <Form form={form} layout="vertical" initialValues={expense ? { ...expense, cost: String(editingInstallment ? (expense.installmentTotalAmount ?? expense.cost) : expense.cost), categoryId: expense.categoryId ?? expense.category?.id, date: toCalendarDate(expense.date), paymentMethod: expense.paymentMethod ?? "CASH", creditCardId: expense.creditCardId ?? undefined } : { currency: "MXN", paymentMethod: "CASH", ...initialValues }} onValuesChange={(changed: Partial<ExpenseFormValues>) => { if (changed.date !== undefined || changed.isInstallment) syncFirstPaymentDate(form.getFieldValue("date") as string | undefined); }} onFinish={(values) => onSubmit(buildPayload(values, !expense), receipt)}>
     {error && <div role="alert" className="mb-4 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]">{error}</div>}
     <Form.Item name="title" label={t("title")} rules={[{ required: true, whitespace: true }]}><Input maxLength={120} placeholder={t("groceryShoppingExample")} /></Form.Item>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><Form.Item name="cost" label={t("amount")} rules={[{ required: true }]}><Input inputMode="decimal" placeholder="0.00" /></Form.Item><Form.Item name="currency" label={t("currency")} rules={[{ required: true, len: 3 }]}><Input maxLength={3} placeholder="MXN" /></Form.Item></div>
@@ -113,10 +113,10 @@ export function ExpenseForm({ categories, creditCards = [], expense, loading, er
       </div>
     )}
     <Form.Item name="merchantName" label={t("merchant")}><Input maxLength={120} placeholder={t("merchantExample")} /></Form.Item><Form.Item name="locationLabel" label={t("location")}><Input maxLength={120} placeholder={t("locationExample")} /></Form.Item><Form.Item name="note" label={t("note")}><Input.TextArea rows={3} maxLength={1000} placeholder={t("notePlaceholder")} /></Form.Item>
-    {!expense && <Form.Item label={t("receiptOptional")}><Upload disabled={loading} beforeUpload={(file) => { if (file.size > 5 * 1024 * 1024) return Upload.LIST_IGNORE; setReceipt(file); return false; }} maxCount={1} accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"><Button type="button" variant="outline" size="sm" disabled={loading}>{t("chooseImage")}</Button></Upload></Form.Item>}
+    {!expense && !hideReceipt && <Form.Item label={t("receiptOptional")}><Upload disabled={loading} beforeUpload={(file) => { if (file.size > 5 * 1024 * 1024) return Upload.LIST_IGNORE; setReceipt(file); return false; }} maxCount={1} accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"><Button type="button" variant="outline" size="sm" disabled={loading}>{t("chooseImage")}</Button></Upload></Form.Item>}
     <div className="flex justify-end gap-2">
       <Button type="button" variant="ghost" disabled={loading} onClick={onCancel}>{t("cancel")}</Button>
-      <Button type="submit" variant="primary" loading={loading}>{loading ? t("saving") : expense ? t("saveChanges") : t("createExpense")}</Button>
+      <Button type="submit" variant="primary" loading={loading}>{loading ? t("saving") : submitLabel ?? (expense ? t("saveChanges") : t("createExpense"))}</Button>
     </div>
   </Form>;
 }
