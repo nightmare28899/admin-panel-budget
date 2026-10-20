@@ -1,37 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
-import { getCreditCardsAction } from "@/lib/userActions";
+import { useMemo } from "react";
 import type { CreditCardSummary } from "../statement-import.types";
-import { useSessionRedirect } from "./useSessionRedirect";
-import { useLocale } from "@/i18n/LocaleProvider";
-import { frontendError } from "@/i18n/errors";
+import { useFinanceContext } from "../FinanceContext";
 
-/** The user's active credit cards — used by both the upload picker and the history filter. */
+/** The user's active credit cards — uses shared context to avoid duplicate fetches. */
 export function useCreditCards() {
-  const { t } = useLocale();
-  const redirectIfExpired = useSessionRedirect();
-  const [cards, setCards] = useState<CreditCardSummary[]>([]);
-  const [cardsError, setCardsError] = useState<string>();
-  const [loading, setLoading] = useState(true);
+  const shared = useFinanceContext();
 
-  const reload = useCallback(async () => {
-    setLoading(true);
-    const result = await getCreditCardsAction();
-    if (redirectIfExpired(result.sessionExpired)) return;
+  const cards = useMemo<CreditCardSummary[]>(
+    () => shared.sharedCards,
+    [shared.sharedCards],
+  );
 
-    if (result.error) {
-      setCards([]);
-      setCardsError(frontendError(result.error, t, "requestFailedGeneric"));
-    } else {
-      setCards(result.data ?? []);
-      setCardsError(undefined);
-    }
-    setLoading(false);
-  }, [redirectIfExpired, t]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => void reload(), 0);
-    return () => window.clearTimeout(timer);
-  }, [reload]);
-
-  return { cards, cardsError, loading };
+  return {
+    cards,
+    cardsError: undefined,
+    loading: shared.sharedCardsLoading,
+  };
 }

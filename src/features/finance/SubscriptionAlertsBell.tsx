@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Popover } from "antd";
 import { getSubscriptionsAction } from "@/lib/userActions";
@@ -22,16 +22,23 @@ export function SubscriptionAlertsBell() {
   const { t, formatNumber } = useLocale();
   const [{ alerts, status }, setAlertsState] = useState<SubscriptionAlertsState>({ alerts: [], status: "loading" });
   const [open, setOpen] = useState(false);
+  const hasLoaded = useRef(false);
 
+  // Lazy-load subscriptions only when popover opens (first time).
   useEffect(() => {
+    if (!open || hasLoaded.current) return;
+    hasLoaded.current = true;
     let active = true;
     void loadSubscriptionAlerts(getSubscriptionsAction).then((state) => {
       if (active) setAlertsState(state);
     });
+    // Reset flag on close so it reloads next time (stays fresh).
+    const timer = window.setTimeout(() => { hasLoaded.current = false; }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [open]);
 
   const bell = (
     <button

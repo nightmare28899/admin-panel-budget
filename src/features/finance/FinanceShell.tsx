@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { getCreditCardsAction, userLogoutAction } from "@/lib/userActions";
 import { AppShell, type AppShellNavItem } from "@/components/layout/AppShell";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { CardPaymentAlertsBell } from "./CardPaymentAlertsBell";
 import { SubscriptionAlertsBell } from "./SubscriptionAlertsBell";
-import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
-import { usePendingPurchases } from "./hooks/usePendingPurchases";
+import { FinanceProvider } from "./FinanceContext";
 import { useLocale } from "@/i18n/LocaleProvider";
 
 type FinanceUser = {
@@ -108,49 +107,38 @@ function createNavItems(
   ];
 }
 
-export function FinanceShell({
+function PendingBadgeLoader({ children }: { children: (count?: number) => React.ReactNode }) {
+  const [pendingCount, setPendingCount] = useState<number>();
+  useEffect(() => {
+    let cancelled = false;
+    void getCreditCardsAction().then((result) => {
+      if (!cancelled && !result.error && result.data) {
+        setPendingCount(result.data.filter((c) => c.isActive).length);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return <>{children(pendingCount)}</>;
+}
+
+function FinanceShellInner({
   user,
+  pendingCount,
   children,
 }: {
   user: FinanceUser;
+  pendingCount?: number;
   children: React.ReactNode;
 }) {
   const router = useRouter();
   const { t } = useLocale();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
-  const pathname = usePathname();
-  const pending = usePendingPurchases({ limit: 1 });
-  const [activeCardCount, setActiveCardCount] = useState<number | null>(null);
-
-  // Refreshed on navigation and on card changes so the sidebar count follows
-  // cards added, deactivated or permanently deleted.
-  useEffect(() => {
-    let cancelled = false;
-    const refresh = () => {
-      void getCreditCardsAction().then((result) => {
-        if (cancelled || result.error || !result.data) return;
-        setActiveCardCount(result.data.filter((card) => card.isActive).length);
-      });
-    };
-    refresh();
-    window.addEventListener(CREDIT_CARDS_CHANGED_EVENT, refresh);
-    return () => {
-      cancelled = true;
-      window.removeEventListener(CREDIT_CARDS_CHANGED_EVENT, refresh);
-    };
-  }, [pathname]);
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    await userLogoutAction();
-    router.replace("/");
-  };
 
   return (
     <>
       <AppShell
-        navItems={createNavItems(t, activeCardCount, pending.error ? undefined : pending.data?.pagination.totalCount)}
+        navItems={createNavItems(t, null, pendingCount)}
         workspaceItems={createWorkspaceItems(t)}
         user={user}
         onSignOut={() => setLogoutConfirmationOpen(true)}
@@ -174,5 +162,30 @@ export function FinanceShell({
         loading={loggingOut}
       />
     </>
+  );
+
+  function handleLogout() {
+    setLoggingOut(true);
+    void userLogoutAction().then(() => router.replace("/"));
+  }
+}
+
+export function FinanceShell({
+  user,
+  children,
+}: {
+  user: FinanceUser;
+  children: React.ReactNode;
+}) {
+  return (
+    <FinanceProvider>
+      <PendingBadgeLoader>
+        {(pendingCount) => (
+          <FinanceShellInner user={user} pendingCount={pendingCount}>
+            {children}
+          </FinanceShellInner>
+        )}
+      </PendingBadgeLoader>
+    </FinanceProvider>
   );
 }
