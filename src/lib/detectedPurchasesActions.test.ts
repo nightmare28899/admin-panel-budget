@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "./api";
 import { userApi } from "./userApi";
 import { getUserToken } from "./userSession";
-import { confirmDetectedPurchaseAction, discardDetectedPurchaseAction, getDetectedPurchasesAction } from "./userActions";
+import { confirmDetectedPurchaseAction, confirmDetectedPurchaseAsPaymentAction, discardDetectedPurchaseAction, getDetectedPurchasesAction } from "./userActions";
 
-vi.mock("./userApi", () => ({ userApi: { me: vi.fn(), detectedPurchases: vi.fn(), confirmDetectedPurchase: vi.fn(), discardDetectedPurchase: vi.fn() } }));
+vi.mock("./userApi", () => ({ userApi: { me: vi.fn(), detectedPurchases: vi.fn(), confirmDetectedPurchase: vi.fn(), discardDetectedPurchase: vi.fn(), confirmDetectedPurchaseAsPayment: vi.fn() } }));
 vi.mock("./userSession", () => ({ getUserToken: vi.fn(), getUserRefreshToken: vi.fn(), setUserSession: vi.fn(), clearUserSession: vi.fn(), USER_SESSION_EXPIRED: "sessionExpiredMessage", userGoogleAuthEnabled: vi.fn() }));
 const id = "ef3c0f55-e5a0-4aa8-88ab-956306ae40dd";
 const expense = { title: "Market", cost: "25.00", currency: "MXN", categoryId: id };
@@ -37,5 +37,24 @@ describe("detected purchase server actions", () => {
   it("preserves server conflict messages and codes for user-visible retry", async () => {
     vi.mocked(userApi.discardDetectedPurchase).mockRejectedValue(new ApiError(409, "Already confirmed", { code: "PURCHASE_ALREADY_CONFIRMED" }));
     expect(await discardDetectedPurchaseAction(id)).toMatchObject({ error: "Already confirmed", errorCode: "PURCHASE_ALREADY_CONFIRMED" });
+  });
+  describe("confirm as card payment", () => {
+    const body = { cardId: id, amount: 150.25, paidAt: "2026-10-19T12:00:00.000Z" };
+    it("validates before contacting the API", async () => {
+      expect(await confirmDetectedPurchaseAsPaymentAction("../x", body)).toHaveProperty("error");
+      expect(await confirmDetectedPurchaseAsPaymentAction(id, { ...body, cardId: "nope" })).toHaveProperty("error");
+      expect(await confirmDetectedPurchaseAsPaymentAction(id, { ...body, amount: 0 })).toHaveProperty("error");
+      expect(await confirmDetectedPurchaseAsPaymentAction(id, { ...body, amount: 1.234 })).toHaveProperty("error");
+      expect(await confirmDetectedPurchaseAsPaymentAction(id, { ...body, paidAt: "x" })).toHaveProperty("error");
+      expect(userApi.confirmDetectedPurchaseAsPayment).not.toHaveBeenCalled();
+    });
+    it("forwards the parsed body with the server token", async () => {
+      await confirmDetectedPurchaseAsPaymentAction(id, body);
+      expect(userApi.confirmDetectedPurchaseAsPayment).toHaveBeenCalledWith("server-token", id, body);
+    });
+    it("surfaces typed backend codes", async () => {
+      vi.mocked(userApi.confirmDetectedPurchaseAsPayment).mockRejectedValue(new ApiError(409, "x", { code: "STATEMENT_REQUIRED" }));
+      expect(await confirmDetectedPurchaseAsPaymentAction(id, body)).toMatchObject({ errorCode: "STATEMENT_REQUIRED" });
+    });
   });
 });

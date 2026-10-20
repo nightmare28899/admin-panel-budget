@@ -19,4 +19,9 @@ describe("detected purchase API contract", () => {
     await userApi.discardDetectedPurchase("token", "purchase");
     expect(request).toHaveBeenCalledWith("/detected-purchases/purchase/discard", { method: "POST", body: "{}" }, "token");
   });
+  it("posts the card payment body to the encoded confirm-as-payment route", async () => {
+    const body = { cardId: "card", amount: 10, paidAt: "2026-10-19T12:00:00.000Z" };
+    await userApi.confirmDetectedPurchaseAsPayment("token", "id/x", body);
+    expect(request).toHaveBeenCalledWith("/detected-purchases/id%2Fx/confirm-as-payment", { method: "POST", body: JSON.stringify(body) }, "token");
+  });
 });

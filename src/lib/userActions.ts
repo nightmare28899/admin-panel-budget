@@ -23,7 +23,7 @@ import type {
   UpdateSubscriptionPayload,
 } from "@/features/finance/subscriptions.types";
 import { z } from "zod";
-import type { DetectedPurchase, DetectedPurchaseListResponse } from "@/features/finance/interfaces/detected-purchases";
+import type { ConfirmAsPaymentPayload, DetectedPurchase, DetectedPurchaseListResponse } from "@/features/finance/interfaces/detected-purchases";
 import { pendingPurchaseQuery } from "@/features/finance/utils/detected-purchases";
 import { ApiError } from "./api";
 import { userApi } from "./userApi";
@@ -583,6 +583,19 @@ export async function confirmDetectedPurchaseAction(id: string, expense: Expense
   const parsed = purchaseExpenseSchema.safeParse(expense);
   if (!purchaseIdSchema.safeParse(id).success || !parsed.success) return { error: "requestFailedGeneric" };
   return withFreshUser((token) => userApi.confirmDetectedPurchase(token, id, parsed.data));
+}
+
+const purchasePaymentSchema = z.object({
+  cardId: z.string().uuid(),
+  amount: z.number().min(0.01).max(9999999999.99).refine((value) => Math.abs(Math.round(value * 100) - value * 100) < 1e-6),
+  paidAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
+  note: z.string().max(500).optional(),
+});
+
+export async function confirmDetectedPurchaseAsPaymentAction(id: string, payload: ConfirmAsPaymentPayload): Promise<Result<DetectedPurchase>> {
+  const parsed = purchasePaymentSchema.safeParse(payload);
+  if (!purchaseIdSchema.safeParse(id).success || !parsed.success) return { error: "requestFailedGeneric" };
+  return withFreshUser((token) => userApi.confirmDetectedPurchaseAsPayment(token, id, parsed.data));
 }
 
 export async function discardDetectedPurchaseAction(id: string): Promise<Result<DetectedPurchase>> {

@@ -13,6 +13,7 @@ export interface DetectedPurchase {
   mayBeRegistered: boolean;
   status: "PENDING" | "CONFIRMED" | "DISCARDED";
   expenseId: string | null;
+  statementPaymentId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,4 +21,11 @@ export interface DetectedPurchase {
 export interface DetectedPurchaseListResponse {
   purchases: DetectedPurchase[];
   pagination: ExpenseListResponse["pagination"];
+}
+
+export interface ConfirmAsPaymentPayload {
+  cardId: string;
+  amount: number;
+  paidAt: string;
+  note?: string;
 }

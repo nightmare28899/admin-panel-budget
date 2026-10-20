@@ -1,4 +1,4 @@
-import type { DetectedPurchase, DetectedPurchaseListResponse } from "@/features/finance/interfaces/detected-purchases";
+import type { ConfirmAsPaymentPayload, DetectedPurchase, DetectedPurchaseListResponse } from "@/features/finance/interfaces/detected-purchases";
 import { API_BASE_URL, request } from "./api";
 import type { BudgetWritePayload, CardExpenseBreakdownResponse, Category, CategoryWritePayload, Expense, ExpenseListResponse, ExpenseWritePayload, Summary } from "@/features/finance/finance.types";
 import type {
@@ -68,6 +68,8 @@ export const userApi = {
     request<DetectedPurchaseListResponse>(`/detected-purchases?${query}`, { method: "GET" }, token),
   confirmDetectedPurchase: (token: string, id: string, expense: ExpenseWritePayload) =>
     request<DetectedPurchase>(`/detected-purchases/${encodeURIComponent(id)}/confirm`, { method: "POST", body: JSON.stringify({ expense }) }, token),
+  confirmDetectedPurchaseAsPayment: (token: string, id: string, body: ConfirmAsPaymentPayload) =>
+    request<DetectedPurchase>(`/detected-purchases/${encodeURIComponent(id)}/confirm-as-payment`, { method: "POST", body: JSON.stringify(body) }, token),
   discardDetectedPurchase: (token: string, id: string) =>
     request<DetectedPurchase>(`/detected-purchases/${encodeURIComponent(id)}/discard`, { method: "POST", body: JSON.stringify({}) }, token),
   login: (email: string, password: string) => request<{ accessToken: string; refreshToken: string; user: UserAccount }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),

@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ExpenseForm } from "./ExpenseForm";
+import { PurchaseCardPaymentForm } from "./PurchaseCardPaymentForm";
 import { usePendingPurchases } from "./hooks/usePendingPurchases";
 import { usePurchaseApproval } from "./hooks/usePurchaseApproval";
 import type { DetectedPurchase } from "./interfaces/detected-purchases";
-import { detectedPurchaseExpense } from "./utils/detected-purchases";
+import { detectedPurchaseExpense, looksLikeCardPayment } from "./utils/detected-purchases";
 import { buildPagination } from "@/lib/pagination";
 
 const CONFIDENCE_LABELS = { HIGH: "purchaseConfidenceHigh", MEDIUM: "purchaseConfidenceMedium", LOW: "purchaseConfidenceLow" } as const;
@@ -22,7 +23,8 @@ export function PendingExpensesView() {
   const [pageSize, setPageSize] = useState(20);
   const [selected, setSelected] = useState<DetectedPurchase>();
   const [discarding, setDiscarding] = useState<DetectedPurchase>();
-  const inbox = usePendingPurchases({ page, limit: pageSize, paused: Boolean(selected || discarding) });
+  const [paying, setPaying] = useState<DetectedPurchase>();
+  const inbox = usePendingPurchases({ page, limit: pageSize, paused: Boolean(selected || discarding || paying) });
   const approval = usePurchaseApproval();
   const totalPages = inbox.data?.pagination.totalPages;
   useEffect(() => {
@@ -31,10 +33,11 @@ export function PendingExpensesView() {
       return () => window.clearTimeout(timer);
     }
   }, [page, totalPages]);
-  const close = () => { if (!approval.saving) { setSelected(undefined); setDiscarding(undefined); approval.clearError(); } };
+  const close = () => { if (!approval.saving) { setSelected(undefined); setDiscarding(undefined); setPaying(undefined); approval.clearError(); } };
   const afterMutation = async () => {
     setSelected(undefined);
     setDiscarding(undefined);
+    setPaying(undefined);
     approval.clearError();
     // approval.mutate already dispatched DETECTED_PURCHASES_CHANGED, which refreshes the list
     // (and publishes the sidebar count); refresh() is a no-op while that request is in flight.
@@ -65,9 +68,14 @@ export function PendingExpensesView() {
             <div className="space-y-2"><h3 className="font-semibold text-[var(--text-1)]">{purchase.merchant || t("detectedPurchase")}</h3>
               <p className="text-lg text-[var(--text-1)]">{formatNumber(purchase.amountCents / 100, { style: "currency", currency: purchase.currency })}</p>
               <p className="text-sm text-[var(--text-2)]">{formatDate(purchase.occurredAtMillis, { dateStyle: "medium", timeStyle: "short" })}</p>
-              <Tag>{t(CONFIDENCE_LABELS[purchase.confidence])}</Tag><p className="text-xs text-[var(--text-3)]">{purchase.sourcePackage}</p>
+              <Tag>{t(CONFIDENCE_LABELS[purchase.confidence])}</Tag>{looksLikeCardPayment(purchase.merchant) && <Tag color="blue">{t("purchaseLooksLikePayment")}</Tag>}<p className="text-xs text-[var(--text-3)]">{purchase.sourcePackage}</p>
             </div>
-            <div className="flex gap-2"><Button variant="outline" disabled={approval.saving} onClick={() => { approval.clearError(); setDiscarding(purchase); }}>{t("discardPurchase")}</Button><Button disabled={approval.saving} onClick={() => { approval.clearError(); setSelected(purchase); void approval.loadReferences(); }}>{t("acceptPurchase")}</Button></div>
+            <div className="flex flex-wrap gap-2">{(() => {
+              const payFirst = looksLikeCardPayment(purchase.merchant);
+              const pay = <Button key="pay" variant={payFirst ? "primary" : "outline"} disabled={approval.saving} onClick={() => { approval.clearError(); setPaying(purchase); }}>{t("registerAsCardPayment")}</Button>;
+              const accept = <Button key="accept" variant={payFirst ? "outline" : "primary"} disabled={approval.saving} onClick={() => { approval.clearError(); setSelected(purchase); void approval.loadReferences(); }}>{t("acceptPurchase")}</Button>;
+              return payFirst ? [pay, accept] : [accept, pay];
+            })()}<Button variant="outline" disabled={approval.saving} onClick={() => { approval.clearError(); setDiscarding(purchase); }}>{t("discardPurchase")}</Button></div>
           </div>
           {(purchase.possibleDuplicateOf || purchase.mayBeRegistered) && <div className="mt-4"><Alert type="warning" showIcon title={t("purchaseDuplicateWarning")} /></div>}
         </div>
@@ -79,6 +87,9 @@ export function PendingExpensesView() {
         {(selected?.possibleDuplicateOf || selected?.mayBeRegistered) && <div className="mb-4"><Alert type="warning" showIcon title={t("purchaseDuplicateWarning")} /></div>}
         {selected && (approval.referencesLoading ? <Spin aria-label={t("loadingForm")} /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : <ExpenseForm key={selected.id} categories={approval.categories} creditCards={approval.cards} initialValues={detectedPurchaseExpense(selected, t("detectedPurchase"))} hideReceipt submitLabel={t("acceptAndCreateExpense")} loading={approval.saving} error={approval.error} onCancel={close} onSubmit={async (expense) => { if (await approval.mutate(selected.id, expense)) await afterMutation(); }} />)}
       </div>
+    </Modal>
+    <Modal open={Boolean(paying)} onClose={close} title={t("registerAsCardPayment")} maxWidth="max-w-lg">
+      {paying && <PurchaseCardPaymentForm key={paying.id} purchase={paying} cards={approval.cards} loading={approval.saving} error={approval.error} errorCode={approval.errorCode} onCancel={close} onSubmit={async (payload) => { if (await approval.mutateAsPayment(paying.id, payload)) await afterMutation(); }} />}
     </Modal>
     <ConfirmModal open={Boolean(discarding)} onClose={close} onConfirm={async () => { if (discarding && await approval.mutate(discarding.id)) await afterMutation(); }} title={t("discardPurchase")} description={t("discardPurchaseDescription")} confirmLabel={t("discardPurchase")} loading={approval.saving}>
       {approval.error && <Alert type="error" title={approval.error} />}
