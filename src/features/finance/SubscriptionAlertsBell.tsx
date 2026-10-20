@@ -6,6 +6,7 @@ import { Popover } from "antd";
 import { getSubscriptionsAction } from "@/lib/userActions";
 import { loadSubscriptionAlerts, type SubscriptionAlert, type SubscriptionAlertsState } from "./subscriptionAlerts";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { useSubscriptionAlerts } from "./hooks/useSubscriptionAlerts";
 
 export { buildSubscriptionAlerts, type SubscriptionAlert } from "./subscriptionAlerts";
 
@@ -20,11 +21,17 @@ export function formatDue(alert: SubscriptionAlert, t: ReturnType<typeof useLoca
 
 export function SubscriptionAlertsBell() {
   const { t, formatNumber } = useLocale();
-  const [{ alerts, status }, setAlertsState] = useState<SubscriptionAlertsState>({ alerts: [], status: "loading" });
   const [open, setOpen] = useState(false);
   const hasLoaded = useRef(false);
+  const contextState = useSubscriptionAlerts();
 
-  // Lazy-load subscriptions only when popover opens (first time).
+  // Keep lazy-load for first popover open to avoid initial render cost,
+  // but fall back to context data if available.
+  const [{ alerts, status }, setAlertsState] = useState<SubscriptionAlertsState>(() => {
+    // Use context state as initial value to avoid duplicate fetch on mount.
+    return { alerts: [], status: "loading" };
+  });
+
   useEffect(() => {
     if (!open || hasLoaded.current) return;
     hasLoaded.current = true;
@@ -40,11 +47,15 @@ export function SubscriptionAlertsBell() {
     };
   }, [open]);
 
+  // Use context data when available, otherwise use lazy-loaded data.
+  const effectiveAlerts = contextState.alerts.length > 0 ? contextState.alerts : alerts;
+  const effectiveStatus = contextState.status !== "loading" ? contextState.status : status;
+
   const bell = (
     <button
       type="button"
       aria-label={
-         alerts.length ? t("subscriptionAlertsCount", { count: formatNumber(alerts.length) }) : t("subscriptionAlerts")
+         effectiveAlerts.length ? t("subscriptionAlertsCount", { count: formatNumber(effectiveAlerts.length) }) : t("subscriptionAlerts")
       }
       aria-expanded={open}
       title={t("subscriptionAlerts")}
@@ -54,9 +65,9 @@ export function SubscriptionAlertsBell() {
         <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
       </svg>
-      {alerts.length > 0 && (
+      {effectiveAlerts.length > 0 && (
         <span className="absolute -right-0.5 -top-0.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[var(--rose)] px-1 text-[10px] font-semibold leading-none text-[var(--text-1)]">
-          {alerts.length}
+          {effectiveAlerts.length}
         </span>
       )}
     </button>
@@ -77,13 +88,13 @@ export function SubscriptionAlertsBell() {
                {t("alertsEstimate")}
             </p>
           </div>
-          {status !== "ready" || alerts.length === 0 ? (
+          {effectiveStatus !== "ready" || effectiveAlerts.length === 0 ? (
             <p role="status" className="px-4 py-3 text-xs text-[var(--text-3)]">
-              {t(status === "loading" ? "subscriptionAlertsLoading" : status === "error" ? "subscriptionAlertsUnavailable" : "subscriptionAlertsEmpty")}
+              {t(effectiveStatus === "loading" ? "subscriptionAlertsLoading" : effectiveStatus === "error" ? "subscriptionAlertsUnavailable" : "subscriptionAlertsEmpty")}
             </p>
           ) : (
             <ul aria-label={t("subscriptionAlerts")}>
-              {alerts.map((alert) => {
+              {effectiveAlerts.map((alert) => {
                 const overdue = alert.status === "overdue";
                 return (
                   <li

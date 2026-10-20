@@ -1,52 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getCreditCardsOverviewAction } from "@/lib/userActions";
+import { useEffect, useMemo, useState } from "react";
 import { buildCardPaymentAlerts } from "../cardPaymentAlerts";
 import { CREDIT_CARDS_CHANGED_EVENT } from "../creditCardsEvents";
 import type { CardPaymentAlert } from "../credit-cards.types";
+import { useFinanceContext } from "../FinanceContext";
 
 export function useCardPaymentAlerts() {
   const [alerts, setAlerts] = useState<CardPaymentAlert[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const { sharedOverview, sharedOverviewLoading } = useFinanceContext();
 
+  // Derive alerts from context overview data.
   useEffect(() => {
     let active = true;
-    let request = 0;
-    const refresh = async () => {
-      const current = ++request;
-      try {
-        const result = await getCreditCardsOverviewAction("");
-        if (!active || current !== request) return;
-        if (!result.data || result.error || result.sessionExpired) {
-          setAlerts([]);
-          setStatus("error");
-          return;
-        }
-        setAlerts(buildCardPaymentAlerts(result.data.cards));
-        setStatus("ready");
-      } catch {
-        if (active && current === request) {
-          setAlerts([]);
-          setStatus("error");
-        }
-      }
+    const derive = () => {
+      if (!active) return;
+      const derived = buildCardPaymentAlerts(sharedOverview?.cards ?? []);
+      setAlerts(derived);
     };
-    const onRefresh = () => { void refresh(); };
+
+    derive();
+
+    const onRefresh = () => { void derive(); };
     const onVisible = () => { if (document.visibilityState === "visible") onRefresh(); };
-    void refresh();
-    const timer = window.setInterval(onRefresh, 60_000);
+
     window.addEventListener(CREDIT_CARDS_CHANGED_EVENT, onRefresh);
     window.addEventListener("focus", onRefresh);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       active = false;
-      window.clearInterval(timer);
       window.removeEventListener(CREDIT_CARDS_CHANGED_EVENT, onRefresh);
       window.removeEventListener("focus", onRefresh);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, []);
+  }, [sharedOverview]);
+
+  // Derive status from alerts + loading — no effect needed.
+  const status = useMemo<"loading" | "ready" | "error">(() => {
+    if (sharedOverviewLoading) return "loading";
+    if (alerts.length > 0) return "ready";
+    return "error";
+  }, [sharedOverviewLoading, alerts.length]);
 
   return { alerts, status };
 }

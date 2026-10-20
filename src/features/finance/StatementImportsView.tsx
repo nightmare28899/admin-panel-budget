@@ -20,8 +20,8 @@ import { useStatementUpload } from "./hooks/useStatementUpload";
 import { STATUS_META } from "./statement-import.utils";
 import type { StatementImportStatus } from "./statement-import.types";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { createStatementPaymentAction, getCreditCardsOverviewAction } from "@/lib/userActions";
-import type { CreditCardOverviewResponse } from "./credit-cards.types";
+import { createStatementPaymentAction } from "@/lib/userActions";
+import { useFinanceContext } from "./FinanceContext";
 import { StatementDebtSummary } from "./StatementDebtSummary";
 import { frontendError } from "@/i18n/errors";
 import {
@@ -53,7 +53,8 @@ export function StatementImportsView() {
   const [selectedCardId, setSelectedCardId] = useState<string>();
   const [pendingPaidId, setPendingPaidId] = useState<string>();
   const [recordingPayment, setRecordingPayment] = useState(false);
-  const [overview, setOverview] = useState<CreditCardOverviewResponse>();
+
+  const { sharedOverview: overview } = useFinanceContext();
 
   const feedback = useFeedbackBanner();
   const creditCards = useCreditCards();
@@ -79,19 +80,6 @@ export function StatementImportsView() {
     setError: feedback.setError,
     setNotice: feedback.setNotice,
   });
-
-  const loadOverview = async () => {
-    const result = await getCreditCardsOverviewAction("includeInactive=true");
-    if (result.error) feedback.setError(frontendError(result.error, t, "requestFailedGeneric"));
-    else setOverview(result.data);
-  };
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => void loadOverview(), 0);
-    return () => window.clearTimeout(timer);
-    // The overview refreshes explicitly after payment writes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const deleteImport = useStatementDelete({
     onDeleted: imports.reload,
@@ -428,7 +416,7 @@ export function StatementImportsView() {
             return;
           }
           window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
-          await Promise.all([imports.reload(), loadOverview()]);
+          await imports.reload();
           feedback.setNotice(t("paymentRecorded"));
           setPendingPaidId(undefined);
         }}

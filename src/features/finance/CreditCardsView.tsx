@@ -1,17 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCardsPageSkeleton } from "./CreditCardsPageSkeleton";
 import { CreditCardManager } from "./CreditCardManager";
-import type { CreditCardOverviewResponse, CreditCardWritePayload } from "./credit-cards.types";
+import type { CreditCardWritePayload } from "./credit-cards.types";
 import {
   createCreditCardAction,
   deactivateCreditCardAction,
   deleteCreditCardPermanentlyAction,
-  getCreditCardsOverviewAction,
   updateCreditCardAction,
 } from "@/lib/userActions";
+import { useFinanceContext } from "./FinanceContext";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
 import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
@@ -19,29 +19,14 @@ import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
 export function CreditCardsView() {
   const router = useRouter();
   const { t } = useLocale();
-  const [overview, setOverview] = useState<CreditCardOverviewResponse>();
-  const [loading, setLoading] = useState(true);
+  const { sharedOverview: overview, sharedOverviewLoading } = useFinanceContext();
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState<string>();
 
+  // The overview is loaded by FinanceProvider; we only handle write + reload.
   const load = useCallback(async () => {
-    setLoading(true);
-    const result = await getCreditCardsOverviewAction("includeInactive=true");
-
-    if (result.sessionExpired) {
-      router.push("/user-login");
-      return;
-    }
-
-    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
-    else setOverview(result.data);
-    setLoading(false);
-  }, [router, t]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => void load(), 0);
-    return () => window.clearTimeout(timer);
-  }, [load]);
+    window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
+  }, []);
 
   const refreshAfter = async (result: { error?: string; sessionExpired?: boolean }) => {
     if (result.sessionExpired) {
@@ -125,7 +110,7 @@ export function CreditCardsView() {
 
   return (
     <div className="min-h-full w-full p-4 sm:p-6">
-      {!overview && !loading && (
+      {!overview && !sharedOverviewLoading && (
         <div className="mb-4">
           <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("myCards")}</h1>
           <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("trackCardsDescription")}</p>
@@ -135,7 +120,7 @@ export function CreditCardsView() {
       {!overview && errorAlert}
       {!overview && successAlert}
 
-      {loading && !overview ? (
+      {sharedOverviewLoading && !overview ? (
         <CreditCardsPageSkeleton />
       ) : overview ? (
         <CreditCardManager

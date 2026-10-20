@@ -1,31 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { getSubscriptionsAction } from "@/lib/userActions";
-import { buildSubscriptionAlerts, type SubscriptionAlert } from "./SubscriptionAlertsBell";
+import { buildSubscriptionAlerts, type SubscriptionAlert } from "./subscriptionAlerts";
+import { useFinanceContext } from "./FinanceContext";
 import { useLocale } from "@/i18n/LocaleProvider";
 
 const BANNER_THRESHOLD_DAYS = 3;
 
 export function SubscriptionDueBanner() {
   const { t, formatNumber } = useLocale();
-  const [alerts, setAlerts] = useState<SubscriptionAlert[]>([]);
   const [dismissed, setDismissed] = useState(false);
+  const { sharedSubscriptions, sharedSubscriptionsLoading } = useFinanceContext();
 
-  useEffect(() => {
-    let active = true;
-    void getSubscriptionsAction().then((result) => {
-      if (!active || !result.data) return;
-      const urgent = buildSubscriptionAlerts(result.data).filter(
-        (alert) => alert.status === "overdue" || alert.daysUntil <= BANNER_THRESHOLD_DAYS,
-      );
-      setAlerts(urgent);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const alerts = useMemo<SubscriptionAlert[]>(() => {
+    if (sharedSubscriptionsLoading) return [];
+    return buildSubscriptionAlerts(sharedSubscriptions).filter(
+      (alert) => alert.status === "overdue" || alert.daysUntil <= BANNER_THRESHOLD_DAYS,
+    );
+  }, [sharedSubscriptions, sharedSubscriptionsLoading]);
 
   if (dismissed || alerts.length === 0) return null;
 
