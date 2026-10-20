@@ -3,7 +3,7 @@ import NutritionShell from "@/features/nutrition/NutritionShell";
 import NutritionUnavailable from "@/features/nutrition/NutritionUnavailable";
 import {
   NutritionSessionError,
-  loadNutritionState,
+  loadNutritionStateOnce,
 } from "@/features/nutrition/nutrition.repository";
 import type { NutritionState } from "@/features/nutrition/nutrition.types";
 import { shellUser } from "@/features/nutrition/domain/shellUser";
@@ -14,7 +14,7 @@ const LOGIN_PATH = "/user-login?next=/nutrition";
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   let state: NutritionState | null = null;
   try {
-    state = await loadNutritionState();
+    state = await loadNutritionStateOnce();
   } catch (error) {
     // No token or the backend rejected it (expired): same gating as Personal Finance.
     if (error instanceof NutritionSessionError) redirect(LOGIN_PATH);

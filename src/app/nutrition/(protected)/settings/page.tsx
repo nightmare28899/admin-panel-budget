@@ -1,6 +1,6 @@
 import SettingsView from "@/features/nutrition/SettingsView";
-import { loadNutritionState } from "@/features/nutrition/nutrition.repository";
+import { loadNutritionStateOnce } from "@/features/nutrition/nutrition.repository";
 export default async function SettingsPage() {
-  const state = await loadNutritionState();
+  const state = await loadNutritionStateOnce();
   return <SettingsView key={JSON.stringify(state.profile)} profile={state.profile} />;
 }

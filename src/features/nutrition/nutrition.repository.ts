@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { ApiError } from "@/lib/api";
 import { userApi } from "@/lib/userApi";
 import { getUserToken } from "@/lib/userSession";
@@ -34,6 +35,13 @@ export async function loadNutritionState(): Promise<NutritionState> {
     throw new Error("Nutrition data needs verification. The service returned an unexpected shape.");
   return parsed.data;
 }
+
+/**
+ * Render-time loader: the protected layout and the page both need the state in the
+ * same server render, so share one backend request per render pass. Server actions
+ * must keep calling loadNutritionState (uncached): they read, mutate, then re-render.
+ */
+export const loadNutritionStateOnce = cache(loadNutritionState);
 
 export async function nutritionCommand(command: string, payload: Json = {}): Promise<void> {
   const token = await requireNutritionSession();

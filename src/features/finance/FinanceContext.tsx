@@ -1,33 +1,54 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { getCreditCardsAction, getCreditCardsOverviewAction, getSubscriptionsAction } from "@/lib/userActions";
+import { getCreditCardsOverviewAction, getSubscriptionsAction } from "@/lib/userActions";
+import { dedupeInflight } from "@/lib/inflight";
 import type { CreditCardSummary } from "./statement-import.types";
 import type { Subscription } from "./subscriptions.types";
 import type { CreditCardOverviewResponse } from "./credit-cards.types";
+import { createFinanceStore, type FinanceSnapshot, type FinanceStore } from "./financeStore";
+
+/** Signed-in user as resolved once by the server layout (no client /me request). */
+export type FinanceProfile = {
+  name?: string;
+  email?: string;
+  currency?: string;
+  isActive?: boolean;
+};
 
 interface FinanceContextValue {
-  /** Active card count for sidebar badges. */
+  /** Signed-in user from the server layout — views must not refetch /me. */
+  profile: FinanceProfile | undefined;
+  /** Active card count for sidebar badges (null until the overview loads). */
   activeCardCount: number | null;
-  /** Shared credit cards list — avoids duplicate fetches in child views. */
+  /** Pending purchase count for the sidebar (undefined until known / on error). */
+  pendingCount: number | undefined;
+  /** Publish a fresh pending count (called by usePendingPurchases — no extra request). */
+  setPendingCount: (count: number | undefined) => void;
+  /** All cards (active and inactive), derived from the shared overview. */
   sharedCards: CreditCardSummary[];
-  /** Whether the shared cards are still loading. */
   sharedCardsLoading: boolean;
-  /** Shared subscriptions list — avoids duplicate fetches (banner + bell). */
   sharedSubscriptions: Subscription[];
-  /** Whether the shared subscriptions are still loading. */
   sharedSubscriptionsLoading: boolean;
-  /** Shared credit cards overview (includeInactive=true) — avoids duplicate fetches across views. */
+  /** Shared credit cards overview (includeInactive=true). */
   sharedOverview: CreditCardOverviewResponse | undefined;
-  /** Whether the shared overview is still loading. */
   sharedOverviewLoading: boolean;
-  /** Flattened card list from the shared overview — for hooks that only need cards, not the full overview shape. */
+  /** Same list as sharedCards (kept for existing callers). */
   overviewCards: CreditCardSummary[];
+  /** Refetch cards + overview (one request). Mutations may call this or dispatch CREDIT_CARDS_CHANGED_EVENT once. */
+  refreshCards: () => Promise<void>;
+  /** Refetch subscriptions (one request). Call after subscription mutations. */
+  refreshSubscriptions: () => Promise<void>;
 }
 
+const noop = async () => {};
+
 const FinanceContext = createContext<FinanceContextValue>({
+  profile: undefined,
   activeCardCount: null,
+  pendingCount: undefined,
+  setPendingCount: () => {},
   sharedCards: [],
   sharedCardsLoading: true,
   sharedSubscriptions: [],
@@ -35,109 +56,50 @@ const FinanceContext = createContext<FinanceContextValue>({
   sharedOverview: undefined,
   sharedOverviewLoading: true,
   overviewCards: [],
+  refreshCards: noop,
+  refreshSubscriptions: noop,
 });
 
 export function useFinanceContext(): FinanceContextValue {
   return useContext(FinanceContext);
 }
 
-function initializeCards(): { cards: CreditCardSummary[]; loading: boolean } {
-  return { cards: [], loading: true };
+function createBrowserStore(): FinanceStore {
+  return createFinanceStore({
+    fetchOverview: () => getCreditCardsOverviewAction("includeInactive=true"),
+    fetchSubscriptions: () => getSubscriptionsAction(),
+    eventTarget: typeof window === "undefined" ? undefined : window,
+    dedupe: dedupeInflight,
+  });
 }
 
-function initializeSubscriptions(): { subscriptions: Subscription[]; loading: boolean } {
-  return { subscriptions: [], loading: true };
-}
+const serverSnapshot = (store: FinanceStore): FinanceSnapshot => store.getSnapshot();
 
-function initializeOverview(): { overview: CreditCardOverviewResponse | undefined; loading: boolean } {
-  return { overview: undefined, loading: true };
-}
+/** Fetches overview (cards) and subscriptions once and shares them with every child. */
+export function FinanceProvider({ children, user }: { children: ReactNode; user?: FinanceProfile }) {
+  const [store] = useState(createBrowserStore);
+  const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, () => serverSnapshot(store));
 
-/** Provider that fetches credit cards, subscriptions and overview once and shares the result with all children. */
-export function FinanceProvider({ children }: { children: ReactNode }) {
-  const [{ cards: sharedCards, loading: sharedCardsLoading }, setCards] = useState(initializeCards);
-  const [activeCardCount, setActiveCardCount] = useState<number | null>(null);
+  useEffect(() => store.start(), [store]);
 
-  const [{ subscriptions: sharedSubscriptions, loading: sharedSubscriptionsLoading }, setSubscriptions] = useState(initializeSubscriptions);
-
-  const [{ overview: sharedOverview, loading: sharedOverviewLoading }, setOverview] = useState(initializeOverview);
-
-  const refreshCards = useCallback(async () => {
-    try {
-      const result = await getCreditCardsAction();
-      if (result.error || !result.data) return;
-      const cards = result.data;
-      setCards({ cards, loading: false });
-      setActiveCardCount(cards.filter((c) => c.isActive).length);
-    } catch {
-      setCards((prev) => ({ ...prev, loading: false }));
-    }
-  }, []);
-
-  const refreshSubscriptions = useCallback(async () => {
-    try {
-      const result = await getSubscriptionsAction();
-      if (result.error || !result.data) return;
-      setSubscriptions({ subscriptions: result.data, loading: false });
-    } catch {
-      setSubscriptions((prev) => ({ ...prev, loading: false }));
-    }
-  }, []);
-
-  const refreshOverview = useCallback(async () => {
-    try {
-      const result = await getCreditCardsOverviewAction("includeInactive=true");
-      if (result.error || !result.data) return;
-      setOverview({ overview: result.data, loading: false });
-    } catch {
-      setOverview((prev) => ({ ...prev, overview: prev.overview, loading: false }));
-    }
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const onRefreshCards = () => { if (!cancelled) void refreshCards(); };
-    // Fetch on mount — standard pattern, consistent with other hooks in this module.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void refreshCards();
-    window.addEventListener("CREDIT_CARDS_CHANGED", onRefreshCards);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("CREDIT_CARDS_CHANGED", onRefreshCards);
-    };
-  }, [refreshCards]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void refreshSubscriptions();
-  }, [refreshSubscriptions]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const onRefreshOverview = () => { if (!cancelled) void refreshOverview(); };
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void refreshOverview();
-    window.addEventListener("CREDIT_CARDS_CHANGED", onRefreshOverview);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("CREDIT_CARDS_CHANGED", onRefreshOverview);
-    };
-  }, [refreshOverview]);
-
-  const overviewCards = useMemo(() => sharedOverview?.cards ?? [], [sharedOverview]);
-
-  return (
-    <FinanceContext.Provider value={{
-      activeCardCount,
-      sharedCards,
-      sharedCardsLoading: sharedCardsLoading,
-      sharedSubscriptions,
-      sharedSubscriptionsLoading: sharedSubscriptionsLoading,
-      sharedOverview,
-      sharedOverviewLoading: sharedOverviewLoading,
-      overviewCards,
-    }}>
-      {children}
-    </FinanceContext.Provider>
+  const value = useMemo<FinanceContextValue>(
+    () => ({
+      profile: user,
+      activeCardCount: snapshot.activeCardCount,
+      pendingCount: snapshot.pendingCount,
+      setPendingCount: store.setPendingCount,
+      sharedCards: snapshot.cards,
+      sharedCardsLoading: snapshot.overviewLoading,
+      sharedSubscriptions: snapshot.subscriptions,
+      sharedSubscriptionsLoading: snapshot.subscriptionsLoading,
+      sharedOverview: snapshot.overview,
+      sharedOverviewLoading: snapshot.overviewLoading,
+      overviewCards: snapshot.cards,
+      refreshCards: store.refreshOverview,
+      refreshSubscriptions: store.refreshSubscriptions,
+    }),
+    [snapshot, store, user],
   );
+
+  return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;
 }

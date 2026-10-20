@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { api } from "@/lib/api";
+import { getAdminMe } from "@/lib/adminMe";
 import { ProfileView } from "./ProfileView";
 
 export default async function ProfilePage() {
@@ -12,7 +12,7 @@ export default async function ProfilePage() {
   }
 
   try {
-    const profile = await api.getMe(token);
+    const profile = await getAdminMe(token);
     const user = profile.user;
     if ((user?.role || "").toLowerCase() !== "admin" || !user) {
       redirect("/login");

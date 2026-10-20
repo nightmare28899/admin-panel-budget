@@ -1,5 +1,6 @@
 "use client";
 
+import { useFinanceContext } from "./FinanceContext";
 import { DatePicker } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import dayjs, { type Dayjs } from "dayjs";
@@ -10,7 +11,6 @@ import type { Delta } from "@/components/ui/TrendBadge";
 import {
   getCardExpenseBreakdownAction,
   getExpensesAction,
-  getUserMeAction,
 } from "@/lib/userActions";
 import type {
   CardExpenseBreakdownGroup,
@@ -176,6 +176,7 @@ function CardIcon() {
 
 export function ReportsView() {
   const router = useRouter();
+  const { profile } = useFinanceContext();
   const { t, formatDate, formatNumber } = useLocale();
   const requestSequence = useRef(0);
   const [range, setRange] = useState<[Dayjs, Dayjs]>([
@@ -219,9 +220,8 @@ export function ReportsView() {
     const key = requestKey;
 
     void (async () => {
-      const profile = await getUserMeAction();
-      if (sequence !== requestSequence.current) return;
-      if (profile.error || !profile.data?.user?.isActive) {
+      // Profile comes from the server layout (FinanceContext): no /me request per range change.
+      if (profile?.isActive === false) {
         router.push("/user-login");
         return;
       }
@@ -229,7 +229,7 @@ export function ReportsView() {
       const result: ReportData = {
         ...EMPTY_REPORT_DATA,
         key,
-        configuredCurrency: profile.data.user.currency,
+        configuredCurrency: profile?.currency,
       };
       if (range[0].startOf("day").isAfter(effectiveEnd.startOf("day"))) {
         setData(result);
@@ -278,7 +278,7 @@ export function ReportsView() {
       }
       setData(result);
     })();
-  }, [compare, effectiveEnd, previousRange, range, requestKey, router, t]);
+  }, [compare, effectiveEnd, previousRange, profile, range, requestKey, router, t]);
 
   const currentBucketResult = useMemo(
     () => buildReportBuckets(range[0], effectiveEnd, granularity, expenses),

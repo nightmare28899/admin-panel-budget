@@ -8,7 +8,6 @@ import {
   createCategoryAction,
   deleteCategoryAction,
   getCategoriesAction,
-  getUserMeAction,
   updateCategoryAction,
 } from "@/lib/userActions";
 import { Card } from "@/components/ui/Card";
@@ -27,14 +26,12 @@ export function CategoriesView() {
 
   const reload = useCallback(async () => {
     setLoading(true);
-    const profile = await getUserMeAction();
-
-    if (profile.error || !profile.data?.user?.isActive) {
+    // The session/active-user check already ran in the server layout; no /me request here.
+    const cats = await getCategoriesAction();
+    if (cats.sessionExpired) {
       router.push("/user-login");
       return;
     }
-
-    const cats = await getCategoriesAction();
     if (cats.error) setError(frontendError(cats.error, t, "requestFailedGeneric"));
     else setCategories(cats.data ?? []);
     setLoading(false);

@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Popover } from "antd";
-import { getSubscriptionsAction } from "@/lib/userActions";
-import { loadSubscriptionAlerts, type SubscriptionAlert, type SubscriptionAlertsState } from "./subscriptionAlerts";
+import type { SubscriptionAlert } from "./subscriptionAlerts";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useSubscriptionAlerts } from "./hooks/useSubscriptionAlerts";
 
@@ -22,34 +21,9 @@ export function formatDue(alert: SubscriptionAlert, t: ReturnType<typeof useLoca
 export function SubscriptionAlertsBell() {
   const { t, formatNumber } = useLocale();
   const [open, setOpen] = useState(false);
-  const hasLoaded = useRef(false);
-  const contextState = useSubscriptionAlerts();
-
-  // Keep lazy-load for first popover open to avoid initial render cost,
-  // but fall back to context data if available.
-  const [{ alerts, status }, setAlertsState] = useState<SubscriptionAlertsState>(() => {
-    // Use context state as initial value to avoid duplicate fetch on mount.
-    return { alerts: [], status: "loading" };
-  });
-
-  useEffect(() => {
-    if (!open || hasLoaded.current) return;
-    hasLoaded.current = true;
-    let active = true;
-    void loadSubscriptionAlerts(getSubscriptionsAction).then((state) => {
-      if (active) setAlertsState(state);
-    });
-    // Reset flag on close so it reloads next time (stays fresh).
-    const timer = window.setTimeout(() => { hasLoaded.current = false; }, 0);
-    return () => {
-      active = false;
-      window.clearTimeout(timer);
-    };
-  }, [open]);
-
-  // Use context data when available, otherwise use lazy-loaded data.
-  const effectiveAlerts = contextState.alerts.length > 0 ? contextState.alerts : alerts;
-  const effectiveStatus = contextState.status !== "loading" ? contextState.status : status;
+  // Alerts derive from the subscriptions FinanceProvider already loaded: no request here.
+  const { alerts, status: effectiveStatus } = useSubscriptionAlerts();
+  const effectiveAlerts = alerts;
 
   const bell = (
     <button

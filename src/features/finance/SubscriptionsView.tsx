@@ -24,8 +24,6 @@ import {
   deactivateSubscriptionAction,
   deleteSubscriptionAction,
   getCategoriesAction,
-  getSubscriptionsAction,
-  getUserMeAction,
   linkExpensesToSubscriptionAction,
   updateSubscriptionAction,
 } from "@/lib/userActions";
@@ -38,6 +36,7 @@ import { CreditCardPicker } from "./CreditCardPicker";
 import { ChargeGroupDetail } from "./ChargeGroupDetail";
 import { fetchAllExpensesForCategory, groupCharges, type ChargeGroup } from "./subscriptionCharges";
 import { useCreditCards } from "./hooks/useCreditCards";
+import { useFinanceContext } from "./FinanceContext";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
 import { buildPagination } from "@/lib/pagination";
@@ -351,9 +350,16 @@ export function SubscriptionsView() {
       ? formatDate(`${calendarDate}T12:00:00`, { dateStyle: "medium" })
       : "—";
   };
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  // Subscriptions live in FinanceProvider (shared with the banner and the bell); this view
+  // only loads categories + charges, and asks the provider to refetch after a mutation.
+  const {
+    sharedSubscriptions: subscriptions,
+    sharedSubscriptionsLoading: subscriptionsLoading,
+    refreshSubscriptions,
+  } = useFinanceContext();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const loading = categoriesLoading || subscriptionsLoading;
   const [error, setError] = useState<string>();
   const [filter, setFilter] = useState<FilterTab>("all");
   const [page, setPage] = useState(1);
@@ -417,38 +423,32 @@ export function SubscriptionsView() {
     setLinkedChargesBySubscriptionId(bySubscriptionId);
   }, [t]);
 
-  const reload = useCallback(async () => {
-    setLoading(true);
-    const profile = await getUserMeAction();
-
-    if (profile.error || !profile.data?.user?.isActive) {
+  const loadInitial = useCallback(async () => {
+    const cats = await getCategoriesAction();
+    if (cats.sessionExpired) {
       router.push("/user-login");
       return;
     }
-
-    const [cats, subs] = await Promise.all([getCategoriesAction(), getSubscriptionsAction()]);
-
     if (cats.error) {
       setError(frontendError(cats.error, t, "requestFailedGeneric"));
-      setLoading(false);
+      setCategoriesLoading(false);
       return;
     }
     setCategories(cats.data ?? []);
-
-    if (subs.error) {
-      setError(frontendError(subs.error, t, "requestFailedGeneric"));
-      setLoading(false);
-      return;
-    }
-    setSubscriptions(subs.data ?? []);
-    setLoading(false);
+    setCategoriesLoading(false);
     void loadCharges(cats.data ?? []);
   }, [router, t, loadCharges]);
 
+  // After a mutation: one subscriptions refetch (via the provider) and one charges refetch.
+  // Categories did not change, so they are not requested again.
+  const reload = useCallback(async () => {
+    await Promise.all([refreshSubscriptions(), loadCharges(categories)]);
+  }, [refreshSubscriptions, loadCharges, categories]);
+
   useEffect(() => {
-    const timer = window.setTimeout(() => void reload(), 0);
+    const timer = window.setTimeout(() => void loadInitial(), 0);
     return () => window.clearTimeout(timer);
-  }, [reload]);
+  }, [loadInitial]);
 
   const openCreate = () => {
     setEditingSubscription(undefined);

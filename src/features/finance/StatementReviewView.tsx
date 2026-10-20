@@ -461,7 +461,7 @@ export function StatementReviewView({
     const returnedRowIds = new Set(detailResult.data.rows.map((row) => row.id));
     setSelectedRowIds((current) => current.filter((id) => returnedRowIds.has(id)));
     setStatementImport(detailResult.data);
-    router.refresh();
+    // No router.refresh(): no server-rendered data depends on this view (it only re-ran the layout /me request).
     return true;
   };
 

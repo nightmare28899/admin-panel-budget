@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getCreditCardsAction, userLogoutAction } from "@/lib/userActions";
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { userLogoutAction } from "@/lib/userActions";
 import { AppShell, type AppShellNavItem } from "@/components/layout/AppShell";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { CardPaymentAlertsBell } from "./CardPaymentAlertsBell";
 import { SubscriptionAlertsBell } from "./SubscriptionAlertsBell";
-import { FinanceProvider } from "./FinanceContext";
+import { FinanceProvider, useFinanceContext, type FinanceProfile } from "./FinanceContext";
+import { usePendingPurchases } from "./hooks/usePendingPurchases";
 import { useLocale } from "@/i18n/LocaleProvider";
 
-type FinanceUser = {
-  name?: string;
-  email?: string;
-};
+type FinanceUser = FinanceProfile;
+
+const PENDING_PAGE_PATH = "/finance/pending-expenses";
 
 function createWorkspaceItems(t: ReturnType<typeof useLocale>["t"]): AppShellNavItem[] {
   return [
@@ -107,30 +107,20 @@ function createNavItems(
   ];
 }
 
-function PendingBadgeLoader({ children }: { children: (count?: number) => React.ReactNode }) {
-  const [pendingCount, setPendingCount] = useState<number>();
-  useEffect(() => {
-    let cancelled = false;
-    void getCreditCardsAction().then((result) => {
-      if (!cancelled && !result.error && result.data) {
-        setPendingCount(result.data.filter((c) => c.isActive).length);
-      }
-    });
-    return () => { cancelled = true; };
-  }, []);
-  return <>{children(pendingCount)}</>;
-}
-
 function FinanceShellInner({
   user,
-  pendingCount,
   children,
 }: {
   user: FinanceUser;
-  pendingCount?: number;
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const { activeCardCount, pendingCount } = useFinanceContext();
+  // Pending badge: a count-only request (limit 1) that publishes its total to the
+  // context. The pending page runs the real list, which publishes the same total,
+  // so the shell instance stays idle there instead of duplicating the request.
+  usePendingPurchases({ limit: 1, disabled: pathname.startsWith(PENDING_PAGE_PATH) });
   const { t } = useLocale();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
@@ -138,7 +128,7 @@ function FinanceShellInner({
   return (
     <>
       <AppShell
-        navItems={createNavItems(t, null, pendingCount)}
+        navItems={createNavItems(t, activeCardCount, pendingCount)}
         workspaceItems={createWorkspaceItems(t)}
         user={user}
         onSignOut={() => setLogoutConfirmationOpen(true)}
@@ -178,14 +168,8 @@ export function FinanceShell({
   children: React.ReactNode;
 }) {
   return (
-    <FinanceProvider>
-      <PendingBadgeLoader>
-        {(pendingCount) => (
-          <FinanceShellInner user={user} pendingCount={pendingCount}>
-            {children}
-          </FinanceShellInner>
-        )}
-      </PendingBadgeLoader>
+    <FinanceProvider user={user}>
+      <FinanceShellInner user={user}>{children}</FinanceShellInner>
     </FinanceProvider>
   );
 }

@@ -3,7 +3,6 @@
 import { Alert, Empty, List, Spin, Tag } from "antd";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -19,7 +18,6 @@ const CONFIDENCE_LABELS = { HIGH: "purchaseConfidenceHigh", MEDIUM: "purchaseCon
 
 export function PendingExpensesView() {
   const { t, formatDate, formatNumber } = useLocale();
-  const router = useRouter();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [selected, setSelected] = useState<DetectedPurchase>();
@@ -38,8 +36,10 @@ export function PendingExpensesView() {
     setSelected(undefined);
     setDiscarding(undefined);
     approval.clearError();
+    // approval.mutate already dispatched DETECTED_PURCHASES_CHANGED, which refreshes the list
+    // (and publishes the sidebar count); refresh() is a no-op while that request is in flight.
+    // No router.refresh(): nothing server-rendered depends on this list.
     await inbox.refresh();
-    router.refresh();
   };
   return <div className="w-full p-4 sm:p-6">
     <section>

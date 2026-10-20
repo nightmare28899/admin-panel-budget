@@ -12,7 +12,7 @@ export function useSubscriptionAlerts(): SubscriptionAlertsState {
     }
     const alerts = buildSubscriptionAlerts(sharedSubscriptions);
     return {
-      status: alerts.length > 0 ? "ready" : "error",
+      status: "ready",
       alerts,
     };
   }, [sharedSubscriptions, sharedSubscriptionsLoading]);

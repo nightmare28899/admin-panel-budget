@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "./DashboardShell";
-import { api } from "@/lib/api";
+import { getAdminMe } from "@/lib/adminMe";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const cookieStore = await cookies();
@@ -12,7 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
 
     try {
-        const profile = await api.getMe(token);
+        const profile = await getAdminMe(token);
         const user = profile.user;
         if ((user?.role || "").toLowerCase() !== "admin") {
             redirect("/login");

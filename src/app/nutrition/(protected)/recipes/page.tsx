@@ -1,5 +1,5 @@
 import RecipesView from "@/features/nutrition/RecipesView";
-import { loadNutritionState } from "@/features/nutrition/nutrition.repository";
+import { loadNutritionStateOnce } from "@/features/nutrition/nutrition.repository";
 export default async function RecipesPage({
   searchParams,
 }: {
@@ -11,7 +11,7 @@ export default async function RecipesPage({
     <RecipesView
       key={query}
       initialQuery={query}
-      state={await loadNutritionState()}
+      state={await loadNutritionStateOnce()}
       initialOptionId={typeof option === "string" ? option : undefined}
     />
   );

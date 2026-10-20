@@ -23,8 +23,8 @@ export function CreditCardsView() {
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState<string>();
 
-  // The overview is loaded by FinanceProvider; we only handle write + reload.
-  const load = useCallback(async () => {
+  // The overview is loaded by FinanceProvider; one event makes it refetch once.
+  const notifyCardsChanged = useCallback(() => {
     window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
   }, []);
 
@@ -35,8 +35,7 @@ export function CreditCardsView() {
     }
     if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
     else {
-      window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
-      await load();
+      notifyCardsChanged();
     }
   };
 
@@ -62,16 +61,14 @@ export function CreditCardsView() {
         subscriptions: result.data.unlinkedSubscriptions,
       }),
     );
-    window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
-    await load();
+    notifyCardsChanged();
   };
 
   const statementPaymentChanged = async (notice?: string) => {
     setError(undefined);
     setSuccess(notice);
     // The sidebar and the "pending payments" KPI read the same overview data.
-    window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
-    await load();
+    notifyCardsChanged();
   };
 
   const successAlert = success ? (
