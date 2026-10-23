@@ -8,7 +8,8 @@ import { useCardPaymentAlerts } from "./hooks/useCardPaymentAlerts";
 
 export function CardPaymentAlertsBell() {
   const { t, formatNumber, formatDate } = useLocale();
-  const { alerts, status } = useCardPaymentAlerts();
+  const { alerts, cutoffAlerts, status } = useCardPaymentAlerts();
+  const total = alerts.length + cutoffAlerts.length;
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,12 +25,24 @@ export function CardPaymentAlertsBell() {
             <p className="text-[13px] font-semibold text-[var(--text-1)]">{t("cardPaymentAlerts")}</p>
             <p className="mt-1 text-xs text-[var(--text-3)]">{t("cardPaymentAlertsPolicy")}</p>
           </div>
-          {status !== "ready" || alerts.length === 0 ? (
+          {status !== "ready" || total === 0 ? (
             <p role="status" className="px-4 py-3 text-xs text-[var(--text-3)]">
               {t(status === "loading" ? "cardPaymentAlertsLoading" : status === "error" ? "cardPaymentAlertsUnavailable" : "cardPaymentAlertsEmpty")}
             </p>
           ) : (
             <ul aria-label={t("cardPaymentAlerts")} className="max-h-80 overflow-y-auto">
+              {cutoffAlerts.map(({ card, cutoffDate }) => (
+                <li key={`cutoff-${card.id}`} className="border-b border-l-2 border-b-[var(--border-soft)] border-l-[var(--gold)] px-4 py-3">
+                  <p className="text-[13px] font-medium text-[var(--text-1)]">{card.bank} · {card.name} · {card.last4}</p>
+                  <p className="mt-1 text-xs text-[var(--gold-text)]">
+                    {t("cutoffAlertNeedsStatement")}
+                    {cutoffDate && <>{" · "}{t("lastCutoff")}: {formatDate(cutoffDate, { dateStyle: "medium" })}</>}
+                  </p>
+                  <Link href="/finance/statements" onClick={() => setOpen(false)} className="mt-1 inline-block text-xs font-medium text-[var(--accent-text)] hover:underline">
+                    {t("uploadStatement")}
+                  </Link>
+                </li>
+              ))}
               {alerts.map(({ card, dueDate, amount, daysUntilDue }) => (
                 <li key={card.id} className={`border-b border-l-2 border-b-[var(--border-soft)] px-4 py-3 ${daysUntilDue < 0 ? "border-l-[var(--rose)]" : "border-l-[var(--gold)]"}`}>
                   <p className="text-[13px] font-medium text-[var(--text-1)]">{card.bank} · {card.name} · {card.last4}</p>
@@ -55,7 +68,7 @@ export function CardPaymentAlertsBell() {
     >
       <button
         type="button"
-        aria-label={alerts.length ? t("cardPaymentAlertsCount", { count: formatNumber(alerts.length) }) : t("cardPaymentAlerts")}
+        aria-label={total ? t("cardPaymentAlertsCount", { count: formatNumber(total) }) : t("cardPaymentAlerts")}
         aria-expanded={open}
         title={t("cardPaymentAlerts")}
         className="relative flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--text-2)] transition-colors hover:bg-[var(--bg-2)] hover:text-[var(--text-1)] focus-visible:outline-2 focus-visible:outline-sky-400"
@@ -64,8 +77,8 @@ export function CardPaymentAlertsBell() {
           <rect x="2" y="5" width="20" height="14" rx="3" />
           <path d="M2 10h20m-15 5h4" />
         </svg>
-        {alerts.length > 0 && (
-          <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--rose)] px-1 text-[10px] font-semibold text-[var(--text-1)]">{formatNumber(alerts.length)}</span>
+        {total > 0 && (
+          <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--rose)] px-1 text-[10px] font-semibold text-[var(--text-1)]">{formatNumber(total)}</span>
         )}
       </button>
     </Popover>

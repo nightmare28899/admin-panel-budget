@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCardPaymentAlerts, cardPaymentDate } from "./cardPaymentAlerts";
+import { buildCardPaymentAlerts, buildCutoffStatementAlerts, cardPaymentDate } from "./cardPaymentAlerts";
 import type { CreditCardOverviewItem } from "./credit-cards.types";
 
 function card(overrides: Partial<CreditCardOverviewItem["statementSummary"]> = {}): CreditCardOverviewItem {
@@ -48,5 +48,27 @@ describe("platform card payment alerts", () => {
   });
   it("counts calendar days across month and DST boundaries", () => {
     expect(buildCardPaymentAlerts([card({ dueDate: "2026-11-02" })], new Date(2026, 9, 30, 23)).map((a) => a.daysUntilDue)).toEqual([3]);
+  });
+});
+
+describe("cutoff-needs-statement alerts", () => {
+  const needs = (id: string, extra: Partial<CreditCardOverviewItem> = {}) => ({
+    ...card({ paymentStatus: "PAID", needsNewStatement: true }),
+    id, closingDay: 10, ...extra,
+  }) as CreditCardOverviewItem;
+
+  it("alerts for a closed cycle without a statement, with no amount", () => {
+    const alerts = buildCutoffStatementAlerts([needs("a")], today);
+    expect(alerts).toEqual([{ card: expect.objectContaining({ id: "a" }), cutoffDate: "2026-10-10", daysSinceCutoff: 4 }]);
+    expect(alerts[0]).not.toHaveProperty("amount");
+  });
+  it("orders by the oldest cutoff first and ignores inactive or up-to-date cards", () => {
+    const old = needs("old", { closingDay: 1 });
+    const inactive = { ...needs("off"), isActive: false } as CreditCardOverviewItem;
+    const paid = card({ paymentStatus: "PAID", needsNewStatement: false });
+    expect(buildCutoffStatementAlerts([needs("a"), old, inactive, paid], today).map((a) => a.card.id)).toEqual(["old", "a"]);
+  });
+  it("does not add cutoff cards to amount-based payment alerts", () => {
+    expect(buildCardPaymentAlerts([needs("a")], today)).toEqual([]);
   });
 });

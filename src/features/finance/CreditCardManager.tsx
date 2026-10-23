@@ -18,6 +18,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import type { MessageKey } from "@/i18n/messages";
 import { listPendingPayments } from "./cardPaymentSchedule";
 import { PaymentReminderBanner } from "./PaymentReminderBanner";
+import { CutoffPendingSection } from "./CutoffPendingSection";
 
 type FilterTab = "all" | "active" | "inactive";
 
@@ -269,7 +270,7 @@ export function CreditCardManager({
         ))}
         {portfolio.byCurrency.map((summary) => {
           const items = pendingPayments.filter((item) => item.card.currency === summary.currency);
-          const total = items.reduce((sum, item) => sum + (item.card.statementSummary.currentPaymentDue ?? 0), 0);
+          const total = items.reduce((sum, item) => sum + (item.state.currentPaymentDue ?? 0), 0);
           const nearest = items.find((item) => item.dueDate !== null)?.dueDate ?? null;
           return (
             <CardKpiTile
@@ -302,6 +303,8 @@ export function CreditCardManager({
           </div>
         </CardKpiTile>
       </div>
+
+      <CutoffPendingSection cards={cards} />
 
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-bold tracking-tight text-[var(--text-1)]">

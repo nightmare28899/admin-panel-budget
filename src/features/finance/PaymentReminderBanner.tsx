@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import type { MessageKey } from "@/i18n/messages";
@@ -81,6 +82,13 @@ export function PaymentReminderBanner({ cards }: { cards: CreditCardOverviewItem
       }),
       amount != null ? t("reminderAmount", { amount: money(amount, card.currency) }) : null,
     ].filter(Boolean).join(" ");
+  } else if (pending.length > 0 && pending[0].state.status === "CUTOFF_NEEDS_STATEMENT") {
+    const { card, state } = pending[0];
+    title = t("cutoffStatusNeedsStatement");
+    message = t("reminderCutoffNeedsStatement", {
+      card: cardLabel(card),
+      date: state.lastCutoffDate ? formatDate(state.lastCutoffDate, { dateStyle: "medium" }) : "—",
+    });
   } else if (pending.length > 0) {
     message = t("reminderNoDueDate", { card: cardLabel(pending[0].card) });
   } else {
@@ -95,13 +103,21 @@ export function PaymentReminderBanner({ cards }: { cards: CreditCardOverviewItem
     >
       <div className="flex min-w-0 flex-1 items-center gap-3.5">
         <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-lg text-[var(--emerald-text)]">
-          {urgent ? "🔔" : "✓"}
+          {urgent || pending.length > 0 ? "🔔" : "✓"}
         </span>
         <div className="min-w-0">
           <p className="text-sm font-semibold text-[var(--text-1)]">{title}</p>
           <p className="mt-0.5 text-xs text-[var(--text-3)]">{message}</p>
         </div>
       </div>
+      {!urgent && pending[0]?.state.status === "CUTOFF_NEEDS_STATEMENT" && (
+        <Link
+          href="/finance/statements"
+          className="whitespace-nowrap rounded-xl border border-sky-500/30 bg-sky-500/15 px-4 py-2 text-xs font-semibold text-[var(--info-text)] transition hover:bg-sky-500/25 focus-visible:outline-2 focus-visible:outline-sky-400"
+        >
+          {t("uploadStatement")}
+        </Link>
+      )}
       {urgent && (
         <div className="flex flex-wrap gap-2">
           <button
