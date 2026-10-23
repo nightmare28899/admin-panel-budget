@@ -48,6 +48,14 @@ export type CreditCardStatementSummary = {
   /** MINIMUM payment target of the latest statement, same currency as the card. */
   minimumPayment: number | null;
   dueDate: string | null;
+  /**
+   * True when a newer cycle closed without an uploaded statement (the latest
+   * statement is paid and does not cover the last closing). Optional for
+   * older API responses.
+   */
+  needsNewStatement?: boolean;
+  /** Inverse of `needsNewStatement`. */
+  coversCurrentCycle?: boolean;
   postCloseSpend: number;
   postCloseExpenseCount: number;
   projectedNextCloseDate: string | null;
@@ -185,4 +193,11 @@ export type CardPaymentAlert = {
   dueDate: string;
   amount: number;
   daysUntilDue: number;
+};
+
+/** A cutoff passed and the statement for it has not been uploaded yet (no amount is known). */
+export type CutoffStatementAlert = {
+  card: CreditCardOverviewItem;
+  cutoffDate: string | null;
+  daysSinceCutoff: number | null;
 };

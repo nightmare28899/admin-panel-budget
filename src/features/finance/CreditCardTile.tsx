@@ -2,6 +2,7 @@
 
 import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, type ButtonHTMLAttributes } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -9,7 +10,9 @@ import type { MessageKey } from "@/i18n/messages";
 import { creditCardTheme } from "./creditCardVisuals";
 import { CreditCardFace } from "./CreditCardFace";
 import { cardPaymentDate } from "./cardPaymentAlerts";
-import { daysUntilDueDate, hasPaymentPending } from "./cardPaymentSchedule";
+import { daysUntilDueDate } from "./cardPaymentSchedule";
+import { getCutoffPaymentState } from "./cardCutoffStatus";
+import { CutoffStatusChip, useCutoffAgo } from "./CutoffStatusChip";
 import type { CreditCardOverviewItem } from "./credit-cards.types";
 import { CreditCardInstallmentPlans } from "./CreditCardInstallmentPlans";
 import { CardStatementPayments } from "./CardStatementPayments";
@@ -101,7 +104,11 @@ export function CreditCardTile({
   const summary = card.statementSummary;
   const statementPaymentStatus = summary.paymentStatus;
   const statementId = summary.statementImportId;
-  const pending = card.isActive && hasPaymentPending(card);
+  const cutoff = getCutoffPaymentState(card);
+  const needsStatement = card.isActive && cutoff.status === "CUTOFF_NEEDS_STATEMENT";
+  const cutoffAgo = useCutoffAgo();
+  // Payment pending = the latest statement still asks for money. A cutoff without a statement has no amount.
+  const pending = card.isActive && cutoff.pending && !needsStatement;
   const paymentDate = cardPaymentDate(card);
   const daysUntilDue = paymentDate.kind === "statement" ? daysUntilDueDate(paymentDate.date) : null;
   const overdue = daysUntilDue !== null && daysUntilDue < 0;
@@ -212,6 +219,54 @@ export function CreditCardTile({
           <p className="text-xs text-[var(--text-3)]">{t("noStatementAvailable")}</p>
         )}
 
+        {card.isActive && (
+          <div
+            data-testid="cutoff-info"
+            className={`rounded-xl border p-3.5 text-xs ${
+              needsStatement ? "border-sky-500/25 bg-sky-500/5" : "border-[var(--border-soft)] bg-[var(--bg-3)]/80"
+            }`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[11px] text-[var(--text-3)]">{t("lastCutoff")}</p>
+              <CutoffStatusChip status={cutoff.status} />
+            </div>
+            {cutoff.status === "NO_CUTOFF_CONFIGURED" ? (
+              <p className="mt-1 text-[var(--text-3)]">{t("setClosingDayHelp")}</p>
+            ) : (
+              <>
+                <p className="mt-0.5 font-mono font-medium text-[var(--text-2)]">
+                  {cutoff.lastCutoffDate ? formatDate(cutoff.lastCutoffDate, { dateStyle: "medium" }) : "—"}
+                  {cutoff.daysSinceCutoff !== null && <span className="font-sans text-[10px] text-[var(--text-3)]"> · {cutoffAgo(cutoff.daysSinceCutoff)}</span>}
+                </p>
+                <Row label={t("nextCutoff")}>
+                  {cutoff.nextCutoffDate ? formatDate(cutoff.nextCutoffDate, { dateStyle: "medium" }) : "—"}
+                  {card.schedule.daysUntilClosing != null && card.schedule.daysUntilClosing >= 0 && (
+                    <span className="font-sans text-[10px] text-[var(--text-3)]"> · {dueDistance(card.schedule.daysUntilClosing)}</span>
+                  )}
+                </Row>
+              </>
+            )}
+            {needsStatement && (
+              <div className="mt-2 space-y-2">
+                <p className="text-[var(--text-3)]">
+                  {t("cutoffNeedsStatementHelp", { date: cutoff.lastCutoffDate ? formatDate(cutoff.lastCutoffDate, { dateStyle: "medium" }) : "—" })}
+                </p>
+                {cutoff.cycleSpendReference != null && cutoff.cycleSpendReference > 0 && (
+                  <p className="text-[11px] text-[var(--text-3)]">
+                    {t("cycleSpendReference")}: <span className="font-mono text-[var(--text-2)]">{formatMoney(cutoff.cycleSpendReference)}</span>
+                  </p>
+                )}
+                <Link
+                  href="/finance/statements"
+                  className="inline-block rounded-lg border border-sky-500/30 bg-sky-500/15 px-3 py-1.5 font-semibold text-[var(--info-text)] transition hover:bg-sky-500/25 focus-visible:outline-2 focus-visible:outline-sky-400"
+                >
+                  {t("uploadStatement")}
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
         {pending ? (
           <div>
             {paymentAmount != null && (
@@ -229,7 +284,7 @@ export function CreditCardTile({
               </div>
             )}
           </div>
-        ) : (
+        ) : needsStatement ? null : (
           <Row label={t("currentPaymentDue")} valueClassName="font-semibold text-[var(--emerald-text)]">
             {summary.currentPaymentDue == null ? "—" : formatMoney(summary.currentPaymentDue)}
           </Row>
