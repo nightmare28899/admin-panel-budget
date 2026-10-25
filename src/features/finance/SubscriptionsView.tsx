@@ -31,7 +31,7 @@ import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/Button";
 import { CreditCardsSkeleton } from "@/components/ui/ContentSkeleton";
-import { categoryTokens } from "./categoryVisuals";
+import { categoryLabel, categoryTokens } from "./categoryVisuals";
 import { CreditCardPicker } from "./CreditCardPicker";
 import { ChargeGroupDetail } from "./ChargeGroupDetail";
 import { fetchAllExpensesForCategory, groupCharges, type ChargeGroup } from "./subscriptionCharges";
@@ -310,7 +310,7 @@ function SubscriptionForm({
           placeholder={t("selectCategory")}
           options={categories.map((category) => ({
             value: category.id,
-            label: `${category.icon ?? ""} ${category.name}`,
+            label: categoryLabel(category),
           }))}
         />
       </Form.Item>

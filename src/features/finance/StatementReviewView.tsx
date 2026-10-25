@@ -52,6 +52,7 @@ import { categoryKeyOf, planStatementCategorization } from "./statementCategoriz
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
 import { buildPagination } from "@/lib/pagination";
+import { categoryLabel } from "./categoryVisuals";
 import type { MessageKey } from "@/i18n/messages";
 
 const ROW_KIND_KEYS: Record<StatementRowKind, MessageKey> = {
@@ -891,7 +892,7 @@ export function StatementReviewView({
           className="w-full"
           options={categories.map((category) => ({
             value: category.id,
-            label: `${category.icon ?? ""} ${category.name}`.trim(),
+            label: categoryLabel(category),
           }))}
           onChange={(value) => patchRow(row.id, { categoryId: value ?? null })}
         />
@@ -1248,7 +1249,7 @@ export function StatementReviewView({
                   className="w-full sm:w-52"
                   options={categories.map((category) => ({
                     value: category.id,
-                    label: `${category.icon ?? ""} ${category.name}`.trim(),
+                    label: categoryLabel(category),
                   }))}
                   onChange={(value) => setBulkCategoryId(value)}
                 />

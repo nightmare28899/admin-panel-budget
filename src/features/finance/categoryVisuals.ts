@@ -52,11 +52,26 @@ export type CategoryVisualTokens = {
 // Shared across ExpenseList (transaction rows) and SubscriptionsView
 // (subscription rows) so the same category always renders with the same
 // color/icon on both pages.
+// The mobile app saves icon-set names ("fast-food-outline") in `icon`, which
+// would render as plain text here; only real glyphs (emoji) are displayable.
+const ICON_SET_NAME = /^[a-z0-9][a-z0-9_-]*$/i;
+
+export function categoryGlyph(icon: string | null | undefined): string | undefined {
+  const glyph = icon?.trim();
+  return glyph && !ICON_SET_NAME.test(glyph) ? glyph : undefined;
+}
+
+/** Select/list label: the displayable glyph (if any) followed by the name. */
+export function categoryLabel(category: Pick<Category, "name" | "icon">): string {
+  const glyph = categoryGlyph(category.icon);
+  return glyph ? `${glyph} ${category.name}` : category.name;
+}
+
 export function categoryTokens(category: Category | null | undefined): CategoryVisualTokens {
   if (!category) return { ...NEUTRAL_TOKEN, icon: { kind: "component", component: NEUTRAL_TOKEN.icon } };
 
   const base = CATEGORY_TOKENS[hashToIndex(category.id ?? category.name, CATEGORY_TOKENS.length)];
-  const persistedGlyph = category.icon?.trim();
+  const persistedGlyph = categoryGlyph(category.icon);
   if (persistedGlyph) return { ...base, icon: { kind: "glyph", glyph: persistedGlyph } };
 
   const keywordIcon = KEYWORD_ICONS.find(([pattern]) => pattern.test(category.name))?.[1];

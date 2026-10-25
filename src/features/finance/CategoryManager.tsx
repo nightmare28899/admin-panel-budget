@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Category, CategoryWritePayload } from "./finance.types";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { categoryLabel } from "./categoryVisuals";
 import { useLocale } from "@/i18n/LocaleProvider";
 
 export function CategoryManager({ categories, onCreate, onUpdate, onDelete, deletingCategoryId }: { categories: Category[]; onCreate: (body: CategoryWritePayload) => Promise<boolean>; onUpdate: (id: string, body: CategoryWritePayload) => Promise<boolean>; onDelete: (id: string) => void; deletingCategoryId?: string }) {
@@ -119,7 +120,7 @@ export function CategoryManager({ categories, onCreate, onUpdate, onDelete, dele
             <List.Item.Meta
               title={
                 <span className="inline-flex items-center gap-2 text-[var(--text-1)]">
-                  {category.icon} {category.name}
+                  {categoryLabel(category)}
                   {category.color && (
                     <span
                       aria-label={t("categoryColor", { color: category.color })}
