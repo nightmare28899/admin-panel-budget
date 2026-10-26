@@ -22,6 +22,7 @@ import type { MessageKey } from "@/i18n/messages";
 import { listPendingPayments } from "./cardPaymentSchedule";
 import { PaymentReminderBanner } from "./PaymentReminderBanner";
 import { CutoffPendingSection } from "./CutoffPendingSection";
+import { estimatePayable } from "./estimatedPayable";
 
 type FilterTab = "all" | "active" | "inactive";
 
@@ -71,6 +72,7 @@ export function CreditCardManager({
   const filterCounts: Record<FilterTab, number> = { all: cards.length, active: activeCards.length, inactive: inactiveCount };
   const totalTransactions = activeCards.reduce((sum, card) => sum + card.currentCycle.expenseCount, 0);
   const pendingPayments = listPendingPayments(cards);
+  const estimatedPayable = estimatePayable(cards);
   const activePercent = portfolio.trackedCards > 0
     ? Math.round((portfolio.activeCards / portfolio.trackedCards) * 100)
     : null;
@@ -304,6 +306,26 @@ export function CreditCardManager({
             </CardKpiTile>
           );
         })}
+        {estimatedPayable.map((estimate) => (
+          <CardKpiTile
+            key={`estimated-payable-${estimate.currency}`}
+            accent="amber"
+            label={t("estimatedPayable")}
+            unit={estimate.currency}
+            value={formatNumber(estimate.total, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          >
+            <dl className="mt-4 space-y-1 border-t border-[var(--border-soft)]/60 pt-3 text-xs text-[var(--text-3)]">
+              <div className="flex justify-between gap-2">
+                <dt>{t("estimatedPayableStatements")}</dt>
+                <dd className="font-mono font-medium text-[var(--text-2)]">{formatMoney(estimate.statementDue, estimate.currency)}</dd>
+              </div>
+              <div className="flex justify-between gap-2">
+                <dt>{t("estimatedPayableNextClose")}</dt>
+                <dd className="font-mono font-medium text-[var(--text-2)]">{formatMoney(estimate.nextClose, estimate.currency)}</dd>
+              </div>
+            </dl>
+          </CardKpiTile>
+        ))}
         <CardKpiTile accent="indigo" size="lg" label={t("transactions")} value={String(totalTransactions)}>
           <div className="mt-4 flex items-center justify-between gap-2 border-t border-[var(--border-soft)]/60 pt-3 text-xs">
             <span className="font-medium text-[var(--emerald-text)]">{t("thisCycle")}</span>
