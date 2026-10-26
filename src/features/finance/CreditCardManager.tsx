@@ -9,6 +9,7 @@ import { CardKpiTile } from "./CardKpiTile";
 import { CreditCardTile } from "./CreditCardTile";
 import { CreditCardStack } from "./CreditCardStack";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { cardGridClass } from "./cardGridLayout";
 import type {
   CreditCardOverviewItem,
   CreditCardOverviewResponse,
@@ -325,7 +326,7 @@ export function CreditCardManager({
         </div>
       ) : (
         isDesktop ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={cardGridClass(visibleCards.length)}>
             {visibleCards.map((card) => renderTile(card))}
           </div>
         ) : (
