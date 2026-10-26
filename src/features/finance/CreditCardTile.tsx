@@ -78,6 +78,7 @@ export function CreditCardTile({
   card,
   detailsExpanded,
   hideFace = false,
+  wide = false,
   onToggleDetails,
   onEdit,
   onDeactivate,
@@ -89,6 +90,8 @@ export function CreditCardTile({
   detailsExpanded: boolean;
   /** The card face is rendered elsewhere (stacked view). */
   hideFace?: boolean;
+  /** Full-width layout: debt and statement on the left, cutoff and payment schedule on the right (lg and up). */
+  wide?: boolean;
   onToggleDetails: () => void;
   onEdit: () => void;
   onDeactivate: () => void;
@@ -145,6 +148,8 @@ export function CreditCardTile({
       {!hideFace && <CreditCardFace card={card} className="m-3" />}
 
       <div className="flex-1 space-y-3 px-4 pb-4">
+        <div className={`grid gap-3 ${wide ? "lg:grid-cols-2 lg:gap-x-8" : ""}`}>
+        <div className="space-y-3">
         {card.creditStatus.limit != null ? (
           <div>
             <div className="flex items-center justify-between text-xs text-[var(--text-3)]">
@@ -218,7 +223,9 @@ export function CreditCardTile({
         ) : (
           <p className="text-xs text-[var(--text-3)]">{t("noStatementAvailable")}</p>
         )}
+        </div>
 
+        <div className="space-y-3">
         {card.isActive && (
           <div
             data-testid="cutoff-info"
@@ -306,6 +313,8 @@ export function CreditCardTile({
         )}
 
         <CreditCardInstallmentPlans plans={card.installmentPlans ?? []} currency={card.currency} />
+        </div>
+        </div>
 
         <button
           type="button"

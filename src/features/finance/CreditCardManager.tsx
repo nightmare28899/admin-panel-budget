@@ -9,7 +9,8 @@ import { CardKpiTile } from "./CardKpiTile";
 import { CreditCardTile } from "./CreditCardTile";
 import { CreditCardStack } from "./CreditCardStack";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { cardGridClass } from "./cardGridLayout";
+import { CreditCardRail } from "./CreditCardRail";
+import { resolveSelectedCardId } from "./cardSelection";
 import type {
   CreditCardOverviewItem,
   CreditCardOverviewResponse,
@@ -75,7 +76,8 @@ export function CreditCardManager({
     if (filter === "inactive") return !card.isActive;
     return true;
   });
-  const selectedIndex = Math.max(0, visibleCards.findIndex((card) => card.id === selectedCardId));
+  const resolvedCardId = resolveSelectedCardId(visibleCards.map((card) => card.id), selectedCardId);
+  const selectedIndex = Math.max(0, visibleCards.findIndex((card) => card.id === resolvedCardId));
   const allVisibleDetailsExpanded = visibleCards.length > 0
     && visibleCards.every((card) => expandedCardIds.has(card.id));
 
@@ -99,11 +101,12 @@ export function CreditCardManager({
     });
   };
 
-  const renderTile = (card: CreditCardOverviewItem, hideFace = false) => (
+  const renderTile = (card: CreditCardOverviewItem, hideFace = false, wide = false) => (
     <CreditCardTile
       key={card.id}
       card={card}
       hideFace={hideFace}
+      wide={wide}
       detailsExpanded={expandedCardIds.has(card.id)}
       onToggleDetails={() => toggleCardDetails(card.id)}
       onEdit={() => {
@@ -326,8 +329,9 @@ export function CreditCardManager({
         </div>
       ) : (
         isDesktop ? (
-          <div className={cardGridClass(visibleCards.length)}>
-            {visibleCards.map((card) => renderTile(card))}
+          <div className="space-y-5">
+            <CreditCardRail cards={visibleCards} selectedId={resolvedCardId} onSelect={setSelectedCardId} />
+            {renderTile(visibleCards[selectedIndex], true, true)}
           </div>
         ) : (
           <div className="space-y-5">
