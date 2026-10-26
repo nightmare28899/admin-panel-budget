@@ -38,6 +38,8 @@ interface FinanceContextValue {
   overviewCards: CreditCardSummary[];
   /** Refetch cards + overview (one request). Mutations may call this or dispatch CREDIT_CARDS_CHANGED_EVENT once. */
   refreshCards: () => Promise<void>;
+  /** Reorder cards in the shared snapshot without a refetch; returns the previous id order. */
+  setCardOrder: (ids: readonly string[]) => string[];
   /** Refetch subscriptions (one request). Call after subscription mutations. */
   refreshSubscriptions: () => Promise<void>;
 }
@@ -56,6 +58,7 @@ const FinanceContext = createContext<FinanceContextValue>({
   sharedOverview: undefined,
   sharedOverviewLoading: true,
   overviewCards: [],
+  setCardOrder: () => [],
   refreshCards: noop,
   refreshSubscriptions: noop,
 });
@@ -95,6 +98,7 @@ export function FinanceProvider({ children, user }: { children: ReactNode; user?
       sharedOverview: snapshot.overview,
       sharedOverviewLoading: snapshot.overviewLoading,
       overviewCards: snapshot.cards,
+      setCardOrder: store.setCardOrder,
       refreshCards: store.refreshOverview,
       refreshSubscriptions: store.refreshSubscriptions,
     }),

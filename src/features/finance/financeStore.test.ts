@@ -131,4 +131,24 @@ describe("financeStore", () => {
     await flush();
     expect(store.getSnapshot()).toBe(store.getSnapshot());
   });
+
+  it("setCardOrder reorders overview and cards locally without any refetch and returns the previous order", async () => {
+    const { store, fetchOverview } = setup();
+    store.start();
+    await flush();
+    const previous = store.setCardOrder(["c", "a", "b"]);
+    expect(previous).toEqual(["a", "b", "c"]);
+    const s = store.getSnapshot();
+    expect(s.cards.map((c) => c.id)).toEqual(["c", "a", "b"]);
+    expect(s.overview?.cards.map((c) => c.id)).toEqual(["c", "a", "b"]);
+    expect(s.activeCardCount).toBe(2);
+    store.setCardOrder(previous);
+    expect(store.getSnapshot().cards.map((c) => c.id)).toEqual(["a", "b", "c"]);
+    expect(fetchOverview).toHaveBeenCalledTimes(1);
+  });
+
+  it("setCardOrder is a no-op before the overview loads", () => {
+    const { store } = setup();
+    expect(store.setCardOrder(["a"])).toEqual([]);
+  });
 });

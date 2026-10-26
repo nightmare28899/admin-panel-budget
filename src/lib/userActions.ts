@@ -382,6 +382,10 @@ export async function updateCreditCardAction(
   return withFreshUser((token) => userApi.updateCreditCard(token, id, body));
 }
 
+export async function reorderCreditCardsAction(ids: string[]) {
+  return withFreshUser((token) => userApi.reorderCreditCards(token, ids));
+}
+
 export async function deactivateCreditCardAction(id: string) {
   return withFreshUser((token) => userApi.deactivateCreditCard(token, id));
 }

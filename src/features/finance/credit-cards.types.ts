@@ -113,6 +113,7 @@ export type CreditCardInstallmentPlan = {
 };
 
 export type CreditCardOverviewItem = {
+  sortOrder?: number;
   installmentPlans?: CreditCardInstallmentPlan[];
   id: string;
   name: string;

@@ -11,6 +11,7 @@ import { CreditCardStack } from "./CreditCardStack";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { CreditCardRail } from "./CreditCardRail";
 import { resolveSelectedCardId } from "./cardSelection";
+import { buildFullOrder } from "./cardOrder";
 import type {
   CreditCardOverviewItem,
   CreditCardOverviewResponse,
@@ -31,6 +32,7 @@ export function CreditCardManager({
   onDeactivate,
   onReactivate,
   onDeletePermanently,
+  onReorder,
   onStatementPaymentChanged,
   notice,
 }: {
@@ -40,6 +42,8 @@ export function CreditCardManager({
   onDeactivate: (id: string) => Promise<void>;
   onReactivate: (id: string) => Promise<void>;
   onDeletePermanently: (id: string) => Promise<void>;
+  /** Persist a new order; receives the ids of ALL cards (visible reordered first, hidden after). */
+  onReorder: (ids: string[]) => Promise<void>;
   /** A statement payment was written (or the ledger moved): reload the overview, optionally with a success notice. */
   onStatementPaymentChanged: (notice?: string) => Promise<void>;
   /** Rendered between the page header and the KPI row (e.g. an error alert). */
@@ -330,7 +334,12 @@ export function CreditCardManager({
       ) : (
         isDesktop ? (
           <div className="space-y-5">
-            <CreditCardRail cards={visibleCards} selectedId={resolvedCardId} onSelect={setSelectedCardId} />
+            <CreditCardRail
+              cards={visibleCards}
+              selectedId={resolvedCardId}
+              onSelect={setSelectedCardId}
+              onReorder={(visibleIds) => onReorder(buildFullOrder(cards.map((card) => card.id), visibleIds))}
+            />
             {renderTile(visibleCards[selectedIndex], true, true)}
           </div>
         ) : (

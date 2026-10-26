@@ -90,6 +90,7 @@ export type CreditCardSummary = {
   closingDay?: number | null;
   paymentDueDay?: number | null;
   isActive: boolean;
+  sortOrder?: number;
   createdAt?: string;
   updatedAt?: string;
 };

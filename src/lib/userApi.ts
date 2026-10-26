@@ -98,6 +98,8 @@ export const userApi = {
     request<CreditCardSummary>("/credit-cards", { method: "POST", body: JSON.stringify(body) }, token),
   updateCreditCard: (token: string, id: string, body: Partial<CreditCardWritePayload> & { isActive?: boolean }) =>
     request<CreditCardSummary>(`/credit-cards/${id}`, { method: "PATCH", body: JSON.stringify(body) }, token),
+  reorderCreditCards: (token: string, ids: string[]) =>
+    request<CreditCardSummary[]>("/credit-cards/order", { method: "PUT", body: JSON.stringify({ ids }) }, token),
   deactivateCreditCard: (token: string, id: string) =>
     request<unknown>(`/credit-cards/${id}`, { method: "DELETE" }, token),
   deleteCreditCardPermanently: (token: string, id: string) =>

@@ -1,4 +1,5 @@
 import { createInflightDeduper } from "@/lib/inflight";
+import { applyCardOrder } from "./cardOrder";
 import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
 import type { CreditCardOverviewResponse } from "./credit-cards.types";
 import type { CreditCardSummary } from "./statement-import.types";
@@ -95,6 +96,21 @@ export function createFinanceStore({ fetchOverview, fetchSubscriptions, eventTar
     },
     refreshOverview,
     refreshSubscriptions,
+    /**
+     * Reorders cards in the shared snapshot (optimistic update, server confirmation or revert)
+     * without a refetch. Returns the previous id order so callers can revert.
+     */
+    setCardOrder(ids: readonly string[]): string[] {
+      const current = snapshot.overview;
+      if (!current) return [];
+      const previous = current.cards.map((card) => card.id);
+      const cards = applyCardOrder(current.cards, ids);
+      update({
+        overview: { ...current, cards },
+        cards: cards as unknown as CreditCardSummary[],
+      });
+      return previous;
+    },
     setPendingCount(count: number | undefined) {
       if (snapshot.pendingCount === count) return;
       update({ pendingCount: count });

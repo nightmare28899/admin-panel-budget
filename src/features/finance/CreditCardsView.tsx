@@ -9,6 +9,7 @@ import {
   createCreditCardAction,
   deactivateCreditCardAction,
   deleteCreditCardPermanentlyAction,
+  reorderCreditCardsAction,
   updateCreditCardAction,
 } from "@/lib/userActions";
 import { useFinanceContext } from "./FinanceContext";
@@ -19,7 +20,7 @@ import { CREDIT_CARDS_CHANGED_EVENT } from "./creditCardsEvents";
 export function CreditCardsView() {
   const router = useRouter();
   const { t } = useLocale();
-  const { sharedOverview: overview, sharedOverviewLoading } = useFinanceContext();
+  const { sharedOverview: overview, sharedOverviewLoading, setCardOrder } = useFinanceContext();
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState<string>();
 
@@ -62,6 +63,23 @@ export function CreditCardsView() {
       }),
     );
     notifyCardsChanged();
+  };
+
+  // Optimistic: reorder the shared snapshot first, then confirm with the server (no refetch).
+  const reorderCards = async (ids: string[]) => {
+    setError(undefined);
+    const previous = setCardOrder(ids);
+    const result = await reorderCreditCardsAction(ids);
+    if (result.sessionExpired) {
+      router.push("/user-login");
+      return;
+    }
+    if (result.error || !result.data) {
+      setCardOrder(previous);
+      setError(t("cardReorderFailed"));
+      return;
+    }
+    setCardOrder(result.data.map((card) => card.id));
   };
 
   const statementPaymentChanged = async (notice?: string) => {
@@ -129,6 +147,7 @@ export function CreditCardsView() {
           onUpdate={async (id, body) => refreshAfter(await updateCreditCardAction(id, body))}
           onDeactivate={async (id) => refreshAfter(await deactivateCreditCardAction(id))}
           onDeletePermanently={deletePermanently}
+          onReorder={reorderCards}
           onStatementPaymentChanged={statementPaymentChanged}
           onReactivate={async (id) =>
             refreshAfter(await updateCreditCardAction(id, { isActive: true }))
