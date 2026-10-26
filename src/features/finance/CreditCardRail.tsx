@@ -29,7 +29,8 @@ export function CreditCardRail({
     <div
       role="group"
       aria-label={t("cardRailLabel")}
-      className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-3 pt-2"
+      // Padding leaves room for the selected face's lift and ring, which overflow-x clipping would cut.
+      className="-mx-3 mb-2 flex snap-x snap-mandatory gap-4 overflow-x-auto px-3 pb-3 pt-4"
     >
       {cards.map((card) => {
         const selected = card.id === selectedId;
@@ -42,7 +43,7 @@ export function CreditCardRail({
             aria-pressed={selected}
             aria-label={t("cardStackCardLabel", { card: `${card.bank} ${card.name}`, last4: card.last4 })}
             onClick={() => onSelect(card.id)}
-            className={`group w-60 shrink-0 cursor-pointer snap-start rounded-2xl text-left transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400 motion-reduce:transition-none ${
+            className={`group min-w-52 max-w-72 flex-1 basis-52 cursor-pointer snap-start rounded-2xl text-left transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400 motion-reduce:transition-none ${
               selected
                 ? "-translate-y-1 ring-2 ring-sky-400 ring-offset-4 ring-offset-[var(--bg-1)]"
                 : `hover:-translate-y-0.5 ${card.isActive ? "" : "opacity-60"}`

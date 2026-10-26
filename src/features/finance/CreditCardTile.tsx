@@ -146,8 +146,14 @@ export function CreditCardTile({
   return (
     <div className={`flex flex-col overflow-hidden rounded-3xl border border-[var(--border-soft)]/90 bg-[var(--bg-1)] transition-all duration-300 hover:border-[var(--border-soft)] hover:shadow-2xl ${emphasisClass} ${card.isActive ? "" : "opacity-60"}`}>
       {!hideFace && <CreditCardFace card={card} className="m-3" />}
+      {hideFace && (
+        <div className="flex items-baseline justify-between gap-3 px-4 pt-4">
+          <h3 className="truncate text-base font-bold tracking-tight text-[var(--text-1)]">{card.name}</h3>
+          <span className="shrink-0 font-mono text-xs text-[var(--text-3)]">{card.bank} •••• {card.last4}</span>
+        </div>
+      )}
 
-      <div className="flex-1 space-y-3 px-4 pb-4">
+      <div className={`flex-1 space-y-3 px-4 pb-4 ${hideFace ? "pt-3" : ""}`}>
         <div className={`grid gap-3 ${wide ? "lg:grid-cols-2 lg:gap-x-8" : ""}`}>
         <div className="space-y-3">
         {card.creditStatus.limit != null ? (
