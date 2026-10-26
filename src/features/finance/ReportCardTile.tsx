@@ -40,6 +40,14 @@ const TILE_STYLE: Record<CardThemeKey, TileStyle> = {
     pill: "border-purple-800/40 bg-[var(--accent-dim)] text-[var(--accent-text)]",
     accent: "text-[var(--accent-text)]",
   },
+  mercadopago: {
+    chip: "from-sky-500 to-indigo-800",
+    bar: "from-yellow-300 to-amber-400",
+    border: "border-sky-900/40 hover:border-sky-800/70",
+    tint: "bg-gradient-to-b from-sky-950/10 to-transparent",
+    pill: "border-yellow-700/40 bg-[var(--gold-dim)] text-[var(--gold-text)]",
+    accent: "text-[var(--gold-text)]",
+  },
   default: {
     chip: "from-slate-600 to-slate-700",
     bar: "from-emerald-600 to-teal-400",

@@ -39,7 +39,7 @@ function normalizeCardIdentity(value: string): string {
     .replace(/\s+/g, " ");
 }
 
-export type CardThemeKey = "banamex" | "bbva" | "rappi" | "default";
+export type CardThemeKey = "banamex" | "bbva" | "rappi" | "mercadopago" | "default";
 
 export type CardTheme = {
   key: CardThemeKey;
@@ -82,6 +82,14 @@ const CARD_THEMES: Record<CardThemeKey, CardTheme> = {
     barClass: "bg-gradient-to-r from-violet-500 to-indigo-400",
     badgeClass: EMERALD_BADGE,
   },
+  mercadopago: {
+    key: "mercadopago",
+    background: "linear-gradient(135deg, #00B1EA 0%, #2D3277 100%)",
+    borderClass: "border-yellow-300/40",
+    glow: "0 14px 35px -10px rgba(0, 177, 234, 0.35)",
+    barClass: "bg-gradient-to-r from-yellow-300 to-amber-400",
+    badgeClass: EMERALD_BADGE,
+  },
   default: {
     key: "default",
     background: "",
@@ -105,6 +113,7 @@ function themeKeyFor(card: CardIdentity): CardThemeKey {
   if (/\bbanamex\b/.test(identity)) return "banamex";
   if (/\bbbva\b/.test(identity)) return "bbva";
   if (/\brappi(?:card)?\b/.test(identity)) return "rappi";
+  if (/\bmercado ?(?:pago|libre)\b/.test(identity)) return "mercadopago";
   return "default";
 }
 
