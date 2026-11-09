@@ -3,6 +3,7 @@ import { createStatementImportAction } from "@/lib/userActions";
 import { useSessionRedirect } from "./useSessionRedirect";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { useToast } from "@/components/ui/ToastProvider";
 
 const MAX_STATEMENT_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -22,22 +23,20 @@ export function useStatementUpload({
   selectedCardId,
   onUploaded,
   setError,
-  setNotice,
 }: {
   fileInputRef: RefObject<HTMLInputElement | null>;
   selectedCardId: string | undefined;
   onUploaded: () => void | Promise<void>;
   setError: (message?: string) => void;
-  setNotice: (message?: string) => void;
 }) {
   const { t } = useLocale();
+  const toast = useToast();
   const redirectIfExpired = useSessionRedirect();
   const [file, setFile] = useState<File>();
   const [uploading, setUploading] = useState(false);
 
   const selectFile = useCallback(
     (nextFile?: File) => {
-      setNotice(undefined);
       setError(undefined);
       if (!nextFile) {
         setFile(undefined);
@@ -48,57 +47,73 @@ export function useStatementUpload({
       if (validationError) {
         setFile(undefined);
         setError(validationError);
+        toast.error(validationError);
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
       setFile(nextFile);
     },
-    [fileInputRef, setError, setNotice, t],
+    [fileInputRef, setError, toast, t],
   );
 
   const upload = useCallback(async () => {
     if (!file) {
-      setError(t("choosePdfBeforeUpload"));
+      const message = t("choosePdfBeforeUpload");
+      setError(message);
+      toast.error(message);
       return;
     }
     if (!selectedCardId) {
-      setError(t("cardRequiredBeforeUpload"));
+      const message = t("cardRequiredBeforeUpload");
+      setError(message);
+      toast.error(message);
       return;
     }
 
     setUploading(true);
     setError(undefined);
-    setNotice(undefined);
-    const result = await createStatementImportAction(file, selectedCardId);
-    setUploading(false);
+    try {
+      const result = await createStatementImportAction(file, selectedCardId);
 
-    if (redirectIfExpired(result.sessionExpired)) return;
-    if (result.error || !result.data) {
-      setError(frontendError(result.error, t, "statementUploadFailed"));
-      return;
+      if (redirectIfExpired(result.sessionExpired)) return;
+      if (result.error || !result.data) {
+        const message = frontendError(result.error, t, "statementUploadFailed");
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      const imported = result.data;
+      const processingError =
+        imported.status === "FAILED"
+          ? imported.failureMessage || imported.failureCode
+            ? t("pdfStoredProcessingFailedDetail", { detail: imported.failureMessage || imported.failureCode || "" })
+            : t("pdfStoredProcessingFailed")
+          : undefined;
+
+      if (!processingError && imported.duplicate) {
+        toast.success(t("duplicatePdf"));
+      } else if (imported.status === "NEEDS_REVIEW") {
+        toast.success(t("statementReady"));
+      } else if (!processingError) {
+        toast.success(t("statementUploaded"));
+      }
+
+      setFile(undefined);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      await onUploaded();
+      if (processingError) {
+        setError(processingError);
+        toast.error(processingError);
+      }
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "statementUploadFailed");
+      setError(message);
+      toast.error(message);
+    } finally {
+      setUploading(false);
     }
-
-    const imported = result.data;
-    const processingError =
-      imported.status === "FAILED"
-        ? imported.failureMessage || imported.failureCode
-          ? t("pdfStoredProcessingFailedDetail", { detail: imported.failureMessage || imported.failureCode || "" })
-          : t("pdfStoredProcessingFailed")
-        : undefined;
-
-    if (!processingError && imported.duplicate) {
-      setNotice(t("duplicatePdf"));
-    } else if (imported.status === "NEEDS_REVIEW") {
-      setNotice(t("statementReady"));
-    } else if (!processingError) {
-      setNotice(t("statementUploaded"));
-    }
-
-    setFile(undefined);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    await onUploaded();
-    if (processingError) setError(processingError);
-  }, [file, fileInputRef, selectedCardId, onUploaded, redirectIfExpired, setError, setNotice, t]);
+  }, [file, fileInputRef, selectedCardId, onUploaded, redirectIfExpired, setError, toast, t]);
 
   return { file, uploading, selectFile, upload };
 }

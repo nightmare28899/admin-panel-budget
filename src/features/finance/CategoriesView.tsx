@@ -14,14 +14,15 @@ import { Card } from "@/components/ui/Card";
 import { ListSkeleton } from "@/components/ui/ContentSkeleton";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export function CategoriesView() {
   const router = useRouter();
   const { t } = useLocale();
+  const toast = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
   const [deletingCategoryId, setDeletingCategoryId] = useState<string>();
 
   const reload = useCallback(async () => {
@@ -47,17 +48,25 @@ export function CategoriesView() {
     successMessage: "categoryCreated" | "categoryUpdated",
   ): Promise<boolean> => {
     setError(undefined);
-    setNotice(undefined);
 
-    const result = await operation();
-    if (result.error) {
-      setError(frontendError(result.error, t, "requestFailedGeneric"));
+    try {
+      const result = await operation();
+      if (result.error) {
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setError(message);
+        toast.error(message);
+        return false;
+      }
+
+      toast.success(t(successMessage));
+      await reload();
+      return true;
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric");
+      setError(message);
+      toast.error(message);
       return false;
     }
-
-    setNotice(t(successMessage));
-    await reload();
-    return true;
   };
 
   const handleDelete = async (id: string) => {
@@ -65,17 +74,22 @@ export function CategoriesView() {
 
     setDeletingCategoryId(id);
     setError(undefined);
-    setNotice(undefined);
 
     try {
       const result = await deleteCategoryAction(id);
       if (result.error) {
-        setError(frontendError(result.error, t, "requestFailedGeneric"));
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setError(message);
+        toast.error(message);
         return;
       }
 
-      setNotice(t("categoryDeleted"));
+      toast.success(t("categoryDeleted"));
       await reload();
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric");
+      setError(message);
+      toast.error(message);
     } finally {
       setDeletingCategoryId(undefined);
     }
@@ -109,23 +123,6 @@ export function CategoriesView() {
         </div>
       )}
 
-      {notice && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-[var(--emerald)]/40 bg-[var(--emerald-dim)] px-4 py-3 text-sm text-[var(--emerald-text)]"
-        >
-          <span>{notice}</span>
-          <button
-            type="button"
-            onClick={() => setNotice(undefined)}
-            aria-label={t("dismissNotification")}
-            className="shrink-0 cursor-pointer text-[var(--emerald-text)]/70 transition-colors hover:text-[var(--emerald-text)]"
-          >
-            ✕
-          </button>
-        </div>
-      )}
 
       <Card className="!p-4">
         {loading && categories.length === 0 ? (

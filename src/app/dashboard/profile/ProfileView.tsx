@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
-import { Toast, ToastType } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/ToastProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
@@ -50,11 +50,11 @@ export function ProfileView({
     password: "",
   });
   const [actionLoading, setActionLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const toast = useToast();
 
-  const showToast = (message: string, type: ToastType = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    if (type === "error") toast.error(message);
+    else toast.success(message);
   };
 
   const openEdit = () => {
@@ -296,8 +296,6 @@ export function ProfileView({
           </div>
         </form>
       </Modal>
-
-      {toast && <Toast message={toast.message} type={toast.type} />}
     </section>
   );
 }

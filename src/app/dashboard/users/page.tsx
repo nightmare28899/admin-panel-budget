@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { MetricCardsSkeleton, SkeletonBlock, TableSkeleton } from "@/components/ui/ContentSkeleton";
 import { Modal } from "@/components/ui/Modal";
-import { Toast, ToastType } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/ToastProvider";
 import { Toggle } from "@/components/ui/Toggle";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
@@ -59,7 +59,7 @@ export default function UsersPage() {
   });
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const toast = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [confirmingUser, setConfirmingUser] = useState<UserRow | null>(null);
@@ -73,9 +73,9 @@ export default function UsersPage() {
   const setHeaderSlot = useHeaderSlot();
 
 
-  const showToast = (message: string, type: ToastType = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    if (type === "error") toast.error(message);
+    else toast.success(message);
   };
 
   const loadUsers = useCallback(async () => {
@@ -641,8 +641,6 @@ export default function UsersPage() {
               </div>
             </form>
       </Modal>
-
-      {toast && <Toast message={toast.message} type={toast.type} />}
 
       <Modal
         open={Boolean(confirmingUser)}

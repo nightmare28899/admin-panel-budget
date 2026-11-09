@@ -3,6 +3,7 @@ import { deleteStatementImportAction } from "@/lib/userActions";
 import { useSessionRedirect } from "./useSessionRedirect";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { useToast } from "@/components/ui/ToastProvider";
 import type { StatementImportListItem } from "../statement-import.types";
 
 /**
@@ -13,13 +14,12 @@ import type { StatementImportListItem } from "../statement-import.types";
 export function useStatementDelete({
   onDeleted,
   setError,
-  setNotice,
 }: {
   onDeleted: () => void | Promise<void>;
   setError: (message?: string) => void;
-  setNotice: (message?: string) => void;
 }) {
   const { t } = useLocale();
+  const toast = useToast();
   const redirectIfExpired = useSessionRedirect();
   const [target, setTarget] = useState<StatementImportListItem>();
   const [deleting, setDeleting] = useState(false);
@@ -36,20 +36,28 @@ export function useStatementDelete({
     if (!target) return;
     setDeleting(true);
     setError(undefined);
-    setNotice(undefined);
-    const result = await deleteStatementImportAction(target.id);
-    setDeleting(false);
+    try {
+      const result = await deleteStatementImportAction(target.id);
 
-    if (redirectIfExpired(result.sessionExpired)) return;
-    if (result.error || !result.data) {
-      setError(frontendError(result.error, t, "statementDeleteFailed"));
-      return;
+      if (redirectIfExpired(result.sessionExpired)) return;
+      if (result.error || !result.data) {
+        const message = frontendError(result.error, t, "statementDeleteFailed");
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      setTarget(undefined);
+      toast.success(t("statementDeleted"));
+      await onDeleted();
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "statementDeleteFailed");
+      setError(message);
+      toast.error(message);
+    } finally {
+      setDeleting(false);
     }
-
-    setTarget(undefined);
-    await onDeleted();
-    setNotice(t("statementDeleted"));
-  }, [target, onDeleted, redirectIfExpired, setError, setNotice, t]);
+  }, [target, onDeleted, redirectIfExpired, setError, toast, t]);
 
   return { target, deleting, requestDelete, cancelDelete, confirmDelete };
 }

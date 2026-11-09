@@ -13,6 +13,7 @@ import type { ChargeGroup } from "./subscriptionCharges";
 import { deleteExpenseAction, updateExpenseAction } from "@/lib/userActions";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { useToast } from "@/components/ui/ToastProvider";
 
 // Shared by both a matched subscription row (inline) and a standalone
 // leftover charge group (no subscription plan) — same edit/delete/expand
@@ -32,6 +33,7 @@ export function ChargeGroupDetail({
   onConvert?: () => void;
 }) {
   const { t, formatDate, formatNumber } = useLocale();
+  const toast = useToast();
   const displayDate = (value: string) => {
     const calendarDate = toCalendarDate(value);
     return calendarDate ? formatDate(`${calendarDate}T12:00:00`, { dateStyle: "medium" }) : "—";
@@ -55,28 +57,47 @@ export function ChargeGroupDetail({
     if (!editingCharge) return;
     setSavingCharge(true);
     setFormError(undefined);
-    const result = await updateExpenseAction(editingCharge.id, values);
-    setSavingCharge(false);
-    if (result.error) {
-      setFormError(frontendError(result.error, t, "requestFailedGeneric"));
-      return;
+    try {
+      const result = await updateExpenseAction(editingCharge.id, values);
+      if (result.error) {
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setFormError(message);
+        toast.error(message);
+        return;
+      }
+      toast.success(t("expenseUpdated"));
+      setEditingCharge(undefined);
+      onChanged();
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric");
+      setFormError(message);
+      toast.error(message);
+    } finally {
+      setSavingCharge(false);
     }
-    setEditingCharge(undefined);
-    onChanged();
   };
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    const result = await deleteExpenseAction(deleteTarget.id);
-    setDeleting(false);
-    if (result.error) {
-      setError(frontendError(result.error, t, "requestFailedGeneric"));
+    try {
+      const result = await deleteExpenseAction(deleteTarget.id);
+      if (result.error) {
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setError(message);
+        toast.error(message);
+        return;
+      }
+      toast.success(t("expenseDeleted"));
+      onChanged();
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric");
+      setError(message);
+      toast.error(message);
+    } finally {
+      setDeleting(false);
       setDeleteTarget(undefined);
-      return;
     }
-    setDeleteTarget(undefined);
-    onChanged();
   };
 
   return (

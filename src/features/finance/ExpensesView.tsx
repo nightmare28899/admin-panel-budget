@@ -39,6 +39,7 @@ import { SubscriptionDueBanner } from "./SubscriptionDueBanner";
 import { useAutoRefresh } from "./hooks/useAutoRefresh";
 import { useCreditCards } from "./hooks/useCreditCards";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { useToast } from "@/components/ui/ToastProvider";
 import { frontendError } from "@/i18n/errors";
 
 const PERIOD_LABEL_KEYS = {
@@ -91,6 +92,7 @@ function safeReceiptUrl(value: string | undefined) {
 export function ExpensesView() {
   const router = useRouter();
   const { t, formatNumber, formatDate } = useLocale();
+  const toast = useToast();
   const [summary, setSummary] = useState<Summary>();
   const [monthTotals, setMonthTotals] = useState<Array<{ currency: string; total: number }>>();
   const [userCurrency, setUserCurrency] = useState<string>();
@@ -102,7 +104,6 @@ export function ExpensesView() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
   const [formError, setFormError] = useState<string>();
   const [filters, setFilters] = useState<{
     q: string;
@@ -251,7 +252,6 @@ export function ExpensesView() {
 
     setSaving(true);
     setError(undefined);
-    setNotice(undefined);
     setFormError(undefined);
 
     try {
@@ -260,14 +260,20 @@ export function ExpensesView() {
         : await createExpenseAction(values, receipt);
 
       if (result.error) {
-        setFormError(frontendError(result.error, t, "requestFailedGeneric"));
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setFormError(message);
+        toast.error(message);
         return;
       }
 
-      setNotice(t(editing ? "expenseUpdated" : "expenseCreated"));
+      toast.success(t(editing ? "expenseUpdated" : "expenseCreated"));
       setDrawer(false);
       setEditing(undefined);
       await reload(page);
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric");
+      setFormError(message);
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -290,20 +296,25 @@ export function ExpensesView() {
 
     setDeletingExpenseId(id);
     setError(undefined);
-    setNotice(undefined);
     setFormError(undefined);
 
     try {
       const result = await deleteExpenseAction(id);
       if (result.error) {
-        setError(frontendError(result.error, t, "requestFailedGeneric"));
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setError(message);
+        toast.error(message);
         return;
       }
 
-      setNotice(t("expenseDeleted"));
+      toast.success(t("expenseDeleted"));
       const remainingTotal = Math.max(0, (list?.pagination.totalCount ?? rows.length) - 1);
       const lastPage = Math.max(1, Math.ceil(remainingTotal / pageSize));
       await reload(Math.min(page, lastPage));
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric");
+      setError(message);
+      toast.error(message);
     } finally {
       setDeletingExpenseId(undefined);
     }
@@ -407,12 +418,18 @@ export function ExpensesView() {
         return;
       }
       if (result.error) {
-        setBudgetError(frontendError(result.error, t, "requestFailedGeneric"));
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setBudgetError(message);
+        toast.error(message);
         return;
       }
-      setNotice(t(payload.budgetAmount > 0 ? "budgetSaved" : "budgetRemoved"));
+      toast.success(t(payload.budgetAmount > 0 ? "budgetSaved" : "budgetRemoved"));
       setBudgetModalOpen(false);
       await reload(page);
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric");
+      setBudgetError(message);
+      toast.error(message);
     } finally {
       setBudgetSaving(false);
     }
@@ -536,23 +553,6 @@ export function ExpensesView() {
           </div>
         )}
 
-        {notice && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-[var(--emerald)]/40 bg-[var(--emerald-dim)] px-4 py-3 text-sm text-[var(--emerald-text)]"
-          >
-            <span>{notice}</span>
-            <button
-              type="button"
-              onClick={() => setNotice(undefined)}
-              aria-label={t("dismissNotification")}
-              className="shrink-0 cursor-pointer text-[var(--emerald-text)]/70 transition-colors hover:text-[var(--emerald-text)]"
-            >
-              ✕
-            </button>
-          </div>
-        )}
 
         {initialLoading ? (
           <MetricCardsSkeleton count={2} className="mb-4 md:grid-cols-3" />

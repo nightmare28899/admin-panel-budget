@@ -24,12 +24,12 @@ import { createStatementPaymentAction } from "@/lib/userActions";
 import { useFinanceContext } from "./FinanceContext";
 import { StatementDebtSummary } from "./StatementDebtSummary";
 import { frontendError } from "@/i18n/errors";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   paymentStatusTone,
   STATEMENT_BACKDROP_CLASS,
   STATEMENT_ERROR_BANNER_CLASS,
   STATEMENT_FIELD_SCOPE,
-  STATEMENT_NOTICE_BANNER_CLASS,
   STATEMENT_PICKER_SCOPE,
   StatementBadge,
   StatementButton,
@@ -40,6 +40,7 @@ import {
 export function StatementImportsView() {
   const router = useRouter();
   const { t, formatDate, formatNumber } = useLocale();
+  const toast = useToast();
   const statusLabels: Record<StatementImportStatus, string> = {
     UPLOADED: t("uploaded"),
     PARSED: t("parsed"),
@@ -62,29 +63,26 @@ export function StatementImportsView() {
   const cardsById = new Map(creditCards.cards.map((card) => [card.id, card]));
 
   useEffect(() => {
-    if (feedback.error || feedback.notice) {
+    if (feedback.error) {
       feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [feedback.error, feedback.notice]);
+  }, [feedback.error]);
 
   const upload = useStatementUpload({
     fileInputRef,
     selectedCardId,
     onUploaded: imports.reloadFromStart,
     setError: feedback.setError,
-    setNotice: feedback.setNotice,
   });
 
   const retry = useStatementRetry({
     onRetried: imports.reload,
     setError: feedback.setError,
-    setNotice: feedback.setNotice,
   });
 
   const deleteImport = useStatementDelete({
     onDeleted: imports.reload,
     setError: feedback.setError,
-    setNotice: feedback.setNotice,
   });
 
   const bannerMessage = feedback.error || imports.error;
@@ -129,14 +127,6 @@ export function StatementImportsView() {
           </div>
         )}
 
-        {feedback.notice && (
-          <div
-            role="status"
-            className={`mb-4 ${STATEMENT_NOTICE_BANNER_CLASS}`}
-          >
-            {feedback.notice}
-          </div>
-        )}
       </div>
 
        <StatementSectionCard title={t("creditCardRequired")} className="mb-4">
@@ -405,20 +395,29 @@ export function StatementImportsView() {
         onConfirm={async (value) => {
           if (!pendingPaidId || !pendingPaidStatement) return;
           setRecordingPayment(true);
-          const result = await createStatementPaymentAction(pendingPaidId, {
-            ...value,
-            expectedVersion: pendingPaidStatement.paymentVersion,
-            idempotencyKey: crypto.randomUUID(),
-          });
-          setRecordingPayment(false);
-          if (result.error) {
-            feedback.setError(frontendError(result.error, t, "paidStatusFailed"));
-            return;
+          try {
+            const result = await createStatementPaymentAction(pendingPaidId, {
+              ...value,
+              expectedVersion: pendingPaidStatement.paymentVersion,
+              idempotencyKey: crypto.randomUUID(),
+            });
+            if (result.error) {
+              const message = frontendError(result.error, t, "paidStatusFailed");
+              feedback.setError(message);
+              toast.error(message);
+              return;
+            }
+            window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
+            await imports.reload();
+            toast.success(t("paymentRecorded"));
+            setPendingPaidId(undefined);
+          } catch (err) {
+            const message = frontendError(err instanceof Error ? err.message : undefined, t, "paidStatusFailed");
+            feedback.setError(message);
+            toast.error(message);
+          } finally {
+            setRecordingPayment(false);
           }
-          window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
-          await imports.reload();
-          feedback.setNotice(t("paymentRecorded"));
-          setPendingPaidId(undefined);
         }}
         defaultAmount={
           pendingPaidStatement?.paymentSummary.currentPaymentDue

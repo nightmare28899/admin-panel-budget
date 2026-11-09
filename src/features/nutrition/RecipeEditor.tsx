@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { useToast } from "@/components/ui/ToastProvider";
 import { recipeSchema } from "./nutrition.schemas";
 import { saveRecipeAction } from "./nutrition.actions";
 import { mealTypes, type Recipe } from "./nutrition.types";
@@ -28,6 +29,7 @@ export function RecipeEditor({
   onCancel: () => void;
 }) {
   const { t } = useLocale();
+  const toast = useToast();
   const mealLabel = useMealLabel();
   const [message, setMessage] = useState("");
   const form = useForm<Recipe>({ resolver: zodResolver(recipeSchema), defaultValues: recipe });
@@ -43,10 +45,17 @@ export function RecipeEditor({
           setMessage("");
           try {
             const result = await saveRecipeAction(values);
-            if (result.success) onSaved();
-            else setMessage(result.error);
+            if (result.success) {
+              toast.success(t("nutSuggestSavedMsg"));
+              onSaved();
+            } else {
+              setMessage(result.error);
+              toast.error(result.error);
+            }
           } catch {
-            setMessage(t("nutRecipeSaveFailed"));
+            const failure = t("nutRecipeSaveFailed");
+            setMessage(failure);
+            toast.error(failure);
           }
         })}
       >

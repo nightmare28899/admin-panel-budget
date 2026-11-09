@@ -30,7 +30,8 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/Button";
-import { Toast, type ToastType } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/ToastProvider";
+import { notifyResult } from "@/lib/actionFeedback";
 import { CreditCardsSkeleton } from "@/components/ui/ContentSkeleton";
 import { categoryLabel, categoryTokens } from "./categoryVisuals";
 import { CreditCardPicker } from "./CreditCardPicker";
@@ -369,7 +370,7 @@ export function SubscriptionsView() {
   const [editingSubscription, setEditingSubscription] = useState<Subscription>();
   const [formError, setFormError] = useState<string>();
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const toast = useToast();
   const [busyId, setBusyId] = useState<string>();
   const [deleteTarget, setDeleteTarget] = useState<Subscription>();
   const [deletingSubscription, setDeletingSubscription] = useState(false);
@@ -478,11 +479,6 @@ export function SubscriptionsView() {
     setFormOpen(true);
   };
 
-  const showToast = (message: string, type: ToastType = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3500);
-  };
-
   const saveSubscription = async (payload: CreateSubscriptionPayload) => {
     setSaving(true);
     setFormError(undefined);
@@ -493,23 +489,29 @@ export function SubscriptionsView() {
       if (result.error) {
         const message = frontendError(result.error, t, "requestFailedGeneric");
         setFormError(message);
-        showToast(message, "error");
+        toast.error(message);
         return;
       }
       if (!editingSubscription && linkingGroup && result.data) {
-        await linkExpensesToSubscriptionAction(
+        const linked = await linkExpensesToSubscriptionAction(
           result.data.id,
           linkingGroup.charges.map((charge) => charge.id),
         );
+        if (linked.error) {
+          toast.error(frontendError(linked.error, t, "requestFailedGeneric"));
+          closeForm();
+          void reload();
+          return;
+        }
       }
-      showToast(t(editingSubscription ? "subscriptionUpdated" : "subscriptionCreated"));
+      toast.success(t(editingSubscription ? "subscriptionUpdated" : "subscriptionCreated"));
       closeForm();
       void reload();
     } catch {
       // A thrown server action (network drop, unserializable response) must not leave the modal silently stuck.
       const message = t("requestFailedGeneric");
       setFormError(message);
-      showToast(message, "error");
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -517,32 +519,46 @@ export function SubscriptionsView() {
 
   const pauseSubscription = async (id: string) => {
     setBusyId(id);
-    const result = await deactivateSubscriptionAction(id);
-    setBusyId(undefined);
-    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
-    else void reload();
+    try {
+      const result = await deactivateSubscriptionAction(id);
+      if (!notifyResult(toast, t, result, { success: "subscriptionPaused" })) {
+        setError(frontendError(result.error, t, "requestFailedGeneric"));
+      } else void reload();
+    } catch {
+      toast.error(t("requestFailedGeneric"));
+    } finally {
+      setBusyId(undefined);
+    }
   };
 
   const resumeSubscription = async (id: string) => {
     setBusyId(id);
-    const result = await updateSubscriptionAction(id, { isActive: true });
-    setBusyId(undefined);
-    if (result.error) setError(frontendError(result.error, t, "requestFailedGeneric"));
-    else void reload();
+    try {
+      const result = await updateSubscriptionAction(id, { isActive: true });
+      if (!notifyResult(toast, t, result, { success: "subscriptionReactivated" })) {
+        setError(frontendError(result.error, t, "requestFailedGeneric"));
+      } else void reload();
+    } catch {
+      toast.error(t("requestFailedGeneric"));
+    } finally {
+      setBusyId(undefined);
+    }
   };
 
   const confirmDeleteSubscription = async () => {
     if (!deleteTarget) return;
     setDeletingSubscription(true);
-    const result = await deleteSubscriptionAction(deleteTarget.id);
-    setDeletingSubscription(false);
-    if (result.error) {
-      setError(frontendError(result.error, t, "requestFailedGeneric"));
+    try {
+      const result = await deleteSubscriptionAction(deleteTarget.id);
+      if (!notifyResult(toast, t, result, { success: "subscriptionDeleted" })) {
+        setError(frontendError(result.error, t, "requestFailedGeneric"));
+      } else void reload();
+    } catch {
+      toast.error(t("requestFailedGeneric"));
+    } finally {
+      setDeletingSubscription(false);
       setDeleteTarget(undefined);
-      return;
     }
-    setDeleteTarget(undefined);
-    void reload();
   };
 
   // Backend already returns subscriptions ordered by nextPaymentDate
@@ -965,7 +981,6 @@ export function SubscriptionsView() {
         confirmVariant="danger"
         loading={deletingSubscription}
       />
-      {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
 }

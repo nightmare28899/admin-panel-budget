@@ -3,17 +3,17 @@ import { processStatementImportAction } from "@/lib/userActions";
 import { useSessionRedirect } from "./useSessionRedirect";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { frontendError } from "@/i18n/errors";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export function useStatementRetry({
   onRetried,
   setError,
-  setNotice,
 }: {
   onRetried: () => void | Promise<void>;
   setError: (message?: string) => void;
-  setNotice: (message?: string) => void;
 }) {
   const { t } = useLocale();
+  const toast = useToast();
   const redirectIfExpired = useSessionRedirect();
   const [processingId, setProcessingId] = useState<string>();
 
@@ -21,32 +21,36 @@ export function useStatementRetry({
     async (id: string) => {
       setProcessingId(id);
       setError(undefined);
-      setNotice(undefined);
-      const result = await processStatementImportAction(id);
-      setProcessingId(undefined);
+      try {
+        const result = await processStatementImportAction(id);
 
-      if (redirectIfExpired(result.sessionExpired)) return;
-      if (result.error || !result.data) {
-        setError(frontendError(result.error, t, "statementProcessFailed"));
-        return;
-      }
+        if (redirectIfExpired(result.sessionExpired)) return;
+        if (result.error || !result.data) {
+          const message = frontendError(result.error, t, "statementProcessFailed");
+          setError(message);
+          toast.error(message);
+          return;
+        }
 
-      await onRetried();
-      if (result.data.status === "FAILED") {
-        setError(
-          result.data.failureMessage ||
-            result.data.failureCode ||
-            t("statementProcessFailed"),
-        );
-      } else {
-        setNotice(
-          result.data.status === "NEEDS_REVIEW"
-            ? t("statementReady")
-            : t("statementProcessingComplete"),
-        );
+        await onRetried();
+        if (result.data.status === "FAILED") {
+          const message = result.data.failureMessage || result.data.failureCode || t("statementProcessFailed");
+          setError(message);
+          toast.error(message);
+        } else {
+          toast.success(
+            result.data.status === "NEEDS_REVIEW" ? t("statementReady") : t("statementProcessingComplete"),
+          );
+        }
+      } catch (err) {
+        const message = frontendError(err instanceof Error ? err.message : undefined, t, "statementProcessFailed");
+        setError(message);
+        toast.error(message);
+      } finally {
+        setProcessingId(undefined);
       }
     },
-    [onRetried, redirectIfExpired, setError, setNotice, t],
+    [onRetried, redirectIfExpired, setError, toast, t],
   );
 
   return { processingId, retry };

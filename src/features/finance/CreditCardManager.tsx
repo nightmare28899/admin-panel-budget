@@ -145,26 +145,35 @@ export function CreditCardManager({
 
   const submit = async (values: CreditCardWritePayload) => {
     setSaving(true);
-    if (editing) await onUpdate(editing.id, values);
-    else await onCreate(values);
-    setSaving(false);
-    closeModal();
+    try {
+      if (editing) await onUpdate(editing.id, values);
+      else await onCreate(values);
+    } finally {
+      setSaving(false);
+      closeModal();
+    }
   };
 
   const confirmDeactivate = async () => {
     if (!deactivateTarget) return;
     setDeactivating(true);
-    await onDeactivate(deactivateTarget.id);
-    setDeactivating(false);
-    setDeactivateTarget(undefined);
+    try {
+      await onDeactivate(deactivateTarget.id);
+    } finally {
+      setDeactivating(false);
+      setDeactivateTarget(undefined);
+    }
   };
 
   const confirmDeletePermanently = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    await onDeletePermanently(deleteTarget.id);
-    setDeleting(false);
-    setDeleteTarget(undefined);
+    try {
+      await onDeletePermanently(deleteTarget.id);
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(undefined);
+    }
   };
 
   const sectionTitle: Record<FilterTab, MessageKey> = {

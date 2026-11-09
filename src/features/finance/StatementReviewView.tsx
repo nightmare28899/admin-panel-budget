@@ -4,6 +4,7 @@ import { Input, InputNumber, Select, Table, type TableColumnsType, type TablePro
 import { cloneElement, useCallback, useEffect, useMemo, useRef, useState, type AriaAttributes, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/ToastProvider";
 import { TableSkeleton } from "@/components/ui/ContentSkeleton";
 import styles from "./StatementReviewTable.module.css";
 import { MarkStatementPaidModal } from "./MarkStatementPaidModal";
@@ -14,7 +15,6 @@ import {
   STATEMENT_BACKDROP_CLASS,
   STATEMENT_ERROR_BANNER_CLASS,
   STATEMENT_FIELD_SCOPE,
-  STATEMENT_NOTICE_BANNER_CLASS,
   StatementBadge,
   StatementButton,
   StatementCountChip,
@@ -136,6 +136,7 @@ export function StatementReviewView({
 }) {
   const router = useRouter();
   const { t, formatDate, formatNumber } = useLocale();
+  const toast = useToast();
   const translationRef = useRef(t);
   useEffect(() => {
     translationRef.current = t;
@@ -187,7 +188,11 @@ export function StatementReviewView({
   const [revertOpen, setRevertOpen] = useState(false);
   const [reloadConfirmOpen, setReloadConfirmOpen] = useState(false);
   const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
+  // Mutation failures keep the inline banner and also raise a toast.
+  const fail = (message: string) => {
+    setError(message);
+    toast.error(message);
+  };
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
   const [rowFilter, setRowFilter] = useState<StatementRowFilter>("ALL");
   const [statementPage, setStatementPage] = useState(1);
@@ -198,7 +203,6 @@ export function StatementReviewView({
   const load = useCallback(async () => {
     setLoading(true);
     setError(undefined);
-    setNotice(undefined);
     setSelectedRowIds([]);
     setBulkCategoryId(undefined);
     setRevealedMerchantIds(new Set());
@@ -240,7 +244,7 @@ export function StatementReviewView({
 
   const patchRow = (id: string, patch: Omit<UpdateStatementRowPayload, "id">) => {
     if (wouldExceedDraftLimit([id])) {
-      setError(t("saveMaxRows"));
+      fail(t("saveMaxRows"));
       return;
     }
 
@@ -248,7 +252,6 @@ export function StatementReviewView({
       ...current,
       [id]: { ...current[id], ...patch, id },
     }));
-    setNotice(undefined);
   };
 
   const rows = useMemo(
@@ -338,111 +341,131 @@ export function StatementReviewView({
   const saveRows = async () => {
     if (!statementImport || changedRows.length === 0) return;
     if (changedRows.length > MAX_CHANGED_STATEMENT_ROWS) {
-      setError(t("saveMaxRows"));
+      fail(t("saveMaxRows"));
       return;
     }
     if (invalidIncludedRows.length > 0) {
-      setError(t("includedExpenseRequirements"));
+      fail(t("includedExpenseRequirements"));
       return;
     }
     if (adjustedRowsMissingReason.length > 0) {
-      setError(t("adjustmentReasonsMissing", { count: formatNumber(adjustedRowsMissingReason.length) }));
+      fail(t("adjustmentReasonsMissing", { count: formatNumber(adjustedRowsMissingReason.length) }));
       return;
     }
 
     setSaving(true);
     setError(undefined);
-    const result = await updateStatementRowsAction(statementImport.id, {
-      version: statementImport.version,
-      rows: changedRows,
-    });
-    setSaving(false);
+    try {
+      const result = await updateStatementRowsAction(statementImport.id, {
+        version: statementImport.version,
+        rows: changedRows,
+      });
 
-    if (result.sessionExpired) {
-      router.push("/user-login");
-      return;
-    }
-    if (result.error || !result.data) {
-      setError(frontendError(result.error, t, "reviewedRowsSaveFailed"));
-      return;
-    }
+      if (result.sessionExpired) {
+        router.push("/user-login");
+        return;
+      }
+      if (result.error || !result.data) {
+        fail(frontendError(result.error, t, "reviewedRowsSaveFailed"));
+        return;
+      }
 
-    setStatementImport(result.data);
-    setDrafts({});
-    setSelectedRowIds([]);
-    setNotice(t("reviewSaved"));
+      setStatementImport(result.data);
+      setDrafts({});
+      setSelectedRowIds([]);
+      toast.success(t("reviewSaved"));
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "reviewedRowsSaveFailed"));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const confirmImport = async () => {
     if (!statementImport || !canConfirm) return;
     setConfirming(true);
     setError(undefined);
-    const result = await confirmStatementImportAction(statementImport.id, {
-      version: statementImport.version,
-    });
-    setConfirming(false);
-    setConfirmOpen(false);
+    try {
+      const result = await confirmStatementImportAction(statementImport.id, {
+        version: statementImport.version,
+      });
 
-    if (result.sessionExpired) {
-      router.push("/user-login");
-      return;
-    }
-    if (result.error || !result.data) {
-      setError(frontendError(result.error, t, "confirmImportFailed"));
-      return;
-    }
+      if (result.sessionExpired) {
+        router.push("/user-login");
+        return;
+      }
+      if (result.error || !result.data) {
+        fail(frontendError(result.error, t, "confirmImportFailed"));
+        return;
+      }
 
-    setStatementImport(result.data.import);
-    setSelectedRowIds([]);
-    setRevealedMerchantIds(new Set());
-    setNotice(t("expensesCreated", { count: formatNumber(result.data.createdExpenseCount), expenses: t(result.data.createdExpenseCount === 1 ? "expenseWord" : "expensesWord") }));
+      setStatementImport(result.data.import);
+      setSelectedRowIds([]);
+      setRevealedMerchantIds(new Set());
+      toast.success(t("expensesCreated", { count: formatNumber(result.data.createdExpenseCount), expenses: t(result.data.createdExpenseCount === 1 ? "expenseWord" : "expensesWord") }));
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "confirmImportFailed"));
+    } finally {
+      setConfirming(false);
+      setConfirmOpen(false);
+    }
   };
 
   const revertImport = async () => {
     if (!statementImport || statementImport.status !== "CONFIRMED") return;
     setReverting(true);
     setError(undefined);
-    const result = await revertStatementImportAction(statementImport.id, {
-      version: statementImport.version,
-    });
-    setReverting(false);
-    setRevertOpen(false);
+    try {
+      const result = await revertStatementImportAction(statementImport.id, {
+        version: statementImport.version,
+      });
 
-    if (result.sessionExpired) {
-      router.push("/user-login");
-      return;
-    }
-    if (result.error || !result.data) {
-      setError(frontendError(result.error, t, "revertImportFailed"));
-      return;
-    }
+      if (result.sessionExpired) {
+        router.push("/user-login");
+        return;
+      }
+      if (result.error || !result.data) {
+        fail(frontendError(result.error, t, "revertImportFailed"));
+        return;
+      }
 
-    setStatementImport(result.data.import);
-    setSelectedRowIds([]);
-    setRevealedMerchantIds(new Set());
-    setNotice(t("expensesRemoved", { count: formatNumber(result.data.deletedExpenseCount), expenses: t(result.data.deletedExpenseCount === 1 ? "expenseWord" : "expensesWord") }));
+      setStatementImport(result.data.import);
+      setSelectedRowIds([]);
+      setRevealedMerchantIds(new Set());
+      toast.success(t("expensesRemoved", { count: formatNumber(result.data.deletedExpenseCount), expenses: t(result.data.deletedExpenseCount === 1 ? "expenseWord" : "expensesWord") }));
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "revertImportFailed"));
+    } finally {
+      setReverting(false);
+      setRevertOpen(false);
+    }
   };
 
   const resumeImport = async () => {
     if (!statementImport || statementImport.status !== "REVERTED") return;
     setResuming(true);
     setError(undefined);
-    const result = await resumeStatementImportAction(statementImport.id, {
-      version: statementImport.version,
-    });
-    setResuming(false);
+    try {
+      const result = await resumeStatementImportAction(statementImport.id, {
+        version: statementImport.version,
+      });
 
-    if (result.sessionExpired) {
-      router.push("/user-login");
-      return;
-    }
-    if (result.error || !result.data) {
-      setError(frontendError(result.error, t, "resumeImportFailed"));
-      return;
-    }
+      if (result.sessionExpired) {
+        router.push("/user-login");
+        return;
+      }
+      if (result.error || !result.data) {
+        fail(frontendError(result.error, t, "resumeImportFailed"));
+        return;
+      }
 
-    setStatementImport(result.data);
-    setNotice(t("importResumed"));
+      setStatementImport(result.data);
+      toast.success(t("importResumed"));
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "resumeImportFailed"));
+    } finally {
+      setResuming(false);
+    }
   };
 
   // Re-fetches the detail so paymentVersion and the ledger stay current.
@@ -456,7 +479,7 @@ export function StatementReviewView({
       return false;
     }
     if (detailResult.error || !detailResult.data) {
-      setError(frontendError(detailResult.error, t, "paidStatusFailed"));
+      fail(frontendError(detailResult.error, t, "paidStatusFailed"));
       return false;
     }
     const returnedRowIds = new Set(detailResult.data.rows.map((row) => row.id));
@@ -475,7 +498,7 @@ export function StatementReviewView({
     // A stale-version conflict (409) or any other failure may mean the ledger
     // moved on: refetch so the next attempt uses the current paymentVersion.
     const reloaded = await reloadStatementDetail();
-    if (reloaded) setError(frontendError(result.error, t, "paidStatusFailed"));
+    if (reloaded) fail(frontendError(result.error, t, "paidStatusFailed"));
     setPaymentLoading(false);
   };
 
@@ -483,65 +506,80 @@ export function StatementReviewView({
     if (!statementImport) return;
     setPaymentLoading(true);
     setError(undefined);
-    const result = await createStatementPaymentAction(statementImport.id, {
-      amount: value.amount,
-      currency: value.currency,
-      paidAt: value.paidAt,
-      note: value.note,
-      expectedVersion: statementImport.paymentVersion,
-      idempotencyKey: crypto.randomUUID(),
-    });
-    if (result.error || !result.data) {
-      await failPaymentWrite(result);
-      return;
+    try {
+      const result = await createStatementPaymentAction(statementImport.id, {
+        amount: value.amount,
+        currency: value.currency,
+        paidAt: value.paidAt,
+        note: value.note,
+        expectedVersion: statementImport.paymentVersion,
+        idempotencyKey: crypto.randomUUID(),
+      });
+      if (result.error || !result.data) {
+        await failPaymentWrite(result);
+        return;
+      }
+      const refreshed = await reloadStatementDetail();
+      if (!refreshed) return;
+      setPaymentModalOpen(false);
+      toast.success(t("paymentRecorded"));
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "paidStatusFailed"));
+    } finally {
+      setPaymentLoading(false);
     }
-    const refreshed = await reloadStatementDetail();
-    setPaymentLoading(false);
-    if (!refreshed) return;
-    setPaymentModalOpen(false);
-    setNotice(t("paymentRecorded"));
   };
 
   const correctPayment = async (value: StatementPaymentFormValue) => {
     if (!statementImport || !paymentToCorrect || !value.reason) return;
     setPaymentLoading(true);
     setError(undefined);
-    const result = await correctStatementPaymentAction(paymentToCorrect.id, {
-      amount: value.amount,
-      currency: value.currency,
-      paidAt: value.paidAt,
-      note: value.note,
-      reason: value.reason,
-      expectedVersion: statementImport.paymentVersion,
-      idempotencyKey: crypto.randomUUID(),
-    });
-    if (result.error || !result.data) {
-      await failPaymentWrite(result);
-      return;
+    try {
+      const result = await correctStatementPaymentAction(paymentToCorrect.id, {
+        amount: value.amount,
+        currency: value.currency,
+        paidAt: value.paidAt,
+        note: value.note,
+        reason: value.reason,
+        expectedVersion: statementImport.paymentVersion,
+        idempotencyKey: crypto.randomUUID(),
+      });
+      if (result.error || !result.data) {
+        await failPaymentWrite(result);
+        return;
+      }
+      const refreshed = await reloadStatementDetail();
+      if (!refreshed) return;
+      setPaymentToCorrect(undefined);
+      toast.success(t("paymentCorrected"));
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "paidStatusFailed"));
+    } finally {
+      setPaymentLoading(false);
     }
-    const refreshed = await reloadStatementDetail();
-    setPaymentLoading(false);
-    if (!refreshed) return;
-    setPaymentToCorrect(undefined);
-    setNotice(t("paymentCorrected"));
   };
 
   const voidPayment = async (payment: StatementPayment, reason: string) => {
     if (!statementImport) return;
     setPaymentLoading(true);
     setError(undefined);
-    const result = await voidStatementPaymentAction(payment.id, {
-      expectedVersion: statementImport.paymentVersion,
-      reason,
-    });
-    if (result.error || !result.data) {
-      await failPaymentWrite(result);
-      return;
+    try {
+      const result = await voidStatementPaymentAction(payment.id, {
+        expectedVersion: statementImport.paymentVersion,
+        reason,
+      });
+      if (result.error || !result.data) {
+        await failPaymentWrite(result);
+        return;
+      }
+      const refreshed = await reloadStatementDetail();
+      if (!refreshed) return;
+      toast.success(t("paymentVoided"));
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "paidStatusFailed"));
+    } finally {
+      setPaymentLoading(false);
     }
-    const refreshed = await reloadStatementDetail();
-    setPaymentLoading(false);
-    if (!refreshed) return;
-    setNotice(t("paymentVoided"));
   };
 
   const applyBulkPatch = (
@@ -550,7 +588,7 @@ export function StatementReviewView({
   ) => {
     const targetRowIds = targetRows.map((row) => row.id);
     if (wouldExceedDraftLimit(targetRowIds)) {
-      setError(t("bulkDraftLimitExceeded"));
+      fail(t("bulkDraftLimitExceeded"));
       return false;
     }
 
@@ -564,7 +602,6 @@ export function StatementReviewView({
     const processedRowIds = new Set(targetRowIds);
     setSelectedRowIds((current) => current.filter((id) => !processedRowIds.has(id)));
     setError(undefined);
-    setNotice(undefined);
     return true;
   };
 
@@ -575,7 +612,7 @@ export function StatementReviewView({
       if (!applyBulkPatch(selectedIncludableRows, { decision })) return;
       const skippedCount = selectedRows.length - selectedIncludableRows.length;
       if (skippedCount > 0) {
-        setNotice(t("bulkIncludeSkipped", { count: formatNumber(skippedCount) }));
+        toast.success(t("bulkIncludeSkipped", { count: formatNumber(skippedCount) }));
       }
       return;
     }
@@ -593,7 +630,7 @@ export function StatementReviewView({
 
     const skippedCount = selectedRows.length - selectedIncludableRows.length;
     if (skippedCount > 0) {
-      setNotice(t("bulkIncludeSkipped", { count: formatNumber(skippedCount) }));
+      toast.success(t("bulkIncludeSkipped", { count: formatNumber(skippedCount) }));
     }
   };
 
@@ -603,64 +640,66 @@ export function StatementReviewView({
     const plan = planStatementCategorization(rows, categories);
     const targetRowIds = Object.keys(plan.rowCategoryKeys);
     if (targetRowIds.length === 0) {
-      setNotice(t("autoCategorizeNoneNeeded"));
+      toast.success(t("autoCategorizeNoneNeeded"));
       return;
     }
     if (wouldExceedDraftLimit(targetRowIds)) {
-      setError(t("bulkDraftLimitExceeded"));
+      fail(t("bulkDraftLimitExceeded"));
       return;
     }
 
     setCategorizing(true);
     setError(undefined);
-    setNotice(undefined);
-
-    let workingCategories = categories;
-    if (plan.categoriesToCreate.length > 0) {
-      const createdCategories: Category[] = [];
-      for (const category of plan.categoriesToCreate) {
-        const result = await createCategoryAction({ name: category.name, icon: category.icon });
-        if (result.sessionExpired) {
-          router.push("/user-login");
-          return;
+    try {
+      let workingCategories = categories;
+      if (plan.categoriesToCreate.length > 0) {
+        const createdCategories: Category[] = [];
+        for (const category of plan.categoriesToCreate) {
+          const result = await createCategoryAction({ name: category.name, icon: category.icon });
+          if (result.sessionExpired) {
+            router.push("/user-login");
+            return;
+          }
+          if (result.error || !result.data) {
+            fail(frontendError(result.error, t, "requestFailedGeneric"));
+            return;
+          }
+          createdCategories.push(result.data);
         }
-        if (result.error || !result.data) {
-          setCategorizing(false);
-          setError(frontendError(result.error, t, "requestFailedGeneric"));
-          return;
-        }
-        createdCategories.push(result.data);
+        workingCategories = [...categories, ...createdCategories];
+        setCategories(workingCategories);
       }
-      workingCategories = [...categories, ...createdCategories];
-      setCategories(workingCategories);
+
+      const categoryIdByKey = new Map(workingCategories.map((category) => [categoryKeyOf(category), category.id]));
+      const rowById = new Map(rows.map((row) => [row.id, row]));
+
+      setDrafts((current) => {
+        const next = { ...current };
+        for (const [rowId, key] of Object.entries(plan.rowCategoryKeys)) {
+          const categoryId = categoryIdByKey.get(key);
+          const row = rowById.get(rowId);
+          if (!categoryId || !row) continue;
+          next[rowId] = {
+            ...next[rowId],
+            id: rowId,
+            categoryId,
+            decision: row.decision === "PENDING" ? "INCLUDE_EXPENSE" : row.decision,
+          };
+        }
+        return next;
+      });
+
+      toast.success(
+        t("autoCategorizeApplied", {
+          count: formatNumber(targetRowIds.length),
+          created: formatNumber(plan.categoriesToCreate.length),
+        }),
+      );
+    } catch (err) {
+      fail(frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric"));
+    } finally {
+      setCategorizing(false);
     }
-
-    const categoryIdByKey = new Map(workingCategories.map((category) => [categoryKeyOf(category), category.id]));
-    const rowById = new Map(rows.map((row) => [row.id, row]));
-
-    setDrafts((current) => {
-      const next = { ...current };
-      for (const [rowId, key] of Object.entries(plan.rowCategoryKeys)) {
-        const categoryId = categoryIdByKey.get(key);
-        const row = rowById.get(rowId);
-        if (!categoryId || !row) continue;
-        next[rowId] = {
-          ...next[rowId],
-          id: rowId,
-          categoryId,
-          decision: row.decision === "PENDING" ? "INCLUDE_EXPENSE" : row.decision,
-        };
-      }
-      return next;
-    });
-
-    setCategorizing(false);
-    setNotice(
-      t("autoCategorizeApplied", {
-        count: formatNumber(targetRowIds.length),
-        created: formatNumber(plan.categoriesToCreate.length),
-      }),
-    );
   };
 
   const requestReload = () => {
@@ -1016,11 +1055,6 @@ export function StatementReviewView({
       {error && (
         <div role="alert" className={`mb-4 ${STATEMENT_ERROR_BANNER_CLASS}`}>
           {error}
-        </div>
-      )}
-      {notice && (
-        <div role="status" className={`mb-4 ${STATEMENT_NOTICE_BANNER_CLASS}`}>
-          {notice}
         </div>
       )}
       {statementImport.failureMessage && (

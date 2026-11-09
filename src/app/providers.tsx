@@ -7,6 +7,7 @@ import enUS from "antd/locale/en_US";
 import esES from "antd/locale/es_ES";
 import { antdSharedTheme } from "@/lib/antdTheme";
 import { LocaleProvider, useLocale } from "@/i18n/LocaleProvider";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 import { SessionRenewalProvider } from "./SessionRenewalProvider";
 
 function LocalizedProviders({ children, queryClient }: PropsWithChildren<{ queryClient: QueryClient }>) {
@@ -15,7 +16,9 @@ function LocalizedProviders({ children, queryClient }: PropsWithChildren<{ query
   return (
     <ConfigProvider theme={antdSharedTheme} locale={locale === "es" ? esES : enUS}>
       <QueryClientProvider client={queryClient}>
-        <SessionRenewalProvider>{children}</SessionRenewalProvider>
+        <ToastProvider>
+          <SessionRenewalProvider>{children}</SessionRenewalProvider>
+        </ToastProvider>
       </QueryClientProvider>
     </ConfigProvider>
   );

@@ -1231,6 +1231,17 @@ const englishMessages = {
   nutOptionNumber: "Option {number}: {title}",
   nutClinicalIndication: "Clinical indication:",
   nutFreeTag: "Free",
+  subscriptionPaused: "Subscription paused",
+  subscriptionReactivated: "Subscription reactivated",
+  subscriptionDeleted: "Subscription deleted",
+  cardCreated: "Card created",
+  cardUpdated: "Card updated",
+  cardDeactivated: "Card deactivated",
+  cardReactivated: "Card reactivated",
+  cardOrderSaved: "Card order saved",
+  purchaseAcceptedAsExpense: "Purchase registered as an expense",
+  purchaseRegisteredAsPayment: "Purchase registered as a card payment",
+  purchaseDiscarded: "Purchase discarded",
 } as const;
 
 export type MessageKey = keyof typeof englishMessages;
@@ -1872,6 +1883,17 @@ const spanishMessages: Record<MessageKey, string> = {
   nutOptionNumber: "Opción {number}: {title}",
   nutClinicalIndication: "Indicación clínica:",
   nutFreeTag: "Libre",
+  subscriptionPaused: "Suscripción pausada",
+  subscriptionReactivated: "Suscripción reactivada",
+  subscriptionDeleted: "Suscripción eliminada",
+  cardCreated: "Tarjeta creada",
+  cardUpdated: "Tarjeta actualizada",
+  cardDeactivated: "Tarjeta desactivada",
+  cardReactivated: "Tarjeta reactivada",
+  cardOrderSaved: "Orden de tarjetas guardado",
+  purchaseAcceptedAsExpense: "Compra registrada como gasto",
+  purchaseRegisteredAsPayment: "Compra registrada como pago de tarjeta",
+  purchaseDiscarded: "Compra descartada",
 };
 
 export const messages = { en: englishMessages, es: spanishMessages };

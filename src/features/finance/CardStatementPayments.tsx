@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
 import { frontendError } from "@/i18n/errors";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   correctStatementPaymentAction,
   createStatementPaymentAction,
@@ -46,6 +47,7 @@ export function CardStatementPayments({
   onChanged: (notice?: string) => void | Promise<void>;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const { t, formatNumber, formatDate } = useLocale();
   const summary = card.statementSummary;
   const statementId = summary.statementImportId;
@@ -113,7 +115,9 @@ export function CardStatementPayments({
       return;
     }
     const info = mapStatementPaymentError(result.error);
-    setModalError(info.key ? t(info.key) : frontendError(result.error, t, "paidStatusFailed"));
+    const message = info.key ? t(info.key) : frontendError(result.error, t, "paidStatusFailed");
+    setModalError(message);
+    toast.error(message);
     if (info.refetch) {
       // The ledger may have moved on: refresh the version and the overview.
       await loadDetail();
@@ -140,71 +144,89 @@ export function CardStatementPayments({
   const recordPayment = async (value: StatementPaymentFormValue) => {
     if (!detail) return;
     setWriting(true);
-    setModalError(undefined);
-    const result = await createStatementPaymentAction(statementId, {
-      amount: value.amount,
-      currency: value.currency,
-      paidAt: value.paidAt,
-      note: value.note,
-      expectedVersion: detail.paymentVersion,
-      idempotencyKey: crypto.randomUUID(),
-    });
-    if (result.error || !result.data) {
-      await showPaymentError(result);
+    try {
+      setModalError(undefined);
+      const result = await createStatementPaymentAction(statementId, {
+        amount: value.amount,
+        currency: value.currency,
+        paidAt: value.paidAt,
+        note: value.note,
+        expectedVersion: detail.paymentVersion,
+        idempotencyKey: crypto.randomUUID(),
+      });
+      if (result.error || !result.data) {
+        await showPaymentError(result);
+        return;
+      }
+      applyMutation(result.data);
+      setPayOpen(false);
+      await onChanged(
+        t("cardAbonoRecorded", {
+          amount: money(value.amount, value.currency),
+          remaining: money(result.data.summary.remainingStatement ?? 0, value.currency),
+        }),
+      );
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "paidStatusFailed");
+      setModalError(message);
+      toast.error(message);
+    } finally {
       setWriting(false);
-      return;
     }
-    applyMutation(result.data);
-    setWriting(false);
-    setPayOpen(false);
-    await onChanged(
-      t("cardAbonoRecorded", {
-        amount: money(value.amount, value.currency),
-        remaining: money(result.data.summary.remainingStatement ?? 0, value.currency),
-      }),
-    );
   };
 
   const correctPayment = async (value: StatementPaymentFormValue) => {
     if (!detail || !paymentToCorrect || !value.reason) return;
     setWriting(true);
-    setModalError(undefined);
-    const result = await correctStatementPaymentAction(paymentToCorrect.id, {
-      amount: value.amount,
-      currency: value.currency,
-      paidAt: value.paidAt,
-      note: value.note,
-      reason: value.reason,
-      expectedVersion: detail.paymentVersion,
-      idempotencyKey: crypto.randomUUID(),
-    });
-    if (result.error || !result.data) {
-      await showPaymentError(result);
+    try {
+      setModalError(undefined);
+      const result = await correctStatementPaymentAction(paymentToCorrect.id, {
+        amount: value.amount,
+        currency: value.currency,
+        paidAt: value.paidAt,
+        note: value.note,
+        reason: value.reason,
+        expectedVersion: detail.paymentVersion,
+        idempotencyKey: crypto.randomUUID(),
+      });
+      if (result.error || !result.data) {
+        await showPaymentError(result);
+        return;
+      }
+      applyMutation(result.data);
+      setPaymentToCorrect(undefined);
+      await onChanged(t("paymentCorrected"));
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "paidStatusFailed");
+      setModalError(message);
+      toast.error(message);
+    } finally {
       setWriting(false);
-      return;
     }
-    applyMutation(result.data);
-    setWriting(false);
-    setPaymentToCorrect(undefined);
-    await onChanged(t("paymentCorrected"));
   };
 
   const voidPayment = async (payment: StatementPayment, reason: string) => {
     if (!detail) return;
     setWriting(true);
-    setModalError(undefined);
-    const result = await voidStatementPaymentAction(payment.id, {
-      expectedVersion: detail.paymentVersion,
-      reason,
-    });
-    if (result.error || !result.data) {
-      await showPaymentError(result);
+    try {
+      setModalError(undefined);
+      const result = await voidStatementPaymentAction(payment.id, {
+        expectedVersion: detail.paymentVersion,
+        reason,
+      });
+      if (result.error || !result.data) {
+        await showPaymentError(result);
+        return;
+      }
+      applyMutation(result.data);
+      await onChanged(t("paymentVoided"));
+    } catch (err) {
+      const message = frontendError(err instanceof Error ? err.message : undefined, t, "paidStatusFailed");
+      setModalError(message);
+      toast.error(message);
+    } finally {
       setWriting(false);
-      return;
     }
-    applyMutation(result.data);
-    setWriting(false);
-    await onChanged(t("paymentVoided"));
   };
 
   const paymentSummary = detail?.paymentSummary;

@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { confirmDetectedPurchaseAction, confirmDetectedPurchaseAsPaymentAction, discardDetectedPurchaseAction, getCategoriesAction } from "@/lib/userActions";
 import { frontendError } from "@/i18n/errors";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { useToast } from "@/components/ui/ToastProvider";
 import type { Category, ExpenseWritePayload } from "../finance.types";
 import { cardPaymentErrorKey, createPurchaseMutationGuard, DETECTED_PURCHASES_CHANGED_EVENT } from "../utils/detected-purchases";
 import { CREDIT_CARDS_CHANGED_EVENT } from "../creditCardsEvents";
@@ -12,6 +13,7 @@ import { useFinanceContext } from "../FinanceContext";
 /** Owns approval mutations and the reference data required by the expense form. */
 export function usePurchaseApproval() {
   const { t } = useLocale();
+  const toast = useToast();
   const redirectIfExpired = useSessionRedirect();
   const [categories, setCategories] = useState<Category[]>([]);
   const [referencesLoading, setReferencesLoading] = useState(false);
@@ -19,6 +21,10 @@ export function usePurchaseApproval() {
   const [error, setError] = useState<string>();
   const [errorCode, setErrorCode] = useState<string>();
   const [saving, setSaving] = useState(false);
+  const fail = (message: string) => {
+    setError(message);
+    toast.error(message);
+  };
   const [runExclusive] = useState(createPurchaseMutationGuard);
 
   // Cards come from FinanceContext; categories are loaded here (no duplicate endpoint).
@@ -50,10 +56,11 @@ export function usePurchaseApproval() {
     try {
       const result = expense ? await confirmDetectedPurchaseAction(id, expense) : await discardDetectedPurchaseAction(id);
       if (redirectIfExpired(result.sessionExpired)) return false;
-      if (result.error || !result.data) { window.dispatchEvent(new Event(DETECTED_PURCHASES_CHANGED_EVENT)); setError(frontendError(result.error, t, "requestFailedGeneric")); return false; }
+      if (result.error || !result.data) { window.dispatchEvent(new Event(DETECTED_PURCHASES_CHANGED_EVENT)); fail(frontendError(result.error, t, "requestFailedGeneric")); return false; }
       window.dispatchEvent(new Event(DETECTED_PURCHASES_CHANGED_EVENT));
+      toast.success(t(expense ? "purchaseAcceptedAsExpense" : "purchaseDiscarded"));
       return true;
-    } catch { setError(t("requestFailedGeneric")); return false; }
+    } catch (err) { fail(frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric")); return false; }
     finally { setSaving(false); }
   });
   /** Converts the purchase into a card payment; refreshes the inbox and the card overview via events only. */
@@ -67,15 +74,16 @@ export function usePurchaseApproval() {
       if (result.error || !result.data) {
         const key = cardPaymentErrorKey(result.errorCode);
         setErrorCode(result.errorCode);
-        setError(key ? t(key) : frontendError(result.error, t, "requestFailedGeneric"));
+        fail(key ? t(key) : frontendError(result.error, t, "requestFailedGeneric"));
         // Typed errors leave the purchase pending, so no refetch; unknown ones may mean another device resolved it.
         if (!key) window.dispatchEvent(new Event(DETECTED_PURCHASES_CHANGED_EVENT));
         return false;
       }
       window.dispatchEvent(new Event(DETECTED_PURCHASES_CHANGED_EVENT));
       window.dispatchEvent(new Event(CREDIT_CARDS_CHANGED_EVENT));
+      toast.success(t("purchaseRegisteredAsPayment"));
       return true;
-    } catch { setError(t("requestFailedGeneric")); return false; }
+    } catch (err) { fail(frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric")); return false; }
     finally { setSaving(false); }
   });
   return { errorCode, mutateAsPayment, categories, cards, referencesLoading, referencesError, loadReferences, saving, error, clearError: () => { setError(undefined); setErrorCode(undefined); }, mutate };

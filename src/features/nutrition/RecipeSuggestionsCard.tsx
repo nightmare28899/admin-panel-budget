@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { useToast } from "@/components/ui/ToastProvider";
 import { saveRecipeAction } from "./nutrition.actions";
 import {
   MAX_SUGGESTION_PREFERENCES,
@@ -47,6 +48,7 @@ export function RecipeSuggestionsCard({
 }) {
   const router = useRouter();
   const { t } = useLocale();
+  const toast = useToast();
   const mealLabel = useMealLabel();
 
   const activeDiet = state.diets.find((diet) => diet.active);
@@ -111,10 +113,16 @@ export function RecipeSuggestionsCard({
       const result = await saveRecipeAction(recipe);
       if (result.success) {
         setSaved((ids) => [...ids, recipe.id]);
+        toast.success(t("nutSuggestSavedMsg"));
         router.refresh();
-      } else setError(result.error);
+      } else {
+        setError(result.error);
+        toast.error(result.error);
+      }
     } catch {
-      setError(t("nutRecipeSaveFailed"));
+      const failure = t("nutRecipeSaveFailed");
+      setError(failure);
+      toast.error(failure);
     } finally {
       setSaving("");
     }
