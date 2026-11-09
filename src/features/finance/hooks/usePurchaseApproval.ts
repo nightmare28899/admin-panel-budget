@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
-import { confirmDetectedPurchaseAction, confirmDetectedPurchaseAsPaymentAction, discardDetectedPurchaseAction, getCategoriesAction } from "@/lib/userActions";
+import { confirmDetectedPurchaseAction, confirmDetectedPurchaseAsPaymentAction, createSubscriptionAction, discardDetectedPurchaseAction, getCategoriesAction, linkExpensesToSubscriptionAction } from "@/lib/userActions";
 import { frontendError } from "@/i18n/errors";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import type { Category, ExpenseWritePayload } from "../finance.types";
-import { cardPaymentErrorKey, createPurchaseMutationGuard, DETECTED_PURCHASES_CHANGED_EVENT } from "../utils/detected-purchases";
+import { cardPaymentErrorKey, createPurchaseMutationGuard, DETECTED_PURCHASES_CHANGED_EVENT, subscriptionPurchaseExpense } from "../utils/detected-purchases";
 import { CREDIT_CARDS_CHANGED_EVENT } from "../creditCardsEvents";
-import type { ConfirmAsPaymentPayload } from "../interfaces/detected-purchases";
+import type { ConfirmAsPaymentPayload, DetectedPurchase } from "../interfaces/detected-purchases";
+import type { CreateSubscriptionPayload } from "../subscriptions.types";
 import { useSessionRedirect } from "./useSessionRedirect";
 import { useFinanceContext } from "../FinanceContext";
 
@@ -86,5 +87,49 @@ export function usePurchaseApproval() {
     } catch (err) { fail(frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric")); return false; }
     finally { setSaving(false); }
   });
-  return { errorCode, mutateAsPayment, categories, cards, referencesLoading, referencesError, loadReferences, saving, error, clearError: () => { setError(undefined); setErrorCode(undefined); }, mutate };
+  /**
+   * Registers the purchase as an expense (so it leaves the inbox), creates the subscription and links
+   * the expense to it. Resolves true when the modal should close and the inbox refresh (including the
+   * partial case where only the subscription step failed); false keeps the modal open.
+   */
+  const mutateAsSubscription = (purchase: DetectedPurchase, subscription: CreateSubscriptionPayload) => runExclusive(async () => {
+    setSaving(true);
+    setError(undefined);
+    try {
+      const expense = subscriptionPurchaseExpense(purchase, t("detectedPurchase"), subscription);
+      if (!expense) { fail(t("purchaseSubscriptionCategoryRequired")); return false; }
+      const confirmed = await confirmDetectedPurchaseAction(purchase.id, expense);
+      if (redirectIfExpired(confirmed.sessionExpired)) return false;
+      if (confirmed.error || !confirmed.data) {
+        // Nothing was created; another device may have resolved the purchase, so refresh the inbox.
+        window.dispatchEvent(new Event(DETECTED_PURCHASES_CHANGED_EVENT));
+        fail(frontendError(confirmed.error, t, "requestFailedGeneric"));
+        return false;
+      }
+      // The purchase has left the inbox from here on, whatever happens next.
+      window.dispatchEvent(new Event(DETECTED_PURCHASES_CHANGED_EVENT));
+      let created;
+      try { created = await createSubscriptionAction(subscription); }
+      catch { created = undefined; }
+      if (!created || created.error || !created.data) {
+        toast.error(t("purchaseSubscriptionNotCreated"));
+        return true;
+      }
+      const expenseId = confirmed.data.expenseId;
+      if (expenseId) {
+        let linked;
+        try { linked = await linkExpensesToSubscriptionAction(created.data.id, [expenseId]); }
+        catch { linked = undefined; }
+        if (!linked || linked.error) {
+          toast.success(t("purchaseRegisteredAsSubscription"));
+          toast.error(t("purchaseSubscriptionLinkFailed"));
+          return true;
+        }
+      }
+      toast.success(t("purchaseRegisteredAsSubscription"));
+      return true;
+    } catch (err) { fail(frontendError(err instanceof Error ? err.message : undefined, t, "requestFailedGeneric")); return false; }
+    finally { setSaving(false); }
+  });
+  return { errorCode, mutateAsPayment, mutateAsSubscription, categories, cards, referencesLoading, referencesError, loadReferences, saving, error, clearError: () => { setError(undefined); setErrorCode(undefined); }, mutate };
 }

@@ -1,5 +1,6 @@
 import type { MessageKey } from "@/i18n/messages";
 import type { ExpenseWritePayload } from "../finance.types";
+import type { CreateSubscriptionPayload } from "../subscriptions.types";
 import type { DetectedPurchase } from "../interfaces/detected-purchases";
 
 export const DETECTED_PURCHASES_CHANGED_EVENT = "finance:detected-purchases-changed";
@@ -72,4 +73,46 @@ const CARD_PAYMENT_ERROR_KEYS: Record<string, MessageKey> = {
 
 export function cardPaymentErrorKey(code: string | undefined): MessageKey | undefined {
   return code ? CARD_PAYMENT_ERROR_KEYS[code] : undefined;
+}
+
+const pad2 = (value: number) => String(value).padStart(2, "0");
+
+/** Adds calendar months to a YYYY-MM-DD day, clamping to the last day of shorter months (Jan 31 + 1 = Feb 28). */
+export function addMonthsClamped(day: string, months: number): string {
+  const [year, month, date] = day.split("-").map(Number);
+  const index = year * 12 + (month - 1) + months;
+  const targetYear = Math.floor(index / 12);
+  const targetMonth = index % 12;
+  const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
+  return `${targetYear}-${pad2(targetMonth + 1)}-${pad2(Math.min(date, lastDay))}`;
+}
+
+/** First monthly anniversary of the purchase day that is strictly after today (always computed from the original day to avoid clamping drift). */
+export function nextMonthlyPaymentDate(purchaseDay: string, today: Date): string {
+  const todayDay = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+  let months = 1;
+  let candidate = addMonthsClamped(purchaseDay, months);
+  while (candidate <= todayDay) candidate = addMonthsClamped(purchaseDay, ++months);
+  return candidate;
+}
+
+export function detectedPurchaseSubscriptionPrefill(purchase: DetectedPurchase, fallbackTitle: string, today: Date) {
+  return {
+    name: purchase.merchant || fallbackTitle,
+    cost: purchase.amountCents / 100,
+    currency: purchase.currency,
+    paymentMethod: "CREDIT_CARD",
+    nextPaymentDate: nextMonthlyPaymentDate(localDay(purchase.occurredAtMillis), today),
+  };
+}
+
+/** Expense that records the detected charge itself, using the category/card/method chosen in the subscription form. Undefined when no category was chosen (expenses require one). */
+export function subscriptionPurchaseExpense(purchase: DetectedPurchase, fallbackTitle: string, subscription: CreateSubscriptionPayload): ExpenseWritePayload | undefined {
+  if (!subscription.categoryId) return undefined;
+  return {
+    ...detectedPurchaseExpense(purchase, fallbackTitle),
+    categoryId: subscription.categoryId,
+    paymentMethod: subscription.paymentMethod,
+    ...(subscription.creditCardId ? { creditCardId: subscription.creditCardId } : {}),
+  } as ExpenseWritePayload;
 }

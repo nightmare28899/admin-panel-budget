@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cardPaymentErrorKey, createPurchaseMutationGuard, defaultPaymentCardId, detectedPurchaseExpense, detectedPurchasePaymentDefaults, looksLikeCardPayment, paymentDateToIso, pendingPurchaseQuery } from "./detected-purchases";
+import { addMonthsClamped, cardPaymentErrorKey, createPurchaseMutationGuard, defaultPaymentCardId, detectedPurchaseExpense, detectedPurchasePaymentDefaults, detectedPurchaseSubscriptionPrefill, looksLikeCardPayment, nextMonthlyPaymentDate, paymentDateToIso, pendingPurchaseQuery, subscriptionPurchaseExpense } from "./detected-purchases";
 import type { DetectedPurchase } from "../interfaces/detected-purchases";
 
 const purchase: DetectedPurchase = {
@@ -78,5 +78,42 @@ describe("card payment error mapping", () => {
     expect(cardPaymentErrorKey("CARD_NOT_FOUND")).toBe("purchasePaymentCardNotFound");
     expect(cardPaymentErrorKey("OTHER")).toBeUndefined();
     expect(cardPaymentErrorKey(undefined)).toBeUndefined();
+  });
+});
+
+describe("subscription prefill from a detected purchase", () => {
+  const today = new Date(2026, 10, 9);
+  it("clamps to the last day of shorter months", () => {
+    expect(addMonthsClamped("2026-01-31", 1)).toBe("2026-02-28");
+    expect(addMonthsClamped("2028-01-31", 1)).toBe("2028-02-29");
+    expect(addMonthsClamped("2026-12-15", 1)).toBe("2027-01-15");
+  });
+  it("uses purchase date plus one month when it is in the future", () => {
+    expect(nextMonthlyPaymentDate("2026-10-18", new Date(2026, 9, 18))).toBe("2026-11-18");
+  });
+  it("rolls past dates forward month by month until strictly after today", () => {
+    expect(nextMonthlyPaymentDate("2026-01-31", today)).toBe("2026-11-30");
+    expect(nextMonthlyPaymentDate("2026-10-09", today)).toBe("2026-12-09");
+    expect(nextMonthlyPaymentDate("2026-10-10", today)).toBe("2026-11-10");
+  });
+  it("maps merchant, amount and currency", () => {
+    expect(detectedPurchaseSubscriptionPrefill(purchase, "Detected purchase", today)).toEqual({
+      name: "Market", cost: 123.45, currency: "MXN", paymentMethod: "CREDIT_CARD", nextPaymentDate: "2026-11-18",
+    });
+  });
+  it("falls back to the translated title and keeps cents exact", () => {
+    expect(detectedPurchaseSubscriptionPrefill({ ...purchase, merchant: null, amountCents: 1 }, "Compra detectada", today)).toMatchObject({ name: "Compra detectada", cost: 0.01 });
+  });
+});
+
+describe("expense recorded for a subscription conversion", () => {
+  const payload = { name: "Market", cost: 99, paymentMethod: "CREDIT_CARD", creditCardId: "card-1", currency: "MXN", billingCycle: "MONTHLY" as const, nextPaymentDate: "2026-11-18T12:00:00.000Z", reminderDays: 3, categoryId: "cat-1" };
+  it("keeps the detected charge and applies chosen category, card and method", () => {
+    expect(subscriptionPurchaseExpense(purchase, "Detected purchase", { ...payload, paymentMethod: "DEBIT_CARD" })).toEqual({
+      title: "Market", merchantName: "Market", cost: "123.45", currency: "MXN", date: "2026-10-18", paymentMethod: "DEBIT_CARD", categoryId: "cat-1", creditCardId: "card-1",
+    });
+  });
+  it("is undefined without a category because expenses require one", () => {
+    expect(subscriptionPurchaseExpense(purchase, "x", { ...payload, categoryId: null })).toBeUndefined();
   });
 });
