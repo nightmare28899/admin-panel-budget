@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Empty, List, Tag } from "antd";
+import { Alert, Empty, List, Segmented, Tag } from "antd";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -27,8 +27,8 @@ export function PendingExpensesView() {
   const [selected, setSelected] = useState<DetectedPurchase>();
   const [discarding, setDiscarding] = useState<DetectedPurchase>();
   const [paying, setPaying] = useState<DetectedPurchase>();
-  const [subscribing, setSubscribing] = useState<DetectedPurchase>();
-  const inbox = usePendingPurchases({ page, limit: pageSize, paused: Boolean(selected || discarding || paying || subscribing) });
+  const [kind, setKind] = useState<"expense" | "subscription">("expense");
+  const inbox = usePendingPurchases({ page, limit: pageSize, paused: Boolean(selected || discarding || paying) });
   const approval = usePurchaseApproval();
   const totalPages = inbox.data?.pagination.totalPages;
   useEffect(() => {
@@ -37,12 +37,12 @@ export function PendingExpensesView() {
       return () => window.clearTimeout(timer);
     }
   }, [page, totalPages]);
-  const close = () => { if (!approval.saving) { setSelected(undefined); setDiscarding(undefined); setPaying(undefined); setSubscribing(undefined); approval.clearError(); } };
+  const close = () => { if (!approval.saving) { setSelected(undefined); setDiscarding(undefined); setPaying(undefined); approval.clearError(); } };
   const afterMutation = async () => {
     setSelected(undefined);
     setDiscarding(undefined);
     setPaying(undefined);
-    setSubscribing(undefined);
+   
     approval.clearError();
     // approval.mutate already dispatched DETECTED_PURCHASES_CHANGED, which refreshes the list
     // (and publishes the sidebar count); refresh() is a no-op while that request is in flight.
@@ -78,9 +78,9 @@ export function PendingExpensesView() {
             <div className="flex flex-wrap gap-2">{(() => {
               const payFirst = looksLikeCardPayment(purchase.merchant);
               const pay = <Button key="pay" variant={payFirst ? "primary" : "outline"} disabled={approval.saving} onClick={() => { approval.clearError(); setPaying(purchase); }}>{t("registerAsCardPayment")}</Button>;
-              const accept = <Button key="accept" variant={payFirst ? "outline" : "primary"} disabled={approval.saving} onClick={() => { approval.clearError(); setSelected(purchase); void approval.loadReferences(); }}>{t("acceptPurchase")}</Button>;
+              const accept = <Button key="accept" variant={payFirst ? "outline" : "primary"} disabled={approval.saving} onClick={() => { approval.clearError(); setSelected(purchase); setKind("expense"); void approval.loadReferences(); }}>{t("acceptPurchase")}</Button>;
               return payFirst ? [pay, accept] : [accept, pay];
-            })()}<Button variant="outline" disabled={approval.saving} onClick={() => { approval.clearError(); setSubscribing(purchase); void approval.loadReferences(); }}>{t("registerAsSubscription")}</Button><Button variant="outline" disabled={approval.saving} onClick={() => { approval.clearError(); setDiscarding(purchase); }}>{t("discardPurchase")}</Button></div>
+            })()}<Button variant="outline" disabled={approval.saving} onClick={() => { approval.clearError(); setSelected(purchase); setKind("subscription"); void approval.loadReferences(); }}>{t("registerAsSubscription")}</Button><Button variant="outline" disabled={approval.saving} onClick={() => { approval.clearError(); setDiscarding(purchase); }}>{t("discardPurchase")}</Button></div>
           </div>
           {(purchase.possibleDuplicateOf || purchase.mayBeRegistered) && <div className="mt-4"><Alert type="warning" showIcon title={t("purchaseDuplicateWarning")} /></div>}
         </div>
@@ -90,17 +90,12 @@ export function PendingExpensesView() {
     <Modal open={Boolean(selected)} onClose={close} title={t("acceptPurchase")} maxWidth="max-w-2xl">
       <div className="max-h-[75vh] overflow-y-auto pr-1">
         {(selected?.possibleDuplicateOf || selected?.mayBeRegistered) && <div className="mb-4"><Alert type="warning" showIcon title={t("purchaseDuplicateWarning")} /></div>}
-        {selected && (approval.referencesLoading ? <FormSkeleton /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : <ExpenseForm key={selected.id} categories={approval.categories} creditCards={approval.cards} initialValues={detectedPurchaseExpense(selected, t("detectedPurchase"))} hideReceipt submitLabel={t("acceptAndCreateExpense")} loading={approval.saving} error={approval.error} onCancel={close} onSubmit={async (expense) => { if (await approval.mutate(selected.id, expense)) await afterMutation(); }} />)}
+        {selected && <Segmented block className="mb-4" value={kind} onChange={(value) => { approval.clearError(); setKind(value as "expense" | "subscription"); }} disabled={approval.saving} options={[{ value: "expense", label: t("purchaseKindExpense") }, { value: "subscription", label: t("purchaseKindSubscription") }]} />}
+        {selected && (approval.referencesLoading ? <FormSkeleton /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : kind === "subscription" ? <SubscriptionForm key={selected.id} prefill={detectedPurchaseSubscriptionPrefill(selected, t("detectedPurchase"), new Date())} categories={approval.categories} creditCards={approval.cards} creditCardsLoading={false} loading={approval.saving} submitError={approval.error} onCancel={close} onSubmit={async (payload) => { if (await approval.mutateAsSubscription(selected, payload)) await afterMutation(); }} /> : <ExpenseForm key={selected.id} categories={approval.categories} creditCards={approval.cards} initialValues={detectedPurchaseExpense(selected, t("detectedPurchase"))} hideReceipt submitLabel={t("acceptAndCreateExpense")} loading={approval.saving} error={approval.error} onCancel={close} onSubmit={async (expense) => { if (await approval.mutate(selected.id, expense)) await afterMutation(); }} />)}
       </div>
     </Modal>
     <Modal open={Boolean(paying)} onClose={close} title={t("registerAsCardPayment")} maxWidth="max-w-lg">
       {paying && <PurchaseCardPaymentForm key={paying.id} purchase={paying} cards={approval.cards} loading={approval.saving} error={approval.error} errorCode={approval.errorCode} onCancel={close} onSubmit={async (payload) => { if (await approval.mutateAsPayment(paying.id, payload)) await afterMutation(); }} />}
-    </Modal>
-    <Modal open={Boolean(subscribing)} onClose={close} title={t("registerAsSubscription")} maxWidth="max-w-xl">
-      <div className="max-h-[75vh] overflow-y-auto pr-1">
-        {(subscribing?.possibleDuplicateOf || subscribing?.mayBeRegistered) && <div className="mb-4"><Alert type="warning" showIcon title={t("purchaseDuplicateWarning")} /></div>}
-        {subscribing && (approval.referencesLoading ? <FormSkeleton /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : <SubscriptionForm key={subscribing.id} prefill={detectedPurchaseSubscriptionPrefill(subscribing, t("detectedPurchase"), new Date())} categories={approval.categories} creditCards={approval.cards} creditCardsLoading={false} loading={approval.saving} submitError={approval.error} onCancel={close} onSubmit={async (payload) => { if (await approval.mutateAsSubscription(subscribing, payload)) await afterMutation(); }} />)}
-      </div>
     </Modal>
     <ConfirmModal open={Boolean(discarding)} onClose={close} onConfirm={async () => { if (discarding && await approval.mutate(discarding.id)) await afterMutation(); }} title={t("discardPurchase")} description={t("discardPurchaseDescription")} confirmLabel={t("discardPurchase")} loading={approval.saving}>
       {approval.error && <Alert type="error" title={approval.error} />}
