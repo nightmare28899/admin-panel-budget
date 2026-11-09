@@ -30,6 +30,7 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/Button";
+import { Toast, type ToastType } from "@/components/ui/Toast";
 import { CreditCardsSkeleton } from "@/components/ui/ContentSkeleton";
 import { categoryLabel, categoryTokens } from "./categoryVisuals";
 import { CreditCardPicker } from "./CreditCardPicker";
@@ -252,14 +253,6 @@ function SubscriptionForm({
       }
       onFinish={submit}
     >
-      {displayedError && (
-        <div
-          role="alert"
-          className="mb-4 rounded-lg border border-[var(--rose)]/30 bg-[var(--rose)]/10 px-3 py-2 text-sm text-[var(--rose)]"
-        >
-          {displayedError}
-        </div>
-      )}
       <Form.Item name="name" label={t("name")} rules={[{ required: true, whitespace: true }]}>
         <Input maxLength={120} placeholder={t("subscriptionNamePlaceholder")} />
       </Form.Item>
@@ -329,6 +322,14 @@ function SubscriptionForm({
           )}
         </div>
       )}
+      {displayedError && (
+        <div
+          role="alert"
+          className="mt-4 mb-3 rounded-lg border border-[var(--rose)]/30 bg-[var(--rose)]/10 px-3 py-2 text-sm text-[var(--rose)]"
+        >
+          {displayedError}
+        </div>
+      )}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" onClick={onCancel}>
           {t("cancel")}
@@ -368,6 +369,7 @@ export function SubscriptionsView() {
   const [editingSubscription, setEditingSubscription] = useState<Subscription>();
   const [formError, setFormError] = useState<string>();
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [busyId, setBusyId] = useState<string>();
   const [deleteTarget, setDeleteTarget] = useState<Subscription>();
   const [deletingSubscription, setDeletingSubscription] = useState(false);
@@ -476,24 +478,41 @@ export function SubscriptionsView() {
     setFormOpen(true);
   };
 
+  const showToast = (message: string, type: ToastType = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   const saveSubscription = async (payload: CreateSubscriptionPayload) => {
     setSaving(true);
-    const result = editingSubscription
-      ? await updateSubscriptionAction(editingSubscription.id, payload)
-      : await createSubscriptionAction(payload);
-    setSaving(false);
-    if (result.error) {
-      setFormError(frontendError(result.error, t, "requestFailedGeneric"));
-      return;
+    setFormError(undefined);
+    try {
+      const result = editingSubscription
+        ? await updateSubscriptionAction(editingSubscription.id, payload)
+        : await createSubscriptionAction(payload);
+      if (result.error) {
+        const message = frontendError(result.error, t, "requestFailedGeneric");
+        setFormError(message);
+        showToast(message, "error");
+        return;
+      }
+      if (!editingSubscription && linkingGroup && result.data) {
+        await linkExpensesToSubscriptionAction(
+          result.data.id,
+          linkingGroup.charges.map((charge) => charge.id),
+        );
+      }
+      showToast(t(editingSubscription ? "subscriptionUpdated" : "subscriptionCreated"));
+      closeForm();
+      void reload();
+    } catch {
+      // A thrown server action (network drop, unserializable response) must not leave the modal silently stuck.
+      const message = t("requestFailedGeneric");
+      setFormError(message);
+      showToast(message, "error");
+    } finally {
+      setSaving(false);
     }
-    if (!editingSubscription && linkingGroup && result.data) {
-      await linkExpensesToSubscriptionAction(
-        result.data.id,
-        linkingGroup.charges.map((charge) => charge.id),
-      );
-    }
-    closeForm();
-    void reload();
   };
 
   const pauseSubscription = async (id: string) => {
@@ -946,6 +965,7 @@ export function SubscriptionsView() {
         confirmVariant="danger"
         loading={deletingSubscription}
       />
+      {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
 }
