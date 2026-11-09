@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Empty, List, Spin, Tag } from "antd";
+import { Alert, Empty, List, Tag } from "antd";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -9,6 +9,8 @@ import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ExpenseForm } from "./ExpenseForm";
 import { PurchaseCardPaymentForm } from "./PurchaseCardPaymentForm";
+import { PendingPurchasesSkeleton } from "./PendingPurchasesSkeleton";
+import { FormSkeleton } from "@/components/ui/ContentSkeleton";
 import { SubscriptionForm } from "./SubscriptionForm";
 import { usePendingPurchases } from "./hooks/usePendingPurchases";
 import { usePurchaseApproval } from "./hooks/usePurchaseApproval";
@@ -55,7 +57,7 @@ export function PendingExpensesView() {
     </div>
     <div className="mb-4"><p className="text-sm text-[var(--text-2)]">{t("pendingPurchasesDescription")}</p><Link className="mt-2 inline-block text-sm text-[var(--accent-text)]" href="/finance/expenses">{t("expenses")}</Link></div>
     {inbox.error && <div className="mb-4"><Alert type="error" showIcon title={inbox.error} action={<Button size="sm" variant="outline" onClick={() => void inbox.refresh()}>{t("retry")}</Button>} /></div>}
-    {inbox.loading ? <Spin aria-label={t("loadingList")} /> : inbox.data && <List
+    {inbox.loading ? <PendingPurchasesSkeleton /> : inbox.data && <List
       bordered
       dataSource={inbox.data.purchases}
       rowKey="id"
@@ -88,7 +90,7 @@ export function PendingExpensesView() {
     <Modal open={Boolean(selected)} onClose={close} title={t("acceptPurchase")} maxWidth="max-w-2xl">
       <div className="max-h-[75vh] overflow-y-auto pr-1">
         {(selected?.possibleDuplicateOf || selected?.mayBeRegistered) && <div className="mb-4"><Alert type="warning" showIcon title={t("purchaseDuplicateWarning")} /></div>}
-        {selected && (approval.referencesLoading ? <Spin aria-label={t("loadingForm")} /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : <ExpenseForm key={selected.id} categories={approval.categories} creditCards={approval.cards} initialValues={detectedPurchaseExpense(selected, t("detectedPurchase"))} hideReceipt submitLabel={t("acceptAndCreateExpense")} loading={approval.saving} error={approval.error} onCancel={close} onSubmit={async (expense) => { if (await approval.mutate(selected.id, expense)) await afterMutation(); }} />)}
+        {selected && (approval.referencesLoading ? <FormSkeleton /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : <ExpenseForm key={selected.id} categories={approval.categories} creditCards={approval.cards} initialValues={detectedPurchaseExpense(selected, t("detectedPurchase"))} hideReceipt submitLabel={t("acceptAndCreateExpense")} loading={approval.saving} error={approval.error} onCancel={close} onSubmit={async (expense) => { if (await approval.mutate(selected.id, expense)) await afterMutation(); }} />)}
       </div>
     </Modal>
     <Modal open={Boolean(paying)} onClose={close} title={t("registerAsCardPayment")} maxWidth="max-w-lg">
@@ -97,7 +99,7 @@ export function PendingExpensesView() {
     <Modal open={Boolean(subscribing)} onClose={close} title={t("registerAsSubscription")} maxWidth="max-w-xl">
       <div className="max-h-[75vh] overflow-y-auto pr-1">
         {(subscribing?.possibleDuplicateOf || subscribing?.mayBeRegistered) && <div className="mb-4"><Alert type="warning" showIcon title={t("purchaseDuplicateWarning")} /></div>}
-        {subscribing && (approval.referencesLoading ? <Spin aria-label={t("loadingForm")} /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : <SubscriptionForm key={subscribing.id} prefill={detectedPurchaseSubscriptionPrefill(subscribing, t("detectedPurchase"), new Date())} categories={approval.categories} creditCards={approval.cards} creditCardsLoading={false} loading={approval.saving} submitError={approval.error} onCancel={close} onSubmit={async (payload) => { if (await approval.mutateAsSubscription(subscribing, payload)) await afterMutation(); }} />)}
+        {subscribing && (approval.referencesLoading ? <FormSkeleton /> : approval.referencesError ? <Alert type="error" title={approval.referencesError} action={<Button onClick={() => void approval.loadReferences()}>{t("retry")}</Button>} /> : <SubscriptionForm key={subscribing.id} prefill={detectedPurchaseSubscriptionPrefill(subscribing, t("detectedPurchase"), new Date())} categories={approval.categories} creditCards={approval.cards} creditCardsLoading={false} loading={approval.saving} submitError={approval.error} onCancel={close} onSubmit={async (payload) => { if (await approval.mutateAsSubscription(subscribing, payload)) await afterMutation(); }} />)}
       </div>
     </Modal>
     <ConfirmModal open={Boolean(discarding)} onClose={close} onConfirm={async () => { if (discarding && await approval.mutate(discarding.id)) await afterMutation(); }} title={t("discardPurchase")} description={t("discardPurchaseDescription")} confirmLabel={t("discardPurchase")} loading={approval.saving}>
