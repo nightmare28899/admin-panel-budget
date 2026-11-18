@@ -97,7 +97,7 @@ export function PendingExpensesView() {
     <Modal open={Boolean(paying)} onClose={close} title={t("registerAsCardPayment")} maxWidth="max-w-lg">
       {paying && <PurchaseCardPaymentForm key={paying.id} purchase={paying} cards={approval.cards} loading={approval.saving} error={approval.error} errorCode={approval.errorCode} onCancel={close} onSubmit={async (payload) => { if (await approval.mutateAsPayment(paying.id, payload)) await afterMutation(); }} />}
     </Modal>
-    <ConfirmModal open={Boolean(discarding)} onClose={close} onConfirm={async () => { if (discarding && await approval.mutate(discarding.id)) await afterMutation(); }} title={t("discardPurchase")} description={t("discardPurchaseDescription")} confirmLabel={t("discardPurchase")} loading={approval.saving}>
+    <ConfirmModal open={Boolean(discarding)} onClose={close} onConfirm={async () => { if (discarding && await approval.mutate(discarding.id)) await afterMutation(); }} title={t("discardPurchase")} description={<span className="text-white">{t("discardPurchaseDescription")}</span>} confirmLabel={t("discardPurchase")} loading={approval.saving}>
       {approval.error && <Alert type="error" title={approval.error} />}
     </ConfirmModal>
   </div>;

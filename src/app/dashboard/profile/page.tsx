@@ -11,15 +11,17 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
+  let profile;
   try {
-    const profile = await getAdminMe(token);
-    const user = profile.user;
-    if ((user?.role || "").toLowerCase() !== "admin" || !user) {
-      redirect("/login");
-    }
-
-    return <ProfileView initialUser={user} initialAccount={profile.account} />;
+    profile = await getAdminMe(token);
   } catch {
     redirect("/login");
   }
+
+  const user = profile.user;
+  if ((user?.role || "").toLowerCase() !== "admin" || !user) {
+    redirect("/login");
+  }
+
+  return <ProfileView initialUser={user} initialAccount={profile.account} />;
 }

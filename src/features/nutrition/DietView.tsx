@@ -152,9 +152,10 @@ export default function DietView({
   useEffect(() => {
     if (!startNew) return;
     const blank = newDiet(state.profile.timezone);
-    openDraft(blank, structuredClone(blank));
+    const task = queueMicrotask(() => openDraft(blank, structuredClone(blank)));
     // Drop the query so a refresh does not reopen the draft.
     router.replace("/nutrition/diet");
+    return () => task;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startNew]);
 
