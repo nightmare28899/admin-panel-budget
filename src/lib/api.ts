@@ -48,10 +48,26 @@ export type SendTestPushResponse = {
     successCount: number;
     failureCount: number;
     invalidTokensRemoved: number;
+    failureReasons?: Record<string, number>;
 };
 
+export class ApiError extends Error {
+    constructor(
+        public readonly status: number,
+        message: string,
+        public readonly body?: { code?: string; statementCount?: number },
+    ) {
+        super(message);
+        this.name = "ApiError";
+    }
+}
+
+// The empty-body fallback below is a stable i18n message key carrying its
+// {status} interpolation value (see src/i18n/messages.ts + src/i18n/errors.ts
+// frontendError, which knows how to split and translate this exact shape) —
+// this file runs outside React and can't call t() itself.
 function parseApiErrorMessage(raw: string, status: number): string {
-    if (!raw) return `Request failed (${status})`;
+    if (!raw) return `requestFailedWithStatus:${status}`;
 
     try {
         const parsed = JSON.parse(raw) as { message?: string | string[] };
@@ -71,7 +87,19 @@ function parseApiErrorMessage(raw: string, status: number): string {
     return raw;
 }
 
-async function request<T>(
+function parseApiErrorBody(raw: string): ApiError["body"] {
+    try {
+        const parsed = JSON.parse(raw) as { code?: unknown; statementCount?: unknown };
+        return {
+            code: typeof parsed?.code === "string" ? parsed.code : undefined,
+            statementCount: typeof parsed?.statementCount === "number" ? parsed.statementCount : undefined,
+        };
+    } catch {
+        return undefined;
+    }
+}
+
+export async function request<T>(
     path: string,
     init: RequestInit = {},
     token?: string,
@@ -88,7 +116,7 @@ async function request<T>(
 
     if (!res.ok) {
         const text = await res.text();
-        throw new Error(parseApiErrorMessage(text, res.status));
+        throw new ApiError(res.status, parseApiErrorMessage(text, res.status), parseApiErrorBody(text));
     }
 
     return res.json() as Promise<T>;

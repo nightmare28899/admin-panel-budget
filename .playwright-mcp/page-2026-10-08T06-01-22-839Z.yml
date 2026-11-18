@@ -1,0 +1,208 @@
+- generic [ref=f4e1]:
+  - generic [ref=f4e2]:
+    - complementary [ref=f4e3]:
+      - generic [ref=f4e4]:
+        - generic [ref=f4e5]:
+          - generic [ref=f4e6]: B
+          - generic [ref=f4e8]: Budget Panel
+        - paragraph [ref=f4e9]: Navigation
+        - navigation [ref=f4e10]:
+          - link "Expenses" [ref=f4e11] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f4e205] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f4e22]: My Cards
+            - generic "3" [ref=f4e206]
+          - link "Statements" [ref=f4e23] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f4e29] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f4e35] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f4e43] [cursor=pointer]:
+            - /url: /finance/reports
+        - generic [ref=f4e49]:
+          - img "Kevin López González" [ref=f4e50]
+          - generic [ref=f4e51]:
+            - generic [ref=f4e52]: Kevin López González
+            - generic [ref=f4e53]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f4e54] [cursor=pointer]
+    - generic [ref=f4e58]:
+      - banner [ref=f4e59]:
+        - button "Expand sidebar" [ref=f4e61] [cursor=pointer]
+        - generic [ref=f4e64]:
+          - button "Search (Cmd+K)" [ref=f4e65]
+          - button "Language" [ref=f4e69] [cursor=pointer]:
+            - img "global" [ref=f4e70]
+          - button "Subscription alerts (3)" [ref=f4e207] [cursor=pointer]:
+            - generic [ref=f4e211]: "3"
+      - main [ref=f4e77]:
+        - generic [ref=f4e79]:
+          - generic [ref=f4e80]:
+            - generic [ref=f4e81]:
+              - heading "Your expenses" [level=1] [ref=f4e82]
+              - paragraph [ref=f4e83]: Live data from your Budget account.
+            - generic [ref=f4e84]:
+              - generic [ref=f4e212]: Updated 12:01 AM
+              - button "Refresh" [disabled]
+              - button "New expense" [ref=f4e89] [cursor=pointer]
+          - status [ref=f4e213]:
+            - generic [ref=f4e214]:
+              - strong [ref=f4e215]: iCloud
+              - text: is due in 1 day (~MXN 49.00, based on your payment history).
+            - button "Dismiss" [ref=f4e216] [cursor=pointer]: ✕
+          - generic [ref=f4e217]:
+            - generic [ref=f4e220]:
+              - generic [ref=f4e221]:
+                - img "wallet" [ref=f4e223]
+                - paragraph [ref=f4e226]: Spent this period
+              - generic [ref=f4e228]:
+                - generic [ref=f4e229]: MXN
+                - generic [ref=f4e230]: "118.00"
+              - generic [ref=f4e232]:
+                - generic [ref=f4e233]: Monthly · Oct 1 – Oct 31
+                - button "Edit budget" [ref=f4e234] [cursor=pointer]
+            - generic [ref=f4e236]:
+              - generic [ref=f4e237]:
+                - generic [ref=f4e238]:
+                  - img "safety" [ref=f4e240]
+                  - paragraph [ref=f4e244]: Budget period remaining
+                - generic [ref=f4e246]:
+                  - generic [ref=f4e247]: MXN
+                  - generic [ref=f4e248]: 1,532.00
+              - img "7% of budget used" [ref=f4e250]:
+                - generic [ref=f4e253]: "7"
+          - generic [ref=f4e101]:
+            - heading "Expense history" [level=3] [ref=f4e102]
+            - generic [ref=f4e103]:
+              - generic [ref=f4e104]:
+                - searchbox "Search expenses" [ref=f4e106]
+                - button [ref=f4e112] [cursor=pointer]:
+                  - img "search" [ref=f4e114]
+              - generic [ref=f4e117]:
+                - textbox "Filter by date range" [ref=f4e119]:
+                  - /placeholder: From
+                  - text: 2026-10-01
+                - generic "to" [ref=f4e121]:
+                  - img "swap-right" [ref=f4e122]
+                - textbox "Filter by date range" [ref=f4e126]:
+                  - /placeholder: To
+                  - text: 2026-10-07
+                - generic:
+                  - img "calendar"
+                - button [ref=f4e254] [cursor=pointer]:
+                  - img "close-circle" [ref=f4e255]
+              - generic [ref=f4e131] [cursor=pointer]:
+                - generic [ref=f4e132]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=f4e134]
+                - img "down" [ref=f4e136]
+              - generic [ref=f4e139] [cursor=pointer]:
+                - generic "Rappi Card · Rappi •••• 5969" [ref=f4e258]:
+                  - text: Rappi Card · Rappi •••• 5969
+                  - combobox "Filter by card" [ref=f4e142]
+                - img "down" [ref=f4e144]
+                - img "close-circle" [ref=f4e260]
+              - generic [ref=f4e147] [cursor=pointer]:
+                - generic "All" [ref=f4e148]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=f4e149]
+                - img "down" [ref=f4e151]
+            - generic [ref=f4e263]:
+              - generic [ref=f4e265]:
+                - img "No data" [ref=f4e267]
+                - generic [ref=f4e278]: No expenses match filters
+              - generic [ref=f4e279]:
+                - generic [ref=f4e280]: No records
+                - generic [ref=f4e281]:
+                  - generic [ref=f4e282] [cursor=pointer]:
+                    - generic "10 / page" [ref=f4e283]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=f4e284]
+                    - img "down" [ref=f4e286]
+                  - generic [ref=f4e289]:
+                    - button "Previous" [disabled]:
+                      - img "left"
+                    - generic [ref=f4e290]: Page 1 of 1
+                    - button "Next" [disabled]:
+                      - img "right"
+  - alert [ref=f4e291]
+  - generic [ref=f4e292]:
+    - button "Close modal backdrop" [ref=f4e293]
+    - dialog [ref=f4e294]:
+      - heading "New expense" [level=3] [ref=f4e295]
+      - generic [ref=f4e297]:
+        - generic [ref=f4e299]:
+          - generic "Title" [ref=f4e301]: "* Title"
+          - textbox "* Title" [ref=f4e305]:
+            - /placeholder: e.g. Grocery shopping
+        - generic [ref=f4e306]:
+          - generic [ref=f4e308]:
+            - generic "Amount" [ref=f4e310]: "* Amount"
+            - textbox "* Amount" [ref=f4e314]:
+              - /placeholder: "0.00"
+          - generic [ref=f4e316]:
+            - generic "Currency" [ref=f4e318]: "* Currency"
+            - textbox "* Currency" [ref=f4e322]:
+              - /placeholder: MXN
+              - text: MXN
+        - generic [ref=f4e323]:
+          - generic [ref=f4e325]:
+            - generic "Date" [ref=f4e327]
+            - textbox "Date" [ref=f4e331]
+          - generic [ref=f4e333]:
+            - generic "Category" [ref=f4e335]: "* Category"
+            - generic [ref=f4e339] [cursor=pointer]:
+              - generic [ref=f4e340]:
+                - generic: Select a category
+                - combobox "* Category" [ref=f4e341]
+              - img "down" [ref=f4e343]
+        - generic [ref=f4e346]:
+          - generic [ref=f4e348]:
+            - generic "Payment method" [ref=f4e350]: "* Payment method"
+            - generic [ref=f4e354] [cursor=pointer]:
+              - generic "Credit card" [ref=f4e355]:
+                - text: Credit card
+                - combobox "* Payment method" [ref=f4e356]
+              - img "down" [ref=f4e358]
+          - generic [ref=f4e362]:
+            - generic "Credit card" [ref=f4e364]: "* Credit card"
+            - generic [ref=f4e368] [cursor=pointer]:
+              - generic [ref=f4e369]:
+                - generic: Select card
+                - combobox "* Credit card" [ref=f4e370]
+              - img "down" [ref=f4e372]
+        - generic [ref=f4e375]:
+          - generic [ref=f4e377]:
+            - generic "Pay in installments" [ref=f4e379]
+            - switch "Pay in installments" [checked] [active] [ref=f4e383] [cursor=pointer]
+          - generic [ref=f4e386]:
+            - generic [ref=f4e388]:
+              - generic "Months" [ref=f4e390]: "* Months"
+              - generic [ref=f4e394] [cursor=pointer]:
+                - generic [ref=f4e395]:
+                  - generic: Months
+                  - combobox "* Months" [ref=f4e396]
+                - img "down" [ref=f4e398]
+            - generic [ref=f4e402]:
+              - generic "First payment date" [ref=f4e404]
+              - textbox "First payment date" [ref=f4e408]: 2026-10-08
+            - paragraph [ref=f4e409]: The amount above is the total purchase. It is split into equal monthly payments.
+        - generic [ref=f4e411]:
+          - generic "Merchant" [ref=f4e413]
+          - textbox "Merchant" [ref=f4e417]:
+            - /placeholder: e.g. Walmart
+        - generic [ref=f4e419]:
+          - generic "Location" [ref=f4e421]
+          - textbox "Location" [ref=f4e425]:
+            - /placeholder: e.g. Downtown store
+        - generic [ref=f4e427]:
+          - generic "Note" [ref=f4e429]
+          - textbox "Note" [ref=f4e433]:
+            - /placeholder: Add any extra detail (optional)
+        - generic [ref=f4e435]:
+          - generic "Receipt (optional, max 5 MB)" [ref=f4e437]
+          - button "Choose image" [ref=f4e444] [cursor=pointer]
+        - generic [ref=f4e445]:
+          - button "Cancel" [ref=f4e446] [cursor=pointer]
+          - button "Create expense" [ref=f4e447] [cursor=pointer]

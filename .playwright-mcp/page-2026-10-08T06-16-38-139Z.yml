@@ -1,0 +1,215 @@
+- generic [active] [ref=f10e1]:
+  - generic [ref=f10e2]:
+    - complementary [ref=f10e3]:
+      - generic [ref=f10e4]:
+        - generic [ref=f10e5]:
+          - generic [ref=f10e6]: B
+          - generic [ref=f10e8]: Budget Panel
+        - paragraph [ref=f10e9]: Navigation
+        - navigation [ref=f10e10]:
+          - link "Expenses" [ref=f10e11] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f10e205] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f10e22]: My Cards
+            - generic "3" [ref=f10e206]
+          - link "Statements" [ref=f10e23] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f10e29] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f10e35] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f10e43] [cursor=pointer]:
+            - /url: /finance/reports
+        - generic [ref=f10e49]:
+          - img "Kevin López González" [ref=f10e50]
+          - generic [ref=f10e51]:
+            - generic [ref=f10e52]: Kevin López González
+            - generic [ref=f10e53]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f10e54] [cursor=pointer]
+    - generic [ref=f10e58]:
+      - banner [ref=f10e59]:
+        - button "Collapse sidebar" [ref=f10e586] [cursor=pointer]
+        - generic [ref=f10e64]:
+          - button "Search (Cmd+K)" [ref=f10e65]
+          - button "Language" [ref=f10e69] [cursor=pointer]:
+            - img "global" [ref=f10e70]
+          - button "Subscription alerts (3)" [ref=f10e207] [cursor=pointer]:
+            - generic [ref=f10e211]: "3"
+      - main [ref=f10e77]:
+        - generic [ref=f10e587]:
+          - generic [ref=f10e588]:
+            - generic [ref=f10e589]:
+              - heading "Your expenses" [level=1] [ref=f10e590]
+              - paragraph [ref=f10e591]: Live data from your Budget account.
+            - generic [ref=f10e592]:
+              - generic [ref=f10e593]: Updated 12:16 AM
+              - button "Refresh" [ref=f10e594] [cursor=pointer]
+              - button "New expense" [ref=f10e598] [cursor=pointer]
+          - status [ref=f10e599]:
+            - generic [ref=f10e600]:
+              - strong [ref=f10e601]: iCloud
+              - text: is due in 1 day (~MXN 49.00, based on your payment history).
+            - button "Dismiss" [ref=f10e602] [cursor=pointer]: ✕
+          - generic [ref=f10e603]:
+            - generic [ref=f10e606]:
+              - generic [ref=f10e607]:
+                - img "wallet" [ref=f10e609]
+                - paragraph [ref=f10e612]: Spent this period
+              - generic [ref=f10e614]:
+                - generic [ref=f10e615]: MXN
+                - generic [ref=f10e616]: 2,470.75
+              - generic [ref=f10e618]:
+                - generic [ref=f10e619]: Monthly · Oct 1 – Oct 31
+                - button "Edit budget" [ref=f10e620] [cursor=pointer]
+            - generic [ref=f10e622]:
+              - generic [ref=f10e623]:
+                - generic [ref=f10e624]:
+                  - img "safety" [ref=f10e626]
+                  - paragraph [ref=f10e630]: Budget period remaining
+                - generic [ref=f10e632]:
+                  - generic [ref=f10e633]: MXN
+                  - generic [ref=f10e634]: "-820.75"
+              - img "100% of budget used" [ref=f10e636]:
+                - generic [ref=f10e639]: "100"
+          - generic [ref=f10e641]:
+            - heading "Expense history" [level=3] [ref=f10e642]
+            - generic [ref=f10e643]:
+              - generic [ref=f10e644]:
+                - searchbox "Search expenses" [ref=f10e646]
+                - button [ref=f10e648] [cursor=pointer]:
+                  - img "search" [ref=f10e650]
+              - generic [ref=f10e653]:
+                - textbox "Filter by date range" [ref=f10e655]:
+                  - /placeholder: From
+                  - text: 2026-09-15
+                - generic "to" [ref=f10e657]:
+                  - img "swap-right" [ref=f10e658]
+                - textbox "Filter by date range" [ref=f10e662]:
+                  - /placeholder: To
+                  - text: 2026-10-14
+                - generic:
+                  - img "calendar"
+                - button [ref=f10e1037] [cursor=pointer]:
+                  - img "close-circle" [ref=f10e1038]
+              - generic [ref=f10e663] [cursor=pointer]:
+                - generic [ref=f10e664]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=f10e665]
+                - img "down" [ref=f10e667]
+              - generic [ref=f10e670] [cursor=pointer]:
+                - generic "BBVA · BBVA •••• 7289" [ref=f10e1492]:
+                  - text: BBVA · BBVA •••• 7289
+                  - combobox "Filter by card" [ref=f10e672]
+                - img "down" [ref=f10e674]
+                - img "close-circle" [ref=f10e980]
+              - generic [ref=f10e677] [cursor=pointer]:
+                - generic "All" [ref=f10e678]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=f10e679]
+                - img "down" [ref=f10e681]
+            - generic [ref=f10e684]:
+              - generic [ref=f10e685]:
+                - generic [ref=f10e2399]:
+                  - generic [ref=f10e2400]:
+                    - generic [ref=f10e2401]: 🍽️
+                    - generic [ref=f10e2402]:
+                      - paragraph [ref=f10e2403]: Taqueria tako tako
+                      - paragraph [ref=f10e2404]:
+                        - generic [ref=f10e2405]: Sep 18, 2026
+                        - generic [aria-hidden] [ref=f10e2406]: ·
+                        - generic [ref=f10e2407]: Taqueria tako tako
+                        - generic [aria-hidden] [ref=f10e2408]: ·
+                        - generic [ref=f10e2409]: Restaurantes
+                      - paragraph [ref=f10e2410]:
+                        - generic [ref=f10e2411]:
+                          - img "credit-card" [ref=f10e2412]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2415]:
+                    - generic [ref=f10e2416]: "-MXN 180.00"
+                    - generic [ref=f10e2417]:
+                      - button "Edit Taqueria tako tako" [ref=f10e2418] [cursor=pointer]:
+                        - img "edit" [ref=f10e2419]
+                      - button "Delete Taqueria tako tako" [ref=f10e2422] [cursor=pointer]:
+                        - img "delete" [ref=f10e2423]
+                - generic [ref=f10e2426]:
+                  - generic [ref=f10e2427]:
+                    - generic [ref=f10e2428]: 🧩
+                    - generic [ref=f10e2429]:
+                      - paragraph [ref=f10e2430]: Rbl*prog lank web
+                      - paragraph [ref=f10e2431]:
+                        - generic [ref=f10e2432]: Sep 16, 2026
+                        - generic [aria-hidden] [ref=f10e2433]: ·
+                        - generic [ref=f10e2434]: Rbl*prog lank web
+                        - generic [aria-hidden] [ref=f10e2435]: ·
+                        - generic [ref=f10e2436]: Otros gastos
+                      - paragraph [ref=f10e2437]:
+                        - generic [ref=f10e2438]:
+                          - img "credit-card" [ref=f10e2439]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2442]:
+                    - generic [ref=f10e2443]: "-MXN 567.00"
+                    - generic [ref=f10e2444]:
+                      - button "Edit Rbl*prog lank web" [ref=f10e2445] [cursor=pointer]:
+                        - img "edit" [ref=f10e2446]
+                      - button "Delete Rbl*prog lank web" [ref=f10e2449] [cursor=pointer]:
+                        - img "delete" [ref=f10e2450]
+                - generic [ref=f10e2453]:
+                  - generic [ref=f10e2454]:
+                    - generic [ref=f10e2455]: 🎬
+                    - generic [ref=f10e2456]:
+                      - paragraph [ref=f10e2457]: Pg*itunesappst appl[e] c
+                      - paragraph [ref=f10e2458]:
+                        - generic [ref=f10e2459]: Sep 15, 2026
+                        - generic [aria-hidden] [ref=f10e2460]: ·
+                        - generic [ref=f10e2461]: Pg*itunesappst appl[e] c
+                        - generic [aria-hidden] [ref=f10e2462]: ·
+                        - generic [ref=f10e2463]: Streaming y suscripciones
+                      - paragraph [ref=f10e2464]:
+                        - generic [ref=f10e2465]:
+                          - img "credit-card" [ref=f10e2466]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2469]:
+                    - generic [ref=f10e2470]: "-MXN 49.00"
+                    - generic [ref=f10e2471]:
+                      - button "Edit Pg*itunesappst appl[e] c" [ref=f10e2472] [cursor=pointer]:
+                        - img "edit" [ref=f10e2473]
+                      - button "Delete Pg*itunesappst appl[e] c" [ref=f10e2476] [cursor=pointer]:
+                        - img "delete" [ref=f10e2477]
+                - generic [ref=f10e2480]:
+                  - generic [ref=f10e2481]:
+                    - generic [ref=f10e2482]: 🍽️
+                    - generic [ref=f10e2483]:
+                      - paragraph [ref=f10e2484]: Rest ala santa ac...
+                      - paragraph [ref=f10e2485]:
+                        - generic [ref=f10e2486]: Sep 15, 2026
+                        - generic [aria-hidden] [ref=f10e2487]: ·
+                        - generic [ref=f10e2488]: Rest ala santa ac...
+                        - generic [aria-hidden] [ref=f10e2489]: ·
+                        - generic [ref=f10e2490]: Restaurantes
+                      - paragraph [ref=f10e2491]:
+                        - generic [ref=f10e2492]:
+                          - img "credit-card" [ref=f10e2493]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e2496]:
+                    - generic [ref=f10e2497]: "-MXN 816.20"
+                    - generic [ref=f10e2498]:
+                      - button "Edit Rest ala santa ac..." [ref=f10e2499] [cursor=pointer]:
+                        - img "edit" [ref=f10e2500]
+                      - button "Delete Rest ala santa ac..." [ref=f10e2503] [cursor=pointer]:
+                        - img "delete" [ref=f10e2504]
+              - generic [ref=f10e950]:
+                - generic [ref=f10e951]: Showing 31–34 of 34 records
+                - generic [ref=f10e952]:
+                  - generic [ref=f10e953] [cursor=pointer]:
+                    - generic "10 / page" [ref=f10e954]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=f10e955]
+                    - img "down" [ref=f10e957]
+                  - generic [ref=f10e960]:
+                    - button "Previous" [ref=f10e1488] [cursor=pointer]:
+                      - img "left" [ref=f10e1489]
+                    - generic [ref=f10e961]: Page 4 of 4
+                    - button "Next" [disabled]:
+                      - img "right"
+  - alert [ref=f10e204]

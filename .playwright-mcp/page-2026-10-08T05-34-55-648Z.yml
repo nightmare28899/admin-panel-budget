@@ -1,0 +1,96 @@
+- generic [ref=f7e1]:
+  - generic [ref=f7e3]:
+    - complementary [ref=f7e4]:
+      - generic [ref=f7e5]:
+        - generic [ref=f7e6]:
+          - generic [ref=f7e7]: B
+          - generic [ref=f7e9]: Budget Panel
+        - paragraph [ref=f7e10]: Navigation
+        - navigation [ref=f7e11]:
+          - link "Expenses" [ref=f7e12] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f7e123] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f7e23]: My Cards
+            - generic "3" [ref=f7e124]
+          - link "Statements" [ref=f7e24] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f7e30] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f7e36] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f7e44] [cursor=pointer]:
+            - /url: /finance/reports
+        - paragraph [ref=f7e49]: Workspaces
+        - navigation "Workspaces" [ref=f7e50]:
+          - link "Personal nutrition" [ref=f7e51] [cursor=pointer]:
+            - /url: /nutrition/today
+        - generic [ref=f7e58]:
+          - img "Kevin" [ref=f7e59]
+          - generic [ref=f7e60]:
+            - generic [ref=f7e61]: Kevin
+            - generic [ref=f7e62]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f7e63] [cursor=pointer]
+    - generic [ref=f7e67]:
+      - banner [ref=f7e68]:
+        - button "Expand sidebar" [ref=f7e70] [cursor=pointer]
+        - generic [ref=f7e73]:
+          - button "Search (Cmd+K)" [ref=f7e74]
+          - button "Language" [ref=f7e78] [cursor=pointer]:
+            - img "global" [ref=f7e79]
+          - button "Subscription alerts" [ref=f7e82] [cursor=pointer]
+      - main [ref=f7e86]:
+        - generic [ref=f7e88]:
+          - generic [ref=f7e89]:
+            - heading "Your categories" [level=1] [ref=f7e90]
+            - paragraph [ref=f7e91]: Organize expenses and configure category budgets.
+          - generic [ref=f7e125]:
+            - generic [ref=f7e126]:
+              - heading "Category list" [level=2] [ref=f7e127]
+              - button "Add category" [ref=f7e128] [cursor=pointer]
+            - generic [ref=f7e129]:
+              - list [ref=f7e132]:
+                - listitem [ref=f7e280]:
+                  - generic [ref=f7e282]:
+                    - heading "🔁 Suscripción" [level=4] [ref=f7e283]
+                    - generic [ref=f7e286]:
+                      - generic [ref=f7e287]: 5 expenses · 0 subscriptions · 5 statement rows
+                      - generic [ref=f7e288]: This category cannot be deleted because linked records exist.
+                  - list [ref=f7e289]:
+                    - listitem [ref=f7e290]:
+                      - button "Edit" [ref=f7e291] [cursor=pointer]
+                - listitem [ref=f7e292]:
+                  - generic [ref=f7e294]:
+                    - heading "🏪 Tienda de conveniencia" [level=4] [ref=f7e295]
+                    - generic [ref=f7e298]:
+                      - generic [ref=f7e299]: 4 expenses · 0 subscriptions · 3 statement rows
+                      - generic [ref=f7e300]: This category cannot be deleted because linked records exist.
+                  - list [ref=f7e301]:
+                    - listitem [ref=f7e302]:
+                      - button "Edit" [ref=f7e303] [cursor=pointer]
+                - listitem [ref=f7e304]:
+                  - generic [ref=f7e306]:
+                    - heading "🚕 Transporte" [level=4] [ref=f7e307]
+                    - generic [ref=f7e310]:
+                      - generic [ref=f7e311]: 13 expenses · 0 subscriptions · 13 statement rows
+                      - generic [ref=f7e312]: This category cannot be deleted because linked records exist.
+                  - list [ref=f7e313]:
+                    - listitem [ref=f7e314]:
+                      - button "Edit" [ref=f7e315] [cursor=pointer]
+              - list [ref=f7e256]:
+                - listitem [ref=f7e257]: Showing 11–13 of 13 Categories
+                - listitem "Previous Page" [ref=f7e258] [cursor=pointer]:
+                  - button [ref=f7e259]:
+                    - img "left" [ref=f7e260]
+                - listitem "1" [ref=f7e263] [cursor=pointer]
+                - listitem "2" [active] [ref=f7e265] [cursor=pointer]
+                - listitem "Next Page" [ref=f7e267]:
+                  - button [disabled] [ref=f7e268]:
+                    - img "right" [ref=f7e269]
+                - listitem [ref=f7e272]:
+                  - generic [ref=f7e273]:
+                    - generic "10 / page" [ref=f7e274]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=f7e275]
+                    - img "down" [ref=f7e277]
+  - alert [ref=f7e122]

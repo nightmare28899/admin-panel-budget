@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 import { api, LoginResponse } from "./api";
+import { userApi } from "./userApi";
+import { userGoogleAuthEnabled } from "./userSession";
 import {
     ActionResult,
     SESSION_EXPIRED_MESSAGE,
@@ -45,7 +47,7 @@ export async function loginAction(email: string, password: string) {
         const res = await api.login(email, password);
 
         if (!isAdminRole(res.user?.role)) {
-            return { error: "You don’t have permissions to access this platform." };
+            return { error: "noPlatformAccess" };
         }
 
         const cookieStore = await cookies();
@@ -53,7 +55,35 @@ export async function loginAction(email: string, password: string) {
 
         return { success: true };
     } catch (err) {
-        return { error: err instanceof Error ? err.message : "Login failed" };
+        return { error: err instanceof Error ? err.message : "loginFailed" };
+    }
+}
+
+export async function googleLoginAction(firebaseToken: string) {
+    if (!userGoogleAuthEnabled()) {
+        return { error: "userGoogleSignInUnavailable" };
+    }
+
+    try {
+        // Admin sign-in never creates accounts.
+        const res = await userApi.google(firebaseToken, { existingUserOnly: true });
+
+        if (!isAdminRole(res.user?.role)) {
+            // The backend already issued a session for this account; revoke it.
+            try {
+                await userApi.logout(res.accessToken);
+            } catch {
+                // Best effort: no admin cookie is set either way.
+            }
+            return { error: "noPlatformAccess" };
+        }
+
+        const cookieStore = await cookies();
+        setSessionCookies(cookieStore, res);
+
+        return { success: true };
+    } catch (err) {
+        return { error: err instanceof Error ? err.message : "googleFailed" };
     }
 }
 
@@ -84,7 +114,7 @@ export async function renewSessionAction() {
         const refreshed = await api.refreshToken(refreshToken);
         if (!isAdminRole(refreshed.user?.role)) {
             await logoutAction();
-            return { error: "You don’t have permissions to access this platform." };
+            return { error: "noPlatformAccess" };
         }
         const cookieStore = await cookies();
         setSessionCookies(cookieStore, refreshed);
@@ -108,7 +138,7 @@ async function getRefreshToken() {
 function getErrorMessage(error: unknown): string {
     if (error instanceof Error) return error.message;
     if (typeof error === "string") return error;
-    return "Action failed";
+    return "requestFailedGeneric";
 }
 
 async function withAuthRetry<T>(actionFn: (token: string) => Promise<T>): Promise<ActionResult<T>> {

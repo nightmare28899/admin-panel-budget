@@ -1,0 +1,608 @@
+"use server";
+
+import type {
+  BudgetWritePayload,
+  CategoryWritePayload,
+  Expense,
+  ExpenseWritePayload,
+} from "@/features/finance/finance.types";
+import type { CreditCardWritePayload } from "@/features/finance/credit-cards.types";
+import {
+  buildTestDataFixtures,
+  TEST_DATA_MARKER,
+} from "@/features/finance/testDataFixtures";
+import type {
+  ConfirmStatementImportPayload,
+  CorrectStatementPaymentPayload,
+  StatementPaymentWritePayload,
+  UpdateStatementRowsPayload,
+  VoidStatementPaymentPayload,
+} from "@/features/finance/statement-import.types";
+import type {
+  CreateSubscriptionPayload,
+  UpdateSubscriptionPayload,
+} from "@/features/finance/subscriptions.types";
+import { z } from "zod";
+import type { ConfirmAsPaymentPayload, DetectedPurchase, DetectedPurchaseListResponse } from "@/features/finance/interfaces/detected-purchases";
+import { pendingPurchaseQuery } from "@/features/finance/utils/detected-purchases";
+import { ApiError } from "./api";
+import { userApi } from "./userApi";
+import {
+  clearUserSession,
+  getUserRefreshToken,
+  getUserToken,
+  setUserSession,
+  USER_SESSION_EXPIRED,
+  userGoogleAuthEnabled,
+} from "./userSession";
+
+type Result<T = undefined> = {
+  data?: T;
+  error?: string;
+  /** Machine-readable backend error code, when the API error body carries one. */
+  errorCode?: string;
+  /** Extra count carried by some API error bodies (e.g. CREDIT_CARD_HAS_STATEMENTS). */
+  statementCount?: number;
+  sessionExpired?: boolean;
+};
+
+export type SeedTestDataSummary = {
+  created: number;
+  skipped: number;
+  failed: number;
+};
+
+// "requestFailedGeneric" is a stable i18n message key (see
+// src/i18n/messages.ts) — this file can't call t() itself, so UI call sites
+// resolve it via frontendError()/t() before displaying it.
+const errorText = (error: unknown) =>
+  error instanceof Error ? error.message : "requestFailedGeneric";
+
+function testDataGenerationEnabled() {
+  if (process.env.TEST_DATA_ENABLED !== "true") return false;
+
+  try {
+    const apiUrl = new URL(process.env.NEXT_PUBLIC_API_URL ?? "");
+    return (
+      apiUrl.protocol === "http:" &&
+      ["host.docker.internal", "localhost", "127.0.0.1"].includes(
+        apiUrl.hostname,
+      ) &&
+      apiUrl.pathname.replace(/\/$/, "") === "/api"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function addExpenseFields(form: FormData, body: ExpenseWritePayload) {
+  Object.entries(body).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") form.append(key, String(value));
+  });
+}
+
+async function getAllExpensesForTestData(token: string): Promise<Expense[]> {
+  const expenses: Expense[] = [];
+  let page = 1;
+
+  for (let requestCount = 0; requestCount < 20; requestCount += 1) {
+    const query = new URLSearchParams({ page: String(page), limit: "100" });
+    const response = await userApi.expenses(token, query.toString());
+    expenses.push(...response.expenses);
+    if (!response.pagination.hasNext) return expenses;
+    page += 1;
+  }
+
+  throw new Error("testDataExpenseReadLimit");
+}
+
+async function seedTestData(token: string): Promise<SeedTestDataSummary> {
+  const fixtures = buildTestDataFixtures();
+  const summary: SeedTestDataSummary = { created: 0, skipped: 0, failed: 0 };
+  const [existingCategories, cardOverview, existingExpenses] = await Promise.all([
+    userApi.categories(token),
+    userApi.creditCardsOverview(token, "includeInactive=true"),
+    getAllExpensesForTestData(token),
+  ]);
+  const categoriesByName = new Map(
+    existingCategories.map((category) => [category.name, category]),
+  );
+
+  for (const fixture of fixtures.categories) {
+    if (categoriesByName.has(fixture.payload.name)) {
+      summary.skipped += 1;
+      continue;
+    }
+
+    try {
+      const category = await userApi.createCategory(token, fixture.payload);
+      categoriesByName.set(category.name, category);
+      summary.created += 1;
+    } catch (error) {
+      if (isUnauthorizedError(error)) throw error;
+      summary.failed += 1;
+    }
+  }
+
+  for (const fixture of fixtures.cards) {
+    const exists = cardOverview.cards.some(
+      (card) =>
+        card.name === fixture.payload.name &&
+        card.last4 === fixture.payload.last4,
+    );
+    if (exists) {
+      summary.skipped += 1;
+      continue;
+    }
+
+    try {
+      await userApi.createCreditCard(token, fixture.payload);
+      summary.created += 1;
+    } catch (error) {
+      if (isUnauthorizedError(error)) throw error;
+      summary.failed += 1;
+    }
+  }
+
+  const existingExpenseMarkers = new Set(
+    existingExpenses
+      .map((expense) => expense.note)
+      .filter(
+        (note): note is string =>
+          typeof note === "string" && note.startsWith(`${TEST_DATA_MARKER}:`),
+      ),
+  );
+
+  for (const fixture of fixtures.expenses) {
+    if (existingExpenseMarkers.has(fixture.marker)) {
+      summary.skipped += 1;
+      continue;
+    }
+
+    const category = fixtures.categories.find(
+      (candidate) => candidate.key === fixture.categoryKey,
+    );
+    const categoryId = category
+      ? categoriesByName.get(category.payload.name)?.id
+      : undefined;
+    if (!categoryId) {
+      summary.failed += 1;
+      continue;
+    }
+
+    try {
+      const form = new FormData();
+      addExpenseFields(form, { ...fixture.payload, categoryId });
+      await userApi.createExpense(token, form);
+      summary.created += 1;
+    } catch (error) {
+      if (isUnauthorizedError(error)) throw error;
+      summary.failed += 1;
+    }
+  }
+
+  return summary;
+}
+
+export async function userLoginAction(
+  email: string,
+  password: string,
+): Promise<Result> {
+  try {
+    await setUserSession(await userApi.login(email, password));
+    return {};
+  } catch (error) {
+    return { error: errorText(error) };
+  }
+}
+
+export async function userGoogleLoginAction(
+  firebaseToken: string,
+): Promise<Result> {
+  if (!userGoogleAuthEnabled()) {
+    return {
+      error: "userGoogleSignInUnavailable",
+    };
+  }
+
+  try {
+    await setUserSession(await userApi.google(firebaseToken));
+    return {};
+  } catch (error) {
+    return { error: errorText(error) };
+  }
+}
+
+export async function userLogoutAction(): Promise<Result> {
+  const token = await getUserToken();
+
+  if (token) {
+    try {
+      await userApi.logout(token);
+    } catch {
+      // Cookie clearing remains authoritative.
+    }
+  }
+
+  await clearUserSession();
+  return {};
+}
+
+function isUnauthorizedError(error: unknown): error is ApiError {
+  return error instanceof ApiError && error.status === 401;
+}
+
+function userErrorResult<T>(error: unknown): Result<T> {
+  return isUnauthorizedError(error)
+    ? { error: USER_SESSION_EXPIRED, sessionExpired: true }
+    : {
+        error: errorText(error),
+        ...(error instanceof ApiError && error.body?.code ? { errorCode: error.body.code } : {}),
+        ...(error instanceof ApiError && error.body?.statementCount !== undefined
+          ? { statementCount: error.body.statementCount }
+          : {}),
+      };
+}
+
+async function refreshUserSession(): Promise<Result> {
+  const refreshToken = await getUserRefreshToken();
+  if (!refreshToken) {
+    return { error: USER_SESSION_EXPIRED, sessionExpired: true };
+  }
+
+  try {
+    await setUserSession(await userApi.refresh(refreshToken));
+    return {};
+  } catch (error) {
+    if (isUnauthorizedError(error)) {
+      await clearUserSession();
+    }
+    return userErrorResult<undefined>(error);
+  }
+}
+
+async function withUser<T>(
+  operation: (token: string) => Promise<T>,
+  retryAfterRefresh = false,
+): Promise<Result<T>> {
+  const token = await getUserToken();
+  if (!token) return { error: USER_SESSION_EXPIRED, sessionExpired: true };
+
+  try {
+    return { data: await operation(token) };
+  } catch (error) {
+    if (retryAfterRefresh && isUnauthorizedError(error)) {
+      const refreshResult = await refreshUserSession();
+      if (refreshResult.error) {
+        return {
+          error: refreshResult.error,
+          sessionExpired: refreshResult.sessionExpired,
+        };
+      }
+
+      const nextToken = await getUserToken();
+      if (nextToken) {
+        try {
+          return { data: await operation(nextToken) };
+        } catch (retryError) {
+          return userErrorResult<T>(retryError);
+        }
+      }
+
+      return { error: USER_SESSION_EXPIRED, sessionExpired: true };
+    }
+
+    return userErrorResult<T>(error);
+  }
+}
+
+export async function getUserMeAction() {
+  return withUser((token) => userApi.me(token), true);
+}
+
+// Server Components render can't write cookies, so this variant skips the
+// refresh-on-401 retry (which would call setUserSession -> cookies().set()).
+// Use this only from Server Components (e.g. layout guards); client
+// components should keep using getUserMeAction for the refresh behavior.
+export async function getUserMeForLayoutAction() {
+  return withUser((token) => userApi.me(token), false);
+}
+
+export async function getFinanceSummaryAction() {
+  return withUser((token) => userApi.summary(token), true);
+}
+
+/**
+ * Everything the expenses page needs in ONE server action: the browser sends a
+ * single request (server actions run one at a time on the client) and the API
+ * calls run in parallel here. Summary and the list are required; the other
+ * parts are optional and come back undefined on a non-auth failure.
+ */
+export async function getExpensesPageAction(
+  queries: { list: string; month: string; probe: string },
+  { includeProfile, includeCategories }: { includeProfile: boolean; includeCategories: boolean },
+) {
+  return withUser(async (token) => {
+    const optional = <T>(request: Promise<T>) =>
+      request.catch((error: unknown) => {
+        if (isUnauthorizedError(error)) throw error;
+        return undefined;
+      });
+    const [profile, summary, categories, expenses, month, probe] = await Promise.all([
+      includeProfile ? userApi.me(token) : undefined,
+      userApi.summary(token),
+      includeCategories ? optional(userApi.categories(token)) : undefined,
+      userApi.expenses(token, queries.list),
+      optional(userApi.expenses(token, queries.month)),
+      optional(userApi.expenses(token, queries.probe)),
+    ]);
+    return { profile, summary, categories, expenses, month, probe };
+  }, true);
+}
+
+export async function seedTestDataAction(): Promise<
+  Result<SeedTestDataSummary>
+> {
+  if (!testDataGenerationEnabled()) return { error: "testDataDisabled" };
+  return withFreshUser((token) => seedTestData(token));
+}
+
+export async function getExpensesAction(query: string) {
+  return withUser((token) => userApi.expenses(token, query), true);
+}
+
+export async function getCardExpenseBreakdownAction(query: string) {
+  return withUser((token) => userApi.cardExpenseBreakdown(token, query), true);
+}
+
+export async function getExpenseAction(id: string) {
+  return withUser((token) => userApi.expense(token, id), true);
+}
+
+export async function getCategoriesAction() {
+  return withUser((token) => userApi.categories(token), true);
+}
+
+export async function getCreditCardsAction() {
+  return withUser((token) => userApi.creditCards(token), true);
+}
+
+export async function getCreditCardsOverviewAction(query: string) {
+  return withUser((token) => userApi.creditCardsOverview(token, query), true);
+}
+
+export async function createCreditCardAction(body: CreditCardWritePayload) {
+  return withFreshUser((token) => userApi.createCreditCard(token, body));
+}
+
+export async function updateCreditCardAction(
+  id: string,
+  body: Partial<CreditCardWritePayload> & { isActive?: boolean },
+) {
+  return withFreshUser((token) => userApi.updateCreditCard(token, id, body));
+}
+
+export async function reorderCreditCardsAction(ids: string[]) {
+  return withFreshUser((token) => userApi.reorderCreditCards(token, ids));
+}
+
+export async function deactivateCreditCardAction(id: string) {
+  return withFreshUser((token) => userApi.deactivateCreditCard(token, id));
+}
+
+export async function deleteCreditCardPermanentlyAction(id: string) {
+  return withFreshUser((token) => userApi.deleteCreditCardPermanently(token, id));
+}
+
+export async function getStatementImportsAction(query: string) {
+  return withUser((token) => userApi.statementImports(token, query), true);
+}
+
+export async function getStatementImportAction(id: string) {
+  return withUser((token) => userApi.statementImport(token, id), true);
+}
+
+async function withFreshUser<T>(
+  operation: (token: string) => Promise<T>,
+): Promise<Result<T>> {
+  const profile = await getUserMeAction();
+  if (profile.error) {
+    return { error: profile.error, sessionExpired: profile.sessionExpired };
+  }
+
+  const token = await getUserToken();
+  return token
+    ? withUser(operation)
+    : { error: USER_SESSION_EXPIRED, sessionExpired: true };
+}
+
+export async function updateBudgetAction(body: BudgetWritePayload) {
+  return withFreshUser((token) => userApi.updateBudget(token, body));
+}
+
+export async function deleteExpenseAction(id: string) {
+  return withFreshUser((token) => userApi.deleteExpense(token, id));
+}
+
+export async function deleteCategoryAction(id: string) {
+  return withFreshUser((token) => userApi.deleteCategory(token, id));
+}
+
+export async function updateCategoryAction(
+  id: string,
+  body: CategoryWritePayload,
+) {
+  return withFreshUser((token) => userApi.updateCategory(token, id, body));
+}
+
+export async function createCategoryAction(body: CategoryWritePayload) {
+  return withFreshUser((token) => userApi.createCategory(token, body));
+}
+
+export async function createStatementImportAction(
+  file: File,
+  creditCardId?: string,
+) {
+  return withFreshUser((token) => {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    if (creditCardId) form.append("creditCardId", creditCardId);
+    return userApi.createStatementImport(token, form);
+  });
+}
+
+export async function processStatementImportAction(id: string) {
+  return withFreshUser((token) => userApi.processStatementImport(token, id));
+}
+
+export async function updateStatementRowsAction(
+  id: string,
+  body: UpdateStatementRowsPayload,
+) {
+  return withFreshUser((token) => userApi.updateStatementRows(token, id, body));
+}
+
+export async function confirmStatementImportAction(
+  id: string,
+  body: ConfirmStatementImportPayload,
+) {
+  return withFreshUser((token) => userApi.confirmStatementImport(token, id, body));
+}
+
+export async function revertStatementImportAction(
+  id: string,
+  body: ConfirmStatementImportPayload,
+) {
+  return withFreshUser((token) => userApi.revertStatementImport(token, id, body));
+}
+
+export async function resumeStatementImportAction(
+  id: string,
+  body: ConfirmStatementImportPayload,
+) {
+  return withFreshUser((token) => userApi.resumeStatementImport(token, id, body));
+}
+
+export async function createStatementPaymentAction(
+  id: string,
+  body: StatementPaymentWritePayload,
+) {
+  return withFreshUser((token) => userApi.createStatementPayment(token, id, body));
+}
+
+export async function correctStatementPaymentAction(
+  id: string,
+  body: CorrectStatementPaymentPayload,
+) {
+  return withFreshUser((token) => userApi.correctStatementPayment(token, id, body));
+}
+
+export async function voidStatementPaymentAction(
+  id: string,
+  body: VoidStatementPaymentPayload,
+) {
+  return withFreshUser((token) => userApi.voidStatementPayment(token, id, body));
+}
+
+export async function deleteStatementImportAction(id: string) {
+  return withFreshUser((token) => userApi.deleteStatementImport(token, id));
+}
+
+export async function updateExpenseAction(
+  id: string,
+  body: ExpenseWritePayload,
+) {
+  return withFreshUser((token) => userApi.updateExpense(token, id, body));
+}
+
+export async function getSubscriptionsAction() {
+  return withUser((token) => userApi.listSubscriptions(token), true);
+}
+
+export async function linkExpensesToSubscriptionAction(id: string, expenseIds: string[]) {
+  return withFreshUser((token) => userApi.linkExpensesToSubscription(token, id, expenseIds));
+}
+
+export async function unlinkExpensesFromSubscriptionAction(id: string, expenseIds: string[]) {
+  return withFreshUser((token) => userApi.unlinkExpensesFromSubscription(token, id, expenseIds));
+}
+
+export async function createSubscriptionAction(body: CreateSubscriptionPayload) {
+  return withFreshUser((token) => userApi.createSubscription(token, body));
+}
+
+export async function updateSubscriptionAction(
+  id: string,
+  body: UpdateSubscriptionPayload,
+) {
+  return withFreshUser((token) => userApi.updateSubscription(token, id, body));
+}
+
+export async function deactivateSubscriptionAction(id: string) {
+  return withFreshUser((token) => userApi.deactivateSubscription(token, id));
+}
+
+export async function deleteSubscriptionAction(id: string) {
+  return withFreshUser((token) => userApi.deleteSubscriptionPermanently(token, id));
+}
+
+export async function createExpenseAction(
+  body: ExpenseWritePayload,
+  receipt?: File,
+): Promise<Result<unknown>> {
+  return withFreshUser(async (token) => {
+    const form = new FormData();
+    addExpenseFields(form, body);
+    if (receipt) form.append("image", receipt, receipt.name);
+    return userApi.createExpense(token, form);
+  });
+}
+
+const purchaseIdSchema = z.string().uuid();
+const purchaseExpenseSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  cost: z.string().regex(/^\d+(?:\.\d{1,2})?$/).refine((value) => Number(value) > 0),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  categoryId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  note: z.string().max(1000).optional(),
+  merchantName: z.string().max(120).optional(),
+  locationLabel: z.string().max(120).optional(),
+  paymentMethod: z.enum(["CASH", "CREDIT_CARD", "DEBIT_CARD", "TRANSFER"]).optional(),
+  creditCardId: z.string().uuid().optional(),
+  isInstallment: z.boolean().optional(),
+  installmentCount: z.number().int().min(2).max(120).optional(),
+  installmentFrequency: z.literal("MONTHLY").optional(),
+  installmentPurchaseDate: z.string().optional(),
+  installmentFirstPaymentDate: z.string().optional(),
+});
+
+export async function getDetectedPurchasesAction(page = 1, limit = 20): Promise<Result<DetectedPurchaseListResponse>> {
+  const parsed = z.object({ page: z.number().int().min(1), limit: z.number().int().min(1).max(100) }).safeParse({ page, limit });
+  if (!parsed.success) return { error: "requestFailedGeneric" };
+  return withUser((token) => userApi.detectedPurchases(token, pendingPurchaseQuery(page, limit)), true);
+}
+
+export async function confirmDetectedPurchaseAction(id: string, expense: ExpenseWritePayload): Promise<Result<DetectedPurchase>> {
+  const parsed = purchaseExpenseSchema.safeParse(expense);
+  if (!purchaseIdSchema.safeParse(id).success || !parsed.success) return { error: "requestFailedGeneric" };
+  return withFreshUser((token) => userApi.confirmDetectedPurchase(token, id, parsed.data));
+}
+
+const purchasePaymentSchema = z.object({
+  cardId: z.string().uuid(),
+  amount: z.number().min(0.01).max(9999999999.99).refine((value) => Math.abs(Math.round(value * 100) - value * 100) < 1e-6),
+  paidAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
+  note: z.string().max(500).optional(),
+});
+
+export async function confirmDetectedPurchaseAsPaymentAction(id: string, payload: ConfirmAsPaymentPayload): Promise<Result<DetectedPurchase>> {
+  const parsed = purchasePaymentSchema.safeParse(payload);
+  if (!purchaseIdSchema.safeParse(id).success || !parsed.success) return { error: "requestFailedGeneric" };
+  return withFreshUser((token) => userApi.confirmDetectedPurchaseAsPayment(token, id, parsed.data));
+}
+
+export async function discardDetectedPurchaseAction(id: string): Promise<Result<DetectedPurchase>> {
+  if (!purchaseIdSchema.safeParse(id).success) return { error: "requestFailedGeneric" };
+  return withFreshUser((token) => userApi.discardDetectedPurchase(token, id));
+}

@@ -1,0 +1,238 @@
+- generic [ref=f10e1]:
+  - generic [ref=f10e2]:
+    - complementary [ref=f10e3]:
+      - generic [ref=f10e4]:
+        - generic [ref=f10e5]:
+          - generic [ref=f10e6]: B
+          - generic [ref=f10e8]: Budget Panel
+        - paragraph [ref=f10e9]: Navigation
+        - navigation [ref=f10e10]:
+          - link "Expenses" [ref=f10e11] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f10e205] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f10e22]: My Cards
+            - generic "3" [ref=f10e206]
+          - link "Statements" [ref=f10e23] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f10e29] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f10e35] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f10e43] [cursor=pointer]:
+            - /url: /finance/reports
+        - generic [ref=f10e49]:
+          - img "Kevin López González" [ref=f10e50]
+          - generic [ref=f10e51]:
+            - generic [ref=f10e52]: Kevin López González
+            - generic [ref=f10e53]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f10e54] [cursor=pointer]
+    - generic [ref=f10e58]:
+      - banner [ref=f10e59]:
+        - button "Collapse sidebar" [ref=f10e586] [cursor=pointer]
+        - generic [ref=f10e64]:
+          - button "Search (Cmd+K)" [ref=f10e65]
+          - button "Language" [ref=f10e69] [cursor=pointer]:
+            - img "global" [ref=f10e70]
+          - button "Subscription alerts (3)" [ref=f10e207] [cursor=pointer]:
+            - generic [ref=f10e211]: "3"
+      - main [ref=f10e77]:
+        - generic [ref=f10e587]:
+          - generic [ref=f10e588]:
+            - generic [ref=f10e589]:
+              - heading "Your expenses" [level=1] [ref=f10e590]
+              - paragraph [ref=f10e591]: Live data from your Budget account.
+            - generic [ref=f10e592]:
+              - generic [ref=f10e593]: Updated 12:15 AM
+              - button "Refresh" [ref=f10e594] [cursor=pointer]
+              - button "New expense" [ref=f10e598] [cursor=pointer]
+          - status [ref=f10e599]:
+            - generic [ref=f10e600]:
+              - strong [ref=f10e601]: iCloud
+              - text: is due in 1 day (~MXN 49.00, based on your payment history).
+            - button "Dismiss" [ref=f10e602] [cursor=pointer]: ✕
+          - generic [ref=f10e603]:
+            - generic [ref=f10e606]:
+              - generic [ref=f10e607]:
+                - img "wallet" [ref=f10e609]
+                - paragraph [ref=f10e612]: Spent this period
+              - generic [ref=f10e614]:
+                - generic [ref=f10e615]: MXN
+                - generic [ref=f10e616]: 2,470.75
+              - generic [ref=f10e618]:
+                - generic [ref=f10e619]: Monthly · Oct 1 – Oct 31
+                - button "Edit budget" [ref=f10e620] [cursor=pointer]
+            - generic [ref=f10e622]:
+              - generic [ref=f10e623]:
+                - generic [ref=f10e624]:
+                  - img "safety" [ref=f10e626]
+                  - paragraph [ref=f10e630]: Budget period remaining
+                - generic [ref=f10e632]:
+                  - generic [ref=f10e633]: MXN
+                  - generic [ref=f10e634]: "-820.75"
+              - img "100% of budget used" [ref=f10e636]:
+                - generic [ref=f10e639]: "100"
+          - generic [ref=f10e641]:
+            - heading "Expense history" [level=3] [ref=f10e642]
+            - generic [ref=f10e643]:
+              - generic [ref=f10e644]:
+                - searchbox "Search expenses" [ref=f10e646]
+                - button [ref=f10e648] [cursor=pointer]:
+                  - img "search" [ref=f10e650]
+              - generic [ref=f10e653]:
+                - textbox "Filter by date range" [ref=f10e655]:
+                  - /placeholder: From
+                  - text: 2026-10-01
+                - generic "to" [ref=f10e657]:
+                  - img "swap-right" [ref=f10e658]
+                - textbox "Filter by date range" [ref=f10e662]:
+                  - /placeholder: To
+                  - text: 2026-10-07
+                - generic:
+                  - img "calendar"
+                - button [ref=f10e1037] [cursor=pointer]:
+                  - img "close-circle" [ref=f10e1038]
+              - generic [ref=f10e663] [cursor=pointer]:
+                - generic [ref=f10e664]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=f10e665]
+                - img "down" [ref=f10e667]
+              - generic: BBVA · BBVA •••• 7289
+              - generic [ref=f10e670] [cursor=pointer]:
+                - generic "BBVA · BBVA •••• 7289" [ref=f10e1492]:
+                  - text: BBVA · BBVA •••• 7289
+                  - combobox "Filter by card" [active] [ref=f10e672]
+                - img "down" [ref=f10e674]
+                - img "close-circle" [ref=f10e980]
+              - generic [ref=f10e677] [cursor=pointer]:
+                - generic "All" [ref=f10e678]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=f10e679]
+                - img "down" [ref=f10e681]
+            - generic [ref=f10e684]:
+              - generic [ref=f10e685]:
+                - generic [ref=f10e1493]:
+                  - generic [ref=f10e1494]:
+                    - generic [ref=f10e1495]: 🎬
+                    - generic [ref=f10e1496]:
+                      - paragraph [ref=f10e1497]: Pg*google google one
+                      - paragraph [ref=f10e1498]:
+                        - generic [ref=f10e1499]: Oct 4, 2026
+                        - generic [aria-hidden] [ref=f10e1500]: ·
+                        - generic [ref=f10e1501]: Pg*google google one
+                        - generic [aria-hidden] [ref=f10e1502]: ·
+                        - generic [ref=f10e1503]: Streaming y suscripciones
+                      - paragraph [ref=f10e1504]:
+                        - generic [ref=f10e1505]:
+                          - img "credit-card" [ref=f10e1506]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e1509]:
+                    - generic [ref=f10e1510]: "-MXN 59.00"
+                    - generic [ref=f10e1511]:
+                      - button "Edit Pg*google google one" [ref=f10e1512] [cursor=pointer]:
+                        - img "edit" [ref=f10e1513]
+                      - button "Delete Pg*google google one" [ref=f10e1516] [cursor=pointer]:
+                        - img "delete" [ref=f10e1517]
+                - generic [ref=f10e1520]:
+                  - generic [ref=f10e1521]:
+                    - generic [ref=f10e1522]: 🍽️
+                    - generic [ref=f10e1523]:
+                      - paragraph [ref=f10e1524]: Com rap papalotl
+                      - paragraph [ref=f10e1525]:
+                        - generic [ref=f10e1526]: Oct 3, 2026
+                        - generic [aria-hidden] [ref=f10e1527]: ·
+                        - generic [ref=f10e1528]: Com rap papalotl
+                        - generic [aria-hidden] [ref=f10e1529]: ·
+                        - generic [ref=f10e1530]: Restaurantes
+                      - paragraph [ref=f10e1531]:
+                        - generic [ref=f10e1532]:
+                          - img "credit-card" [ref=f10e1533]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e1536]:
+                    - generic [ref=f10e1537]: "-MXN 288.20"
+                    - generic [ref=f10e1538]:
+                      - button "Edit Com rap papalotl" [ref=f10e1539] [cursor=pointer]:
+                        - img "edit" [ref=f10e1540]
+                      - button "Delete Com rap papalotl" [ref=f10e1543] [cursor=pointer]:
+                        - img "delete" [ref=f10e1544]
+                - generic [ref=f10e1547]:
+                  - generic [ref=f10e1548]:
+                    - generic [ref=f10e1549]: 🧩
+                    - generic [ref=f10e1550]:
+                      - paragraph [ref=f10e1551]: Pg*google facebook
+                      - paragraph [ref=f10e1552]:
+                        - generic [ref=f10e1553]: Oct 2, 2026
+                        - generic [aria-hidden] [ref=f10e1554]: ·
+                        - generic [ref=f10e1555]: Pg*google facebook
+                        - generic [aria-hidden] [ref=f10e1556]: ·
+                        - generic [ref=f10e1557]: Otros gastos
+                      - paragraph [ref=f10e1558]:
+                        - generic [ref=f10e1559]:
+                          - img "credit-card" [ref=f10e1560]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e1563]:
+                    - generic [ref=f10e1564]: "-MXN 47.00"
+                    - generic [ref=f10e1565]:
+                      - button "Edit Pg*google facebook" [ref=f10e1566] [cursor=pointer]:
+                        - img "edit" [ref=f10e1567]
+                      - button "Delete Pg*google facebook" [ref=f10e1570] [cursor=pointer]:
+                        - img "delete" [ref=f10e1571]
+                - generic [ref=f10e1574]:
+                  - generic [ref=f10e1575]:
+                    - generic [ref=f10e1576]: 🍽️
+                    - generic [ref=f10e1577]:
+                      - paragraph [ref=f10e1578]: Rest cactus gastrocult
+                      - paragraph [ref=f10e1579]:
+                        - generic [ref=f10e1580]: Oct 2, 2026
+                        - generic [aria-hidden] [ref=f10e1581]: ·
+                        - generic [ref=f10e1582]: Rest cactus gastrocult
+                        - generic [aria-hidden] [ref=f10e1583]: ·
+                        - generic [ref=f10e1584]: Restaurantes
+                      - paragraph [ref=f10e1585]:
+                        - generic [ref=f10e1586]:
+                          - img "credit-card" [ref=f10e1587]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e1590]:
+                    - generic [ref=f10e1591]: "-MXN 374.00"
+                    - generic [ref=f10e1592]:
+                      - button "Edit Rest cactus gastrocult" [ref=f10e1593] [cursor=pointer]:
+                        - img "edit" [ref=f10e1594]
+                      - button "Delete Rest cactus gastrocult" [ref=f10e1597] [cursor=pointer]:
+                        - img "delete" [ref=f10e1598]
+                - generic [ref=f10e1601]:
+                  - generic [ref=f10e1602]:
+                    - generic [ref=f10e1603]: 🧩
+                    - generic [ref=f10e1604]:
+                      - paragraph [ref=f10e1605]: Merpago*rockparaiso
+                      - paragraph [ref=f10e1606]:
+                        - generic [ref=f10e1607]: Oct 2, 2026
+                        - generic [aria-hidden] [ref=f10e1608]: ·
+                        - generic [ref=f10e1609]: Merpago*rockparaiso
+                        - generic [aria-hidden] [ref=f10e1610]: ·
+                        - generic [ref=f10e1611]: Otros gastos
+                      - paragraph [ref=f10e1612]:
+                        - generic [ref=f10e1613]:
+                          - img "credit-card" [ref=f10e1614]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f10e1617]:
+                    - generic [ref=f10e1618]: "-MXN 297.00"
+                    - generic [ref=f10e1619]:
+                      - button "Edit Merpago*rockparaiso" [ref=f10e1620] [cursor=pointer]:
+                        - img "edit" [ref=f10e1621]
+                      - button "Delete Merpago*rockparaiso" [ref=f10e1624] [cursor=pointer]:
+                        - img "delete" [ref=f10e1625]
+              - generic [ref=f10e950]:
+                - generic [ref=f10e951]: Showing 1–5 of 5 records
+                - generic [ref=f10e952]:
+                  - generic [ref=f10e953] [cursor=pointer]:
+                    - generic "10 / page" [ref=f10e954]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=f10e955]
+                    - img "down" [ref=f10e957]
+                  - generic [ref=f10e960]:
+                    - button "Previous" [disabled]:
+                      - img "left"
+                    - generic [ref=f10e961]: Page 1 of 1
+                    - button "Next" [disabled]:
+                      - img "right"
+  - alert [ref=f10e204]

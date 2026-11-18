@@ -1,0 +1,185 @@
+- generic [ref=e1]:
+  - alert [ref=e77]
+  - iframe [aria-hidden] [ref=e107]
+  - generic [ref=e109]:
+    - complementary [ref=e110]:
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]: B
+          - generic [ref=e115]: Budget Panel
+        - paragraph [ref=e116]: Navigation
+        - navigation [ref=e117]:
+          - link "Expenses" [ref=e118] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=e125] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=e129]: My Cards
+            - generic "3" [ref=e130]
+          - link "Statements" [ref=e131] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=e137] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=e143] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=e151] [cursor=pointer]:
+            - /url: /finance/reports
+        - paragraph [ref=e156]: Workspaces
+        - navigation "Workspaces" [ref=e157]:
+          - link "Personal nutrition" [ref=e158] [cursor=pointer]:
+            - /url: /nutrition/today
+        - generic [ref=e165]:
+          - img "Kevin" [ref=e166]
+          - generic [ref=e167]:
+            - generic [ref=e168]: Kevin
+            - generic [ref=e169]: nightmare28899@gmail.com
+          - button "Sign out" [ref=e170] [cursor=pointer]
+    - generic [ref=e174]:
+      - banner [ref=e175]:
+        - button "Expand sidebar" [ref=e177] [cursor=pointer]
+        - generic [ref=e180]:
+          - button "Search (Cmd+K)" [ref=e181]
+          - button "Language" [ref=e185] [cursor=pointer]:
+            - img "global" [ref=e186]
+          - button "Subscription alerts" [ref=e189] [cursor=pointer]
+      - main [ref=e193]:
+        - generic [ref=e195]:
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - heading "Your expenses" [level=1] [ref=e198]
+              - paragraph [ref=e199]: Live data from your Budget account.
+            - generic [ref=e200]:
+              - generic [ref=e201]: Updated 11:13 PM
+              - button "Refresh" [disabled]
+              - button "New expense" [ref=e206] [cursor=pointer]
+          - generic [ref=e207]:
+            - generic [ref=e210]:
+              - generic [ref=e211]:
+                - img "wallet" [ref=e213]
+                - paragraph [ref=e216]: Spent this month
+              - generic [ref=e217]: "0.00"
+              - generic [ref=e220]: October 2026
+            - generic [ref=e225]:
+              - generic [ref=e226]:
+                - img "safety" [ref=e228]
+                - paragraph [ref=e232]: No budget configured
+              - generic [ref=e233]: —
+              - generic [ref=e237]:
+                - paragraph [ref=e238]: Set a budget to track how much you have left each period.
+                - button "Configure budget" [ref=e239] [cursor=pointer]
+          - generic [ref=e241]:
+            - heading "Expense history" [level=3] [ref=e242]
+            - generic [ref=e243]:
+              - generic [ref=e244]:
+                - searchbox "Search expenses" [ref=e246]
+                - button [ref=e248] [cursor=pointer]:
+                  - img "search" [ref=e250]
+              - generic [ref=e253]:
+                - textbox "Filter by date range" [ref=e255]:
+                  - /placeholder: From
+                  - text: 2026-10-01
+                - generic "to" [ref=e257]:
+                  - img "swap-right" [ref=e258]
+                - textbox "Filter by date range" [ref=e262]:
+                  - /placeholder: To
+                  - text: 2026-10-07
+                - generic:
+                  - img "calendar"
+                - button [ref=e650] [cursor=pointer]:
+                  - img "close-circle" [ref=e651]
+              - generic [ref=e263] [cursor=pointer]:
+                - generic [ref=e264]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=e265]
+                - img "down" [ref=e267]
+              - generic [ref=e270] [cursor=pointer]:
+                - generic "Rappi Card · Rappi •••• 5969" [ref=e569]:
+                  - text: Rappi Card · Rappi •••• 5969
+                  - combobox "Filter by card" [ref=e272]
+                - img "down" [ref=e274]
+                - img "close-circle" [ref=e571]
+              - generic [ref=e277] [cursor=pointer]:
+                - generic "All" [ref=e278]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=e279]
+                - img "down" [ref=e281]
+            - generic [ref=e284]:
+              - generic [ref=e654]:
+                - img "No data" [ref=e656]
+                - generic [ref=e667]: No expenses match filters
+              - generic [ref=e541]:
+                - generic [ref=e542]: No records
+                - generic [ref=e543]:
+                  - generic [ref=e544] [cursor=pointer]:
+                    - generic "10 / page" [ref=e545]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=e546]
+                    - img "down" [ref=e548]
+                  - generic [ref=e551]:
+                    - button "Previous" [disabled]:
+                      - img "left"
+                    - generic [ref=e552]: Page 1 of 1
+                    - button "Next" [disabled]:
+                      - img "right"
+  - generic [ref=e668]:
+    - button "Close modal backdrop" [ref=e669]
+    - dialog [ref=e670]:
+      - heading "New expense" [level=3] [ref=e671]
+      - generic [ref=e673]:
+        - generic [ref=e675]:
+          - generic "Title" [ref=e677]: "* Title"
+          - textbox "* Title" [ref=e681]:
+            - /placeholder: e.g. Grocery shopping
+        - generic [ref=e682]:
+          - generic [ref=e684]:
+            - generic "Amount" [ref=e686]: "* Amount"
+            - textbox "* Amount" [ref=e690]:
+              - /placeholder: "0.00"
+          - generic [ref=e692]:
+            - generic "Currency" [ref=e694]: "* Currency"
+            - textbox "* Currency" [ref=e698]:
+              - /placeholder: MXN
+              - text: MXN
+        - generic [ref=e699]:
+          - generic [ref=e701]:
+            - generic "Date" [ref=e703]
+            - textbox "Date" [ref=e707]
+          - generic [ref=e709]:
+            - generic "Category" [ref=e711]: "* Category"
+            - generic [ref=e715] [cursor=pointer]:
+              - generic [ref=e716]:
+                - generic: Select a category
+                - combobox "* Category" [ref=e717]
+              - img "down" [ref=e719]
+        - generic [ref=e724]:
+          - generic "Payment method" [ref=e726]: "* Payment method"
+          - generic [ref=e730] [cursor=pointer]:
+            - generic "Cash" [ref=e731]:
+              - text: Cash
+              - combobox "* Payment method" [expanded] [active] [ref=e732]:
+                - listbox:
+                  - option "Cash" [selected]: CASH
+                  - option "Credit card": CREDIT_CARD
+            - img "down" [ref=e734]
+        - generic [ref=e738]:
+          - generic "Merchant" [ref=e740]
+          - textbox "Merchant" [ref=e744]:
+            - /placeholder: e.g. Walmart
+        - generic [ref=e746]:
+          - generic "Location" [ref=e748]
+          - textbox "Location" [ref=e752]:
+            - /placeholder: e.g. Downtown store
+        - generic [ref=e754]:
+          - generic "Note" [ref=e756]
+          - textbox "Note" [ref=e760]:
+            - /placeholder: Add any extra detail (optional)
+        - generic [ref=e762]:
+          - generic "Receipt (optional, max 5 MB)" [ref=e764]
+          - button "Choose image" [ref=e771] [cursor=pointer]
+        - generic [ref=e772]:
+          - button "Cancel" [ref=e773] [cursor=pointer]
+          - button "Create expense" [ref=e774] [cursor=pointer]
+  - generic [ref=e780]:
+    - generic "Cash" [ref=e781] [cursor=pointer]
+    - generic "Credit card" [ref=e783] [cursor=pointer]
+    - generic "Debit card" [ref=e785] [cursor=pointer]
+    - generic "Transfer" [ref=e787] [cursor=pointer]

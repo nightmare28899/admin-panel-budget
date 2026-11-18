@@ -1,0 +1,146 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e3]:
+    - complementary [ref=f3e4]:
+      - generic [ref=f3e5]:
+        - generic [ref=f3e6]:
+          - generic [ref=f3e7]: B
+          - generic [ref=f3e9]: Budget Panel
+        - paragraph [ref=f3e10]: Navigation
+        - navigation [ref=f3e11]:
+          - link "Expenses" [ref=f3e12] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f3e214] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f3e23]: My Cards
+            - generic "3" [ref=f3e215]
+          - link "Statements" [ref=f3e24] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f3e30] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f3e36] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f3e44] [cursor=pointer]:
+            - /url: /finance/reports
+        - paragraph [ref=f3e49]: Workspaces
+        - navigation "Workspaces" [ref=f3e50]:
+          - link "Personal nutrition" [ref=f3e51] [cursor=pointer]:
+            - /url: /nutrition/today
+        - generic [ref=f3e58]:
+          - img "Kevin" [ref=f3e59]
+          - generic [ref=f3e60]:
+            - generic [ref=f3e61]: Kevin
+            - generic [ref=f3e62]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f3e63] [cursor=pointer]
+    - generic [ref=f3e67]:
+      - banner [ref=f3e68]:
+        - button "Expand sidebar" [ref=f3e70] [cursor=pointer]
+        - generic [ref=f3e73]:
+          - button "Search (Cmd+K)" [ref=f3e74]
+          - button "Language" [ref=f3e78] [cursor=pointer]:
+            - img "global" [ref=f3e79]
+          - button "Subscription alerts" [ref=f3e82] [cursor=pointer]
+      - main [ref=f3e86]:
+        - generic [ref=f3e88]:
+          - generic [ref=f3e89]:
+            - generic [ref=f3e90]:
+              - heading "Your expenses" [level=1] [ref=f3e91]
+              - paragraph [ref=f3e92]: Live data from your Budget account.
+            - generic [ref=f3e93]:
+              - generic [ref=f3e216]: Updated 11:18 PM
+              - button "Refresh" [ref=f3e94] [cursor=pointer]
+              - button "New expense" [active] [ref=f3e98] [cursor=pointer]
+          - status [ref=f3e503]:
+            - generic [ref=f3e504]: Expense created successfully.
+            - button "Dismiss notification" [ref=f3e505] [cursor=pointer]: ✕
+          - generic [ref=f3e217]:
+            - generic [ref=f3e220]:
+              - generic [ref=f3e221]:
+                - img "wallet" [ref=f3e223]
+                - paragraph [ref=f3e226]: Spent this month
+              - generic [ref=f3e228]:
+                - generic [ref=f3e506]: MXN
+                - generic [ref=f3e229]: "113.05"
+              - generic [ref=f3e230]: October 2026
+            - generic [ref=f3e235]:
+              - generic [ref=f3e236]:
+                - img "safety" [ref=f3e238]
+                - paragraph [ref=f3e242]: No budget configured
+              - generic [ref=f3e243]: —
+              - generic [ref=f3e247]:
+                - paragraph [ref=f3e248]: Set a budget to track how much you have left each period.
+                - button "Configure budget" [ref=f3e249] [cursor=pointer]
+          - generic [ref=f3e110]:
+            - heading "Expense history" [level=3] [ref=f3e111]
+            - generic [ref=f3e112]:
+              - generic [ref=f3e113]:
+                - searchbox "Search expenses" [ref=f3e115]
+                - button [ref=f3e121] [cursor=pointer]:
+                  - img "search" [ref=f3e123]
+              - generic [ref=f3e126]:
+                - textbox "Filter by date range" [ref=f3e128]:
+                  - /placeholder: From
+                  - text: 2026-10-01
+                - generic "to" [ref=f3e130]:
+                  - img "swap-right" [ref=f3e131]
+                - textbox "Filter by date range" [ref=f3e135]:
+                  - /placeholder: To
+                  - text: 2026-10-07
+                - generic:
+                  - img "calendar"
+                - button [ref=f3e250] [cursor=pointer]:
+                  - img "close-circle" [ref=f3e251]
+              - generic [ref=f3e140] [cursor=pointer]:
+                - generic [ref=f3e141]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=f3e143]
+                - img "down" [ref=f3e145]
+              - generic [ref=f3e148] [cursor=pointer]:
+                - generic "Rappi Card · Rappi •••• 5969" [ref=f3e254]:
+                  - text: Rappi Card · Rappi •••• 5969
+                  - combobox "Filter by card" [ref=f3e151]
+                - img "down" [ref=f3e153]
+                - img "close-circle" [ref=f3e256]
+              - generic [ref=f3e156] [cursor=pointer]:
+                - generic "All" [ref=f3e157]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=f3e158]
+                - img "down" [ref=f3e160]
+            - generic [ref=f3e259]:
+              - generic [ref=f3e507]:
+                - generic [ref=f3e508]:
+                  - generic [ref=f3e509]: 🛍️
+                  - generic [ref=f3e510]:
+                    - paragraph [ref=f3e511]: Amazon — 3 months
+                    - paragraph [ref=f3e512]:
+                      - generic [ref=f3e513]: Oct 5, 2026
+                      - generic [aria-hidden] [ref=f3e514]: ·
+                      - generic [ref=f3e515]: Amazon
+                      - generic [aria-hidden] [ref=f3e516]: ·
+                      - generic [ref=f3e517]: Compras en línea
+                    - paragraph [ref=f3e518]:
+                      - generic [ref=f3e519]: Installment 1/3
+                      - generic [ref=f3e520]:
+                        - img "credit-card" [ref=f3e521]
+                        - text: Rappi •••• 5969
+                - generic [ref=f3e524]:
+                  - generic [ref=f3e525]: "-MXN 113.05"
+                  - generic [ref=f3e526]:
+                    - button "Edit Amazon — 3 months" [ref=f3e527] [cursor=pointer]:
+                      - img "edit" [ref=f3e528]
+                    - button "Delete Amazon — 3 months" [ref=f3e531] [cursor=pointer]:
+                      - img "delete" [ref=f3e532]
+              - generic [ref=f3e275]:
+                - generic [ref=f3e276]: Showing 1–1 of 1 record
+                - generic [ref=f3e277]:
+                  - generic [ref=f3e278] [cursor=pointer]:
+                    - generic "10 / page" [ref=f3e279]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=f3e280]
+                    - img "down" [ref=f3e282]
+                  - generic [ref=f3e285]:
+                    - button "Previous" [disabled]:
+                      - img "left"
+                    - generic [ref=f3e286]: Page 1 of 1
+                    - button "Next" [disabled]:
+                      - img "right"
+  - alert [ref=f3e287]

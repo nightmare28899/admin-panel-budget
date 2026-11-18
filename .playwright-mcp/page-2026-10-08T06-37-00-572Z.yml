@@ -1,0 +1,337 @@
+- generic [ref=f11e1]:
+  - generic [ref=f11e2]:
+    - complementary [ref=f11e3]:
+      - generic [ref=f11e4]:
+        - generic [ref=f11e5]:
+          - generic [ref=f11e6]: B
+          - generic [ref=f11e8]: Budget Panel
+        - paragraph [ref=f11e9]: Navigation
+        - navigation [ref=f11e10]:
+          - link "Expenses" [active] [ref=f11e11] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards 3" [ref=f11e282] [cursor=pointer]:
+            - /url: /finance/cards
+            - generic [ref=f11e22]: My Cards
+            - generic "3" [ref=f11e283]
+          - link "Statements" [ref=f11e23] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f11e29] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f11e35] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f11e43] [cursor=pointer]:
+            - /url: /finance/reports
+        - generic [ref=f11e49]:
+          - img "Kevin López González" [ref=f11e50]
+          - generic [ref=f11e51]:
+            - generic [ref=f11e52]: Kevin López González
+            - generic [ref=f11e53]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f11e54] [cursor=pointer]
+    - generic [ref=f11e58]:
+      - banner [ref=f11e59]:
+        - button "Collapse sidebar" [ref=f11e61] [cursor=pointer]
+        - generic [ref=f11e64]:
+          - button "Search (Cmd+K)" [ref=f11e65]
+          - button "Language" [ref=f11e69] [cursor=pointer]:
+            - img "global" [ref=f11e70]
+          - button "Subscription alerts (3)" [ref=f11e284] [cursor=pointer]:
+            - generic [ref=f11e288]: "3"
+      - main [ref=f11e77]:
+        - generic [ref=f11e880]:
+          - generic [ref=f11e881]:
+            - generic [ref=f11e882]:
+              - heading "Your expenses" [level=1] [ref=f11e883]
+              - paragraph [ref=f11e884]: Live data from your Budget account.
+            - generic [ref=f11e885]:
+              - generic [ref=f11e886]: Updated 12:36 AM
+              - button "Refresh" [ref=f11e887] [cursor=pointer]
+              - button "New expense" [ref=f11e891] [cursor=pointer]
+          - status [ref=f11e892]:
+            - generic [ref=f11e893]:
+              - strong [ref=f11e894]: iCloud
+              - text: is due in 1 day (~MXN 49.00, based on your payment history).
+            - button "Dismiss" [ref=f11e895] [cursor=pointer]: ✕
+          - generic [ref=f11e896]:
+            - generic [ref=f11e899]:
+              - generic [ref=f11e900]:
+                - img "wallet" [ref=f11e902]
+                - paragraph [ref=f11e905]: Spent this period
+              - generic [ref=f11e907]:
+                - generic [ref=f11e908]: MXN
+                - generic [ref=f11e909]: 2,470.75
+              - generic [ref=f11e911]:
+                - generic [ref=f11e912]: Monthly · Oct 1 – Oct 31
+                - button "Edit budget" [ref=f11e913] [cursor=pointer]
+            - generic [ref=f11e915]:
+              - generic [ref=f11e916]:
+                - generic [ref=f11e917]:
+                  - img "safety" [ref=f11e919]
+                  - paragraph [ref=f11e923]: Budget period remaining
+                - generic [ref=f11e925]:
+                  - generic [ref=f11e926]: MXN
+                  - generic [ref=f11e927]: "-820.75"
+              - img "100% of budget used" [ref=f11e929]:
+                - generic [ref=f11e932]: "100"
+          - generic [ref=f11e934]:
+            - heading "Expense history" [level=3] [ref=f11e935]
+            - generic [ref=f11e936]:
+              - generic [ref=f11e937]:
+                - searchbox "Search expenses" [ref=f11e939]
+                - button [ref=f11e941] [cursor=pointer]:
+                  - img "search" [ref=f11e943]
+              - generic [ref=f11e946]:
+                - textbox "Filter by date range" [ref=f11e948]:
+                  - /placeholder: From
+                - generic "to" [ref=f11e950]:
+                  - img "swap-right" [ref=f11e951]
+                - textbox "Filter by date range" [ref=f11e955]:
+                  - /placeholder: To
+                - generic:
+                  - img "calendar"
+              - generic [ref=f11e956] [cursor=pointer]:
+                - generic [ref=f11e957]:
+                  - generic: Category
+                  - combobox "Filter by category" [ref=f11e958]
+                - img "down" [ref=f11e960]
+              - generic [ref=f11e963] [cursor=pointer]:
+                - generic [ref=f11e964]:
+                  - generic: All cards
+                  - combobox "Filter by card" [ref=f11e965]
+                - img "down" [ref=f11e967]
+              - generic [ref=f11e970] [cursor=pointer]:
+                - generic "All" [ref=f11e971]:
+                  - text: All
+                  - combobox "Filter by payment status" [ref=f11e972]
+                - img "down" [ref=f11e974]
+            - generic [ref=f11e977]:
+              - generic [ref=f11e978]:
+                - generic [ref=f11e979]:
+                  - generic [ref=f11e980]:
+                    - generic [ref=f11e981]: 🎮
+                    - generic [ref=f11e982]:
+                      - paragraph [ref=f11e983]: Google Clash of Clans
+                      - paragraph [ref=f11e984]:
+                        - generic [ref=f11e985]: Oct 7, 2026
+                        - generic [aria-hidden] [ref=f11e986]: ·
+                        - generic [ref=f11e987]: Google Clash of Clans
+                        - generic [aria-hidden] [ref=f11e988]: ·
+                        - generic [ref=f11e989]: Juegos y apps
+                      - paragraph [ref=f11e990]:
+                        - generic [ref=f11e991]:
+                          - img "credit-card" [ref=f11e992]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e995]:
+                    - generic [ref=f11e996]: "-MXN 39.00"
+                    - generic [ref=f11e997]:
+                      - button "Edit Google Clash of Clans" [ref=f11e998] [cursor=pointer]:
+                        - img "edit" [ref=f11e999]
+                      - button "Delete Google Clash of Clans" [ref=f11e1002] [cursor=pointer]:
+                        - img "delete" [ref=f11e1003]
+                - generic [ref=f11e1006]:
+                  - generic [ref=f11e1007]:
+                    - generic [ref=f11e1008]: 🎮
+                    - generic [ref=f11e1009]:
+                      - paragraph [ref=f11e1010]: Google Clash of Clans
+                      - paragraph [ref=f11e1011]:
+                        - generic [ref=f11e1012]: Oct 7, 2026
+                        - generic [aria-hidden] [ref=f11e1013]: ·
+                        - generic [ref=f11e1014]: Google Clash of Clans
+                        - generic [aria-hidden] [ref=f11e1015]: ·
+                        - generic [ref=f11e1016]: Juegos y apps
+                      - paragraph [ref=f11e1017]:
+                        - generic [ref=f11e1018]:
+                          - img "credit-card" [ref=f11e1019]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e1022]:
+                    - generic [ref=f11e1023]: "-MXN 79.00"
+                    - generic [ref=f11e1024]:
+                      - button "Edit Google Clash of Clans" [ref=f11e1025] [cursor=pointer]:
+                        - img "edit" [ref=f11e1026]
+                      - button "Delete Google Clash of Clans" [ref=f11e1029] [cursor=pointer]:
+                        - img "delete" [ref=f11e1030]
+                - generic [ref=f11e1033]:
+                  - generic [ref=f11e1034]:
+                    - generic [ref=f11e1035]: 🎬
+                    - generic [ref=f11e1036]:
+                      - paragraph [ref=f11e1037]: Anthropic Claude Sub
+                      - paragraph [ref=f11e1038]:
+                        - generic [ref=f11e1039]: Oct 6, 2026
+                        - generic [aria-hidden] [ref=f11e1040]: ·
+                        - generic [ref=f11e1041]: Anthropic Claude Sub
+                        - generic [aria-hidden] [ref=f11e1042]: ·
+                        - generic [ref=f11e1043]: Streaming y suscripciones
+                      - paragraph [ref=f11e1044]:
+                        - generic [ref=f11e1045]:
+                          - img "credit-card" [ref=f11e1046]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e1049]:
+                    - generic [ref=f11e1050]: "-MXN 349.00"
+                    - generic [ref=f11e1051]:
+                      - button "Edit Anthropic Claude Sub" [ref=f11e1052] [cursor=pointer]:
+                        - img "edit" [ref=f11e1053]
+                      - button "Delete Anthropic Claude Sub" [ref=f11e1056] [cursor=pointer]:
+                        - img "delete" [ref=f11e1057]
+                - generic [ref=f11e1060]:
+                  - generic [ref=f11e1061]:
+                    - generic [ref=f11e1062]: 🎮
+                    - generic [ref=f11e1063]:
+                      - paragraph [ref=f11e1064]: Google Clash of Clans
+                      - paragraph [ref=f11e1065]:
+                        - generic [ref=f11e1066]: Oct 5, 2026
+                        - generic [aria-hidden] [ref=f11e1067]: ·
+                        - generic [ref=f11e1068]: Google Clash of Clans
+                        - generic [aria-hidden] [ref=f11e1069]: ·
+                        - generic [ref=f11e1070]: Juegos y apps
+                      - paragraph [ref=f11e1071]:
+                        - generic [ref=f11e1072]:
+                          - img "credit-card" [ref=f11e1073]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e1076]:
+                    - generic [ref=f11e1077]: "-MXN 79.00"
+                    - generic [ref=f11e1078]:
+                      - button "Edit Google Clash of Clans" [ref=f11e1079] [cursor=pointer]:
+                        - img "edit" [ref=f11e1080]
+                      - button "Delete Google Clash of Clans" [ref=f11e1083] [cursor=pointer]:
+                        - img "delete" [ref=f11e1084]
+                - generic [ref=f11e1087]:
+                  - generic [ref=f11e1088]:
+                    - generic [ref=f11e1089]: 🛍️
+                    - generic [ref=f11e1090]:
+                      - paragraph [ref=f11e1091]: Amazon
+                      - paragraph [ref=f11e1092]:
+                        - generic [ref=f11e1093]: Oct 5, 2026
+                        - generic [aria-hidden] [ref=f11e1094]: ·
+                        - generic [ref=f11e1095]: Amazon
+                        - generic [aria-hidden] [ref=f11e1096]: ·
+                        - generic [ref=f11e1097]: Compras en línea
+                      - paragraph [ref=f11e1098]:
+                        - generic [ref=f11e1099]: Installment 1/3
+                        - generic [ref=f11e1100]:
+                          - img "credit-card" [ref=f11e1101]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e1104]:
+                    - generic [ref=f11e1105]: "-MXN 113.05"
+                    - generic [ref=f11e1106]:
+                      - button "Edit Amazon" [ref=f11e1107] [cursor=pointer]:
+                        - img "edit" [ref=f11e1108]
+                      - button "Delete Amazon" [ref=f11e1111] [cursor=pointer]:
+                        - img "delete" [ref=f11e1112]
+                - generic [ref=f11e1115]:
+                  - generic [ref=f11e1116]:
+                    - generic [ref=f11e1117]: 🧩
+                    - generic [ref=f11e1118]:
+                      - paragraph [ref=f11e1119]: Stripe Pago Por Servicio
+                      - paragraph [ref=f11e1120]:
+                        - generic [ref=f11e1121]: Oct 5, 2026
+                        - generic [aria-hidden] [ref=f11e1122]: ·
+                        - generic [ref=f11e1123]: Stripe Pago Por Servicio
+                        - generic [aria-hidden] [ref=f11e1124]: ·
+                        - generic [ref=f11e1125]: Otros gastos
+                      - paragraph [ref=f11e1126]:
+                        - generic [ref=f11e1127]:
+                          - img "credit-card" [ref=f11e1128]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e1131]:
+                    - generic [ref=f11e1132]: "-MXN 49.00"
+                    - generic [ref=f11e1133]:
+                      - button "Edit Stripe Pago Por Servicio" [ref=f11e1134] [cursor=pointer]:
+                        - img "edit" [ref=f11e1135]
+                      - button "Delete Stripe Pago Por Servicio" [ref=f11e1138] [cursor=pointer]:
+                        - img "delete" [ref=f11e1139]
+                - generic [ref=f11e1142]:
+                  - generic [ref=f11e1143]:
+                    - generic [ref=f11e1144]: 🎮
+                    - generic [ref=f11e1145]:
+                      - paragraph [ref=f11e1146]: Google Clash of Clans
+                      - paragraph [ref=f11e1147]:
+                        - generic [ref=f11e1148]: Oct 5, 2026
+                        - generic [aria-hidden] [ref=f11e1149]: ·
+                        - generic [ref=f11e1150]: Google Clash of Clans
+                        - generic [aria-hidden] [ref=f11e1151]: ·
+                        - generic [ref=f11e1152]: Juegos y apps
+                      - paragraph [ref=f11e1153]:
+                        - generic [ref=f11e1154]:
+                          - img "credit-card" [ref=f11e1155]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e1158]:
+                    - generic [ref=f11e1159]: "-MXN 79.00"
+                    - generic [ref=f11e1160]:
+                      - button "Edit Google Clash of Clans" [ref=f11e1161] [cursor=pointer]:
+                        - img "edit" [ref=f11e1162]
+                      - button "Delete Google Clash of Clans" [ref=f11e1165] [cursor=pointer]:
+                        - img "delete" [ref=f11e1166]
+                - generic [ref=f11e1169]:
+                  - generic [ref=f11e1170]:
+                    - generic [ref=f11e1171]: 🔁
+                    - generic [ref=f11e1172]:
+                      - paragraph [ref=f11e1173]: Google One (nightmarerespaldo28899@gmail.com) subscription
+                      - paragraph [ref=f11e1174]:
+                        - generic [ref=f11e1175]: Oct 4, 2026
+                        - generic [aria-hidden] [ref=f11e1176]: ·
+                        - generic [ref=f11e1177]: Suscripción
+                  - generic [ref=f11e1178]:
+                    - generic [ref=f11e1179]: "-MXN 59.00"
+                    - generic [ref=f11e1180]:
+                      - button "Edit Google One (nightmarerespaldo28899@gmail.com) subscription" [ref=f11e1181] [cursor=pointer]:
+                        - img "edit" [ref=f11e1182]
+                      - button "Delete Google One (nightmarerespaldo28899@gmail.com) subscription" [ref=f11e1185] [cursor=pointer]:
+                        - img "delete" [ref=f11e1186]
+                - generic [ref=f11e1189]:
+                  - generic [ref=f11e1190]:
+                    - generic [ref=f11e1191]: 🎬
+                    - generic [ref=f11e1192]:
+                      - paragraph [ref=f11e1193]: Pg*google google one
+                      - paragraph [ref=f11e1194]:
+                        - generic [ref=f11e1195]: Oct 4, 2026
+                        - generic [aria-hidden] [ref=f11e1196]: ·
+                        - generic [ref=f11e1197]: Pg*google google one
+                        - generic [aria-hidden] [ref=f11e1198]: ·
+                        - generic [ref=f11e1199]: Streaming y suscripciones
+                      - paragraph [ref=f11e1200]:
+                        - generic [ref=f11e1201]:
+                          - img "credit-card" [ref=f11e1202]
+                          - text: BBVA •••• 7289
+                  - generic [ref=f11e1205]:
+                    - generic [ref=f11e1206]: "-MXN 59.00"
+                    - generic [ref=f11e1207]:
+                      - button "Edit Pg*google google one" [ref=f11e1208] [cursor=pointer]:
+                        - img "edit" [ref=f11e1209]
+                      - button "Delete Pg*google google one" [ref=f11e1212] [cursor=pointer]:
+                        - img "delete" [ref=f11e1213]
+                - generic [ref=f11e1216]:
+                  - generic [ref=f11e1217]:
+                    - generic [ref=f11e1218]: 🎮
+                    - generic [ref=f11e1219]:
+                      - paragraph [ref=f11e1220]: Google Clash of Clans
+                      - paragraph [ref=f11e1221]:
+                        - generic [ref=f11e1222]: Oct 3, 2026
+                        - generic [aria-hidden] [ref=f11e1223]: ·
+                        - generic [ref=f11e1224]: Google Clash of Clans
+                        - generic [aria-hidden] [ref=f11e1225]: ·
+                        - generic [ref=f11e1226]: Juegos y apps
+                      - paragraph [ref=f11e1227]:
+                        - generic [ref=f11e1228]:
+                          - img "credit-card" [ref=f11e1229]
+                          - text: Rappi •••• 5969
+                  - generic [ref=f11e1232]:
+                    - generic [ref=f11e1233]: "-MXN 79.00"
+                    - generic [ref=f11e1234]:
+                      - button "Edit Google Clash of Clans" [ref=f11e1235] [cursor=pointer]:
+                        - img "edit" [ref=f11e1236]
+                      - button "Delete Google Clash of Clans" [ref=f11e1239] [cursor=pointer]:
+                        - img "delete" [ref=f11e1240]
+              - generic [ref=f11e1243]:
+                - generic [ref=f11e1244]: Showing 1–10 of 187 records
+                - generic [ref=f11e1245]:
+                  - generic [ref=f11e1246] [cursor=pointer]:
+                    - generic "10 / page" [ref=f11e1247]:
+                      - text: 10 / page
+                      - combobox "Rows per page" [ref=f11e1248]
+                    - img "down" [ref=f11e1250]
+                  - generic [ref=f11e1253]:
+                    - button "Previous" [disabled]:
+                      - img "left"
+                    - generic [ref=f11e1254]: Page 1 of 19
+                    - button "Next" [ref=f11e1255] [cursor=pointer]:
+                      - img "right" [ref=f11e1256]
+  - alert [ref=f11e204]

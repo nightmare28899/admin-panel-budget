@@ -1,0 +1,209 @@
+"use client";
+
+import { FormEvent, Suspense, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { userGoogleLoginAction, userLoginAction } from "@/lib/userActions";
+import { signInWithGoogle } from "@/lib/googleAuth";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { AmbientBackground } from "@/components/ui/AmbientBackground";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
+import { sanitizeNextPath } from "@/lib/safeNext";
+import { WorkspaceTheme } from "@/components/layout/WorkspaceTheme";
+
+
+function PostLoginLoader() {
+  const { t } = useLocale();
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[var(--bg-0)]/90 backdrop-blur-sm"
+    >
+      <span
+        aria-hidden="true"
+        className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--border-soft)] border-t-[var(--accent)]"
+      />
+      <p className="text-sm font-medium text-[var(--text-2)]">{t("loadingYourPanel")}</p>
+    </div>
+  );
+}
+
+function SessionExpiredNotice() {
+  const searchParams = useSearchParams();
+  const { t } = useLocale();
+  if (searchParams.get("reason") !== "expired") return null;
+
+  return (
+    <div
+      role="status"
+      className="mb-4 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]"
+    >
+      {t("sessionExpiredNotice")}
+    </div>
+  );
+}
+
+export default function UserLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <UserLoginWorkspace />
+    </Suspense>
+  );
+}
+
+// Finance by default; the nutrition login (`next` under /nutrition) themes green.
+function UserLoginWorkspace() {
+  const searchParams = useSearchParams();
+  const next = sanitizeNextPath(searchParams.get("next"));
+  const workspace = next.startsWith("/nutrition") ? "nutrition" : "finance";
+  return (
+    <WorkspaceTheme workspace={workspace}>
+      <UserLoginForm />
+    </WorkspaceTheme>
+  );
+}
+
+function UserLoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const postLoginPath = sanitizeNextPath(searchParams.get("next"));
+  const { t } = useLocale();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+
+  function enterPanel() {
+    setRedirecting(true);
+    router.replace(postLoginPath);
+  }
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+    const result = await userLoginAction(email.trim(), password);
+    if (result.error) {
+      setLoading(false);
+      setError(frontendError(result.error, t, "loginFailed"));
+      return;
+    }
+    enterPanel();
+  }
+
+  async function googleLogin() {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const result = await userGoogleLoginAction(await signInWithGoogle());
+      if (result.error) setError(frontendError(result.error, t, "googleFailed"));
+      else enterPanel();
+    } catch (reason) {
+      const code = typeof reason === "object" && reason !== null && "code" in reason ? String(reason.code) : "";
+      setError(
+        code.includes("popup-closed") || code.includes("cancelled")
+          ? t("googleCancelled")
+          : frontendError(reason instanceof Error ? reason.message : undefined, t, "googleFailed"),
+      );
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
+
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--auth-bg)] p-6">
+      <AmbientBackground variant="auth" />
+      {redirecting && <PostLoginLoader />}
+
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageSwitcher />
+      </div>
+
+      <Card className="relative z-10 w-full max-w-md">
+        <Link
+          href="/"
+          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-3)] transition-colors hover:text-[var(--accent-text)] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        >
+          <span aria-hidden="true">←</span>
+          {t("backToPlatformSelection")}
+        </Link>
+        <div className="mb-6 flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)]">
+            <span className="font-serif text-lg leading-none text-[var(--bg-0)]">B</span>
+          </div>
+          <span className="text-[15px] font-semibold tracking-tight text-[var(--text-1)]">Budget Panel</span>
+        </div>
+        <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("personalFinance")}</h1>
+        <p className="mt-1.5 mb-6 text-sm text-[var(--text-3)]">{t("existingAccountSignIn")}</p>
+
+        <Suspense fallback={null}>
+          <SessionExpiredNotice />
+        </Suspense>
+
+        {error && (
+          <div role="alert" className="mb-4 rounded-xl border border-[var(--rose)]/40 bg-[var(--rose)]/10 px-4 py-3 text-sm text-[var(--rose)]">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <label htmlFor="user-login-email" className="mb-1 block text-sm text-[var(--text-2)]">{t("email")}</label>
+            <input
+              id="user-login-email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              className="input"
+            />
+          </div>
+          <div>
+            <label htmlFor="user-login-password" className="mb-1 block text-sm text-[var(--text-2)]">{t("password")}</label>
+            <input
+              id="user-login-password"
+              name="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder={t("enterPassword")}
+              className="input"
+            />
+          </div>
+          <Button type="submit" variant="primary" disabled={loading || redirecting} className="w-full">
+            {loading ? t("signingIn") : t("signIn")}
+          </Button>
+        </form>
+
+        <div className="my-4 flex items-center gap-3 text-xs text-[var(--text-3)]">
+          <div className="h-px flex-1 bg-[var(--border-soft)]" />
+          {t("or")}
+          <div className="h-px flex-1 bg-[var(--border-soft)]" />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          disabled={googleLoading || redirecting}
+          onClick={googleLogin}
+          aria-label={t("continueWithGoogle")}
+          className="w-full"
+        >
+          {googleLoading ? t("connecting") : t("continueWithGoogle")}
+        </Button>
+      </Card>
+    </main>
+  );
+}

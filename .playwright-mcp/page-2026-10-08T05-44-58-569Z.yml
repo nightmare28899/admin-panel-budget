@@ -1,0 +1,46 @@
+- generic [active] [ref=f14e1]:
+  - generic [ref=f14e3]:
+    - complementary [ref=f14e4]:
+      - generic [ref=f14e5]:
+        - generic [ref=f14e6]:
+          - generic [ref=f14e7]: B
+          - generic [ref=f14e9]: Budget Panel
+        - paragraph [ref=f14e10]: Navigation
+        - navigation [ref=f14e11]:
+          - link "Expenses" [ref=f14e12] [cursor=pointer]:
+            - /url: /finance/expenses
+          - link "My Cards" [ref=f14e19] [cursor=pointer]:
+            - /url: /finance/cards
+          - link "Statements" [ref=f14e24] [cursor=pointer]:
+            - /url: /finance/statements
+          - link "Categories" [ref=f14e30] [cursor=pointer]:
+            - /url: /finance/categories
+          - link "Subscriptions" [ref=f14e36] [cursor=pointer]:
+            - /url: /finance/subscriptions
+          - link "Reports" [ref=f14e44] [cursor=pointer]:
+            - /url: /finance/reports
+        - paragraph [ref=f14e49]: Workspaces
+        - navigation "Workspaces" [ref=f14e50]:
+          - link "Personal nutrition" [ref=f14e51] [cursor=pointer]:
+            - /url: /nutrition/today
+        - generic [ref=f14e58]:
+          - img "Kevin" [ref=f14e59]
+          - generic [ref=f14e60]:
+            - generic [ref=f14e61]: Kevin
+            - generic [ref=f14e62]: nightmare28899@gmail.com
+          - button "Sign out" [ref=f14e63] [cursor=pointer]
+    - generic [ref=f14e67]:
+      - banner [ref=f14e68]:
+        - button "Expand sidebar" [ref=f14e70] [cursor=pointer]
+        - generic [ref=f14e73]:
+          - button "Search (Cmd+K)" [ref=f14e74]
+          - button "Language" [ref=f14e78] [cursor=pointer]:
+            - img "global" [ref=f14e79]
+          - button "Subscription alerts" [ref=f14e82] [cursor=pointer]
+      - main [ref=f14e86]:
+        - generic [ref=f14e89]:
+          - status [ref=f14e90]: Loading credit cards
+          - generic [ref=f14e93]:
+            - heading [level=1] [ref=f14e95]: My Cards
+            - paragraph [ref=f14e97]: Track your credit cards, their cycle spending, and available credit.
+  - alert [ref=f14e213]

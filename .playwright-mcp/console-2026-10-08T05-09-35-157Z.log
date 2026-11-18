@@ -1,0 +1,6 @@
+[   44622ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3010/_next/static/chunks/14gpwl_i0~2az.js:0
+[   44622ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3010/_next/static/chunks/14gpwl_i0~2az.js:0
+[  138330ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3010/_next/static/chunks/14gpwl_i0~2az.js:0
+[  138330ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3010/_next/static/chunks/14gpwl_i0~2az.js:0
+[  161735ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.close call. @ http://localhost:3010/_next/static/chunks/14gpwl_i0~2az.js:0
+[  161735ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.close call. @ http://localhost:3010/_next/static/chunks/14gpwl_i0~2az.js:0

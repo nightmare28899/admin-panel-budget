@@ -2,8 +2,27 @@
 
 import { PropsWithChildren, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ConfigProvider, theme } from "antd";
+import { ConfigProvider } from "antd";
+import enUS from "antd/locale/en_US";
+import esES from "antd/locale/es_ES";
+import { antdSharedTheme } from "@/lib/antdTheme";
+import { LocaleProvider, useLocale } from "@/i18n/LocaleProvider";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 import { SessionRenewalProvider } from "./SessionRenewalProvider";
+
+function LocalizedProviders({ children, queryClient }: PropsWithChildren<{ queryClient: QueryClient }>) {
+  const { locale } = useLocale();
+
+  return (
+    <ConfigProvider theme={antdSharedTheme} locale={locale === "es" ? esES : enUS}>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <SessionRenewalProvider>{children}</SessionRenewalProvider>
+        </ToastProvider>
+      </QueryClientProvider>
+    </ConfigProvider>
+  );
+}
 
 export function Providers({ children }: PropsWithChildren) {
   const [queryClient] = useState(
@@ -18,22 +37,9 @@ export function Providers({ children }: PropsWithChildren) {
         },
       }),
   );
-
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: theme.darkAlgorithm,
-        token: {
-          colorPrimary: "#6366F1",
-          borderRadius: 16,
-          colorBgBase: "#020617",
-          colorTextBase: "#E2E8F0",
-        },
-      }}
-    >
-      <QueryClientProvider client={queryClient}>
-        <SessionRenewalProvider>{children}</SessionRenewalProvider>
-      </QueryClientProvider>
-    </ConfigProvider>
+    <LocaleProvider>
+      <LocalizedProviders queryClient={queryClient}>{children}</LocalizedProviders>
+    </LocaleProvider>
   );
 }

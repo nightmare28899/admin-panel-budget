@@ -21,8 +21,11 @@ export async function POST(request: NextRequest) {
     };
 
     if (!payload.userId || !payload.title || !payload.body) {
+      // "notificationFieldsRequired" is a stable i18n message key (see
+      // src/i18n/messages.ts) — this route can't call t() itself, so the
+      // client resolves it via frontendError()/t() before displaying it.
       return NextResponse.json(
-        { error: "userId, title, and body are required" },
+        { error: "notificationFieldsRequired" },
         { status: 400 },
       );
     }
@@ -44,8 +47,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to send test push",
+        // "failedSendTestNotification" is a stable i18n message key (see
+        // src/i18n/messages.ts) — this route can't call t() itself, so the
+        // client resolves it via frontendError()/t() before displaying it.
+        error: error instanceof Error ? error.message : "failedSendTestNotification",
       },
       { status: 500 },
     );

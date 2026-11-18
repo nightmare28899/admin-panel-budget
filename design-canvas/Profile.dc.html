@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--bg-0:#080b11;--bg-1:#0e131b;--bg-2:#171d26;--bg-3:#262e3a;--border:rgba(148,163,184,.18);--border-soft:rgba(148,163,184,.10);--text-1:#e8ebf1;--text-2:#b6beca;--text-3:#8f99a9;--blue:#3b82f6;--blue-dim:rgba(59,130,246,.16);--blue-text:#8fb8fb;--gold:#f69e0b;--gold-dim:rgba(246,158,11,.18);--gold-text:#f5c26b;--r-xl:16px}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg-0);color:var(--text-1);font-family:'Geist',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:'Geist Mono',ui-monospace,'SF Mono',monospace;font-variant-numeric:tabular-nums}
+.serif{font-family:'Instrument Serif',Georgia,serif;font-style:italic}
+a{color:var(--blue-text);text-decoration:none}
+dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:4px}
+dd{margin:0 0 18px;font-size:13.5px;color:var(--text-1)}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh">
+
+  <aside style="width:260px;flex:none;background:var(--bg-1);border-right:1px solid var(--border-soft);display:flex;flex-direction:column;padding:20px 14px">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 8px 22px">
+      <div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(155deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;flex:none">
+        <span class="serif" style="font-size:18px;color:#fff">B</span>
+      </div>
+      <span style="font-weight:600;font-size:14.5px;letter-spacing:-.01em">Budget Panel</span>
+    </div>
+    <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);padding:10px 10px 8px">Navigation</div>
+    <nav style="display:flex;flex-direction:column;gap:2px">
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-3);opacity:.55">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span style="font-size:13.5px">Overview</span>
+        <span style="margin-left:auto;font-size:9.5px;letter-spacing:.06em;font-weight:600;background:var(--bg-3);border:1px solid var(--border-soft);border-radius:999px;padding:2px 7px">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-2)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.6"/><path d="M21 20c0-2.6-1.8-4.8-4.2-5.5"/></svg>
+        <span style="font-size:13.5px">Users</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-2)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16v-5a6 6 0 0 0-12 0v5l-1.5 2.5h15z"/><path d="M9.5 21a2.5 2.5 0 0 0 5 0"/></svg>
+        <span style="font-size:13.5px">Notifications</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-3);opacity:.55">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.9 7.9 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.7 7.7 0 0 0-2.6-1.5L14 2h-4l-.4 2.5a7.7 7.7 0 0 0-2.6 1.5l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.7 7.7 0 0 0 2.6 1.5L10 22h4l.4-2.5a7.7 7.7 0 0 0 2.6-1.5l2.4 1 2-3.4z"/></svg>
+        <span style="font-size:13.5px">Settings</span>
+        <span style="margin-left:auto;font-size:9.5px;letter-spacing:.06em;font-weight:600;background:var(--bg-3);border:1px solid var(--border-soft);border-radius:999px;padding:2px 7px">SOON</span>
+      </div>
+    </nav>
+    <div style="margin-top:auto;padding-top:14px;border-top:1px solid var(--border-soft)">
+      <a href="#" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;background:var(--bg-3)">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--bg-2);display:flex;align-items:center;justify-content:center;flex:none">
+          <span class="serif" style="font-size:15px">A</span>
+        </div>
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:500;color:var(--text-1)">Ana Torres</div>
+          <div style="font-size:11.5px;color:var(--blue-text)">My Profile</div>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header style="height:64px;flex:none;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--border-soft)">
+      <h1 class="serif" style="font-size:22px;margin:0;font-weight:400">My Profile</h1>
+    </header>
+
+    <main style="flex:1;padding:32px 40px;max-width:900px">
+
+      <div style="position:relative;background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:32px;margin-bottom:20px;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div>
+        <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(148,163,184,.14) 1px,transparent 1px);background-size:16px 16px;mask-image:linear-gradient(to bottom,black,transparent 70%);pointer-events:none"></div>
+        <div style="position:relative;display:flex;align-items:flex-start;gap:22px">
+          <div style="width:88px;height:88px;border-radius:50%;background:var(--bg-3);display:flex;align-items:center;justify-content:center;flex:none;border:1px solid var(--border-soft)">
+            <span class="serif" style="font-size:38px">A</span>
+          </div>
+          <div style="flex:1">
+            <h2 class="serif" style="font-size:34px;margin:0 0 6px;font-weight:400">Ana Torres</h2>
+            <div class="mono" style="font-size:13px;color:var(--text-3);margin-bottom:12px">ana.torres@mail.com</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <span style="font-size:11.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--text-2)">Admin</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:999px;background:var(--gold-dim);color:var(--gold-text)"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17l-6.1 3.5 1.5-6.8-5.2-4.7 6.9-.7z"/></svg>Premium</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)"><span style="width:7px;height:7px;border-radius:50%;background:#3b82f6;display:inline-block"></span>Active</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-3)">Member since March 2023</div>
+          </div>
+          <button style="display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-3);color:var(--text-1);font-size:13px;font-weight:500;flex:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16.5 4.5a1.5 1.5 0 0 1 2 0l1.5 1.5a1.5 1.5 0 0 1 0 2L8.5 19.5z"/></svg>
+            Edit Profile
+          </button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px">
+        <div style="background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:24px">
+          <h3 style="font-size:14px;font-weight:600;margin:0 0 18px">Account details</h3>
+          <dl style="margin:0">
+            <dt>Email</dt><dd class="mono">ana.torres@mail.com</dd>
+            <dt>Role</dt><dd>Admin</dd>
+            <dt>Member since</dt><dd>March 12, 2023</dd>
+            <dt>Account status</dt><dd style="margin-bottom:0"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#3b82f6;display:inline-block"></span>Active</span></dd>
+          </dl>
+        </div>
+        <div style="background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-xl);padding:24px">
+          <h3 style="font-size:14px;font-weight:600;margin:0 0 18px">Preferences</h3>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:6px">Daily budget</div>
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <span class="mono" style="font-size:30px;font-weight:600">450.00</span>
+            <span style="font-size:12px;padding:3px 9px;border-radius:999px;background:var(--bg-3);color:var(--text-2)">MXN</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

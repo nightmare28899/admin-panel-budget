@@ -1,11 +1,20 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { loginAction } from "@/lib/actions";
+import { googleLoginAction, loginAction } from "@/lib/actions";
+import { signInWithGoogle } from "@/lib/googleAuth";
+import { Button } from "@/components/ui/Button";
+import { AmbientBackground } from "@/components/ui/AmbientBackground";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
+import { WorkspaceTheme } from "@/components/layout/WorkspaceTheme";
 
 export default function LoginPage() {
     const router = useRouter();
+    const { t } = useLocale();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -13,6 +22,8 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const [shakeForm, setShakeForm] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const busy = loading || googleLoading;
 
     useEffect(() => {
         if (!toast) return;
@@ -38,37 +49,76 @@ export default function LoginPage() {
             const res = await loginAction(email, password);
 
             if (res.error) {
-                setError(res.error);
+                const message = frontendError(res.error, t, "loginFailed");
+                setError(message);
                 triggerErrorFeedback();
-                showToast(res.error, "error");
+                showToast(message, "error");
                 setLoading(false);
                 return;
             }
 
             if (res.success) {
                 router.push("/dashboard/users");
+                return;
             }
+
+            setLoading(false);
         } catch (err) {
-            const message = err instanceof Error ? err.message : "Login failed";
+            const message = frontendError(err instanceof Error ? err.message : undefined, t, "loginFailed");
             setError(message);
             triggerErrorFeedback();
             showToast(message, "error");
-        } finally {
             setLoading(false);
         }
     }
 
+    function showLoginError(message: string) {
+        setError(message);
+        triggerErrorFeedback();
+        showToast(message, "error");
+    }
+
+    async function onGoogleLogin() {
+        setError("");
+        setGoogleLoading(true);
+        try {
+            const token = await signInWithGoogle();
+            const res = await googleLoginAction(token);
+            if (res.error) {
+                showLoginError(frontendError(res.error, t, "googleFailed"));
+                setGoogleLoading(false);
+                return;
+            }
+            router.push("/dashboard/users");
+        } catch (reason) {
+            const code = typeof reason === "object" && reason !== null && "code" in reason ? String(reason.code) : "";
+            showLoginError(
+                code.includes("popup-closed") || code.includes("cancelled")
+                    ? t("googleCancelled")
+                    : frontendError(reason instanceof Error ? reason.message : undefined, t, "googleFailed"),
+            );
+            setGoogleLoading(false);
+        }
+    }
+
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-6">
+        <WorkspaceTheme workspace="admin">
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--auth-bg)] p-6">
+            <AmbientBackground variant="auth" />
+
+            <div className="absolute top-6 right-6 z-20">
+                <LanguageSwitcher />
+            </div>
+
             {toast && (
                 <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
                     <div
                         role="status"
                         aria-live="polite"
-                        className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-2xl backdrop-blur ${
+                        className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-sm ${
                             toast.type === "error"
-                                ? "border-red-400/40 bg-red-500/15 text-red-100"
-                                : "border-emerald-400/40 bg-emerald-500/15 text-emerald-100"
+                                ? "border-[var(--rose)]/40 bg-[var(--rose-dim)] text-[var(--rose-text)]"
+                                : "border-[var(--emerald)]/40 bg-[var(--emerald-dim)] text-[var(--emerald-text)]"
                         }`}
                     >
                         <span className="mt-0.5 text-base" aria-hidden>
@@ -78,30 +128,41 @@ export default function LoginPage() {
                         <button
                             type="button"
                             onClick={() => setToast(null)}
-                            className="rounded-md px-2 py-1 text-xs text-slate-200/90 hover:bg-white/10"
-                            aria-label="Dismiss notification"
+                            className="cursor-pointer rounded-[var(--radius-sm)] px-2 py-1 text-xs text-[var(--text-2)] transition-colors hover:bg-[var(--bg-3)]"
+                            aria-label={t("dismissNotification")}
                         >
-                            Close
+                            {t("close")}
                         </button>
                     </div>
                 </div>
             )}
 
             <div
-                className={`w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur p-8 shadow-2xl transition-all hover:border-slate-700 hover:shadow-indigo-500/10 ${
+                className={`relative z-10 w-full max-w-md rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--bg-2)]/70 p-6 shadow-sm backdrop-blur-xl transition-colors hover:border-[var(--border)] sm:p-8 ${
                     shakeForm ? "animate-login-shake" : ""
                 }`}
                 onAnimationEnd={() => setShakeForm(false)}
             >
-                <h1 className="text-2xl font-semibold mb-2">Admin Panel</h1>
-                <p className="text-slate-400 mb-6">Sign in to continue.</p>
+                <Link
+                    href="/"
+                    className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-3)] transition-colors hover:text-[var(--accent-text)] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                >
+                    <span aria-hidden="true">←</span>
+                    {t("backToPlatformSelection")}
+                </Link>
+                <h1 className="text-2xl font-semibold text-[var(--text-1)]">{t("adminPanel")}</h1>
+                <p className="mb-6 text-[var(--text-3)]">{t("signInToContinue")}</p>
 
-                <form onSubmit={onSubmit} className="space-y-4">
+                <form onSubmit={onSubmit} className="space-y-4" aria-busy={loading}>
                     <div>
-                        <label className="block text-sm mb-1">Email</label>
+                        <label htmlFor="admin-login-email" className="mb-1 block text-sm text-[var(--text-2)]">{t("email")}</label>
                         <input
+                            id="admin-login-email"
+                            name="email"
                             type="email"
                             required
+                            disabled={busy}
+                            autoComplete="email"
                             value={email}
                             onChange={(e) => {
                                 setEmail(e.target.value);
@@ -110,49 +171,85 @@ export default function LoginPage() {
                             placeholder="you@company.com"
                             className={`input ${
                                 error
-                                    ? "border-red-400/60 focus:border-red-400 focus:ring-red-500/50"
+                                    ? "border-[var(--rose)]/60 focus:border-[var(--rose)] focus:ring-[var(--rose)]/40"
                                     : ""
                             }`}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm mb-1">Password</label>
+                        <label htmlFor="admin-login-password" className="mb-1 block text-sm text-[var(--text-2)]">{t("password")}</label>
                         <div className="relative">
                             <input
+                                id="admin-login-password"
+                                name="password"
                                 type={showPassword ? "text" : "password"}
                                 required
+                                disabled={busy}
+                                autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => {
                                     setPassword(e.target.value);
                                     if (error) setError("");
                                 }}
-                                placeholder="Enter your password"
+                                placeholder={t("enterPassword")}
                                 className={`input pr-12 ${
                                     error
-                                        ? "border-red-400/60 focus:border-red-400 focus:ring-red-500/50"
+                                        ? "border-[var(--rose)]/60 focus:border-[var(--rose)] focus:ring-[var(--rose)]/40"
                                         : ""
                                 }`}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute inset-y-0 right-2 my-auto h-8 rounded-md px-2 text-slate-300 transition hover:bg-slate-800 hover:text-white"
-                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                disabled={busy}
+                                className="absolute inset-y-0 right-2 my-auto h-8 cursor-pointer rounded-[var(--radius-sm)] px-2 text-[var(--text-2)] transition hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                             >
                                 {showPassword ? "🙈" : "👁️"}
                             </button>
                         </div>
                     </div>
 
-                    <button
-                        disabled={loading}
-                        className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 py-2 font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/20 active:translate-y-0"
-                    >
-                        {loading ? "Signing in..." : "Sign in"}
-                    </button>
+                    <Button type="submit" variant="primary" disabled={busy} className="w-full">
+                        {loading ? (
+                            <>
+                                <svg
+                                    className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    aria-hidden="true"
+                                >
+                                    <path strokeLinecap="round" d="M12 3a9 9 0 1 0 9 9" />
+                                </svg>
+                                <span role="status" aria-live="polite">{t("signingIn")}</span>
+                            </>
+                        ) : (
+                            t("signIn")
+                        )}
+                    </Button>
                 </form>
+
+                <div className="my-4 flex items-center gap-3 text-xs text-[var(--text-3)]">
+                    <div className="h-px flex-1 bg-[var(--border-soft)]" />
+                    {t("or")}
+                    <div className="h-px flex-1 bg-[var(--border-soft)]" />
+                </div>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={onGoogleLogin}
+                    aria-label={t("continueWithGoogle")}
+                    className="w-full"
+                >
+                    {googleLoading ? t("connecting") : t("continueWithGoogle")}
+                </Button>
             </div>
         </main>
+        </WorkspaceTheme>
     );
 }

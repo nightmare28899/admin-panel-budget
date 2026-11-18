@@ -11,6 +11,9 @@ import {
 import { Modal, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { logoutAction, renewSessionAction } from "@/lib/actions";
+import { Button } from "@/components/ui/Button";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { frontendError } from "@/i18n/errors";
 import {
   ActionResult,
   SESSION_EXPIRED_MESSAGE,
@@ -27,6 +30,7 @@ const SessionRenewalContext = createContext<SessionRenewalContextValue | null>(n
 
 export function SessionRenewalProvider({ children }: PropsWithChildren) {
   const router = useRouter();
+  const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(SESSION_EXPIRED_MESSAGE);
@@ -128,18 +132,23 @@ export function SessionRenewalProvider({ children }: PropsWithChildren) {
         open={open}
         centered
         closable={false}
-        maskClosable={false}
+        mask={{ closable: false }}
         keyboard={!loading}
-        okText="Renew session"
-        cancelText="Close session"
-        okButtonProps={{ loading }}
-        cancelButtonProps={{ disabled: loading }}
-        onOk={renewSession}
         onCancel={closeSession}
-        title="Session expired"
+        title={t("sessionExpired")}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => void closeSession()} disabled={loading}>
+              {t("closeSession")}
+            </Button>
+            <Button type="button" variant="primary" onClick={() => void renewSession()} loading={loading}>
+              {t("renewSession")}
+            </Button>
+          </div>
+        }
       >
         <Typography.Paragraph style={{ marginBottom: 0 }}>
-          {message}
+          {frontendError(message, t, "sessionExpiredMessage")}
         </Typography.Paragraph>
       </Modal>
     </SessionRenewalContext.Provider>

@@ -1,0 +1,44 @@
+- generic [ref=f12e3]:
+  - complementary [ref=f12e4]:
+    - generic [ref=f12e5]:
+      - generic [ref=f12e6]:
+        - generic [ref=f12e7]: B
+        - generic [ref=f12e9]: Budget Panel
+      - paragraph [ref=f12e10]: Navigation
+      - navigation [ref=f12e11]:
+        - link "Expenses" [ref=f12e12] [cursor=pointer]:
+          - /url: /finance/expenses
+        - link "My Cards" [ref=f12e19] [cursor=pointer]:
+          - /url: /finance/cards
+        - link "Statements" [ref=f12e24] [cursor=pointer]:
+          - /url: /finance/statements
+        - link "Categories" [ref=f12e30] [cursor=pointer]:
+          - /url: /finance/categories
+        - link "Subscriptions" [ref=f12e36] [cursor=pointer]:
+          - /url: /finance/subscriptions
+        - link "Reports" [ref=f12e44] [cursor=pointer]:
+          - /url: /finance/reports
+      - paragraph [ref=f12e49]: Workspaces
+      - navigation "Workspaces" [ref=f12e50]:
+        - link "Personal nutrition" [ref=f12e51] [cursor=pointer]:
+          - /url: /nutrition/today
+      - generic [ref=f12e58]:
+        - img "Kevin" [ref=f12e59]
+        - generic [ref=f12e60]:
+          - generic [ref=f12e61]: Kevin
+          - generic [ref=f12e62]: nightmare28899@gmail.com
+        - button "Sign out" [ref=f12e63] [cursor=pointer]
+  - generic [ref=f12e67]:
+    - banner [ref=f12e68]:
+      - button "Expand sidebar" [ref=f12e70] [cursor=pointer]
+      - generic [ref=f12e73]:
+        - button "Search (Cmd+K)" [ref=f12e74]
+        - button "Language" [ref=f12e78] [cursor=pointer]:
+          - img "global" [ref=f12e79]
+        - button "Subscription alerts" [ref=f12e82] [cursor=pointer]
+    - main [ref=f12e86]:
+      - generic [ref=f12e88]:
+        - generic [ref=f12e89]:
+          - heading "Your categories" [level=1] [ref=f12e90]
+          - paragraph [ref=f12e91]: Organize expenses and configure category budgets.
+        - status [ref=f12e95]: Loading list

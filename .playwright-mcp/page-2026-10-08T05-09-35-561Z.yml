@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [aria-hidden] [ref=e6]: B
+        - generic [ref=e7]: Budget Panel
+      - button "Language" [ref=e8] [cursor=pointer]:
+        - img "global" [ref=e9]
+    - region [ref=e12]:
+      - generic [ref=e13]:
+        - paragraph [ref=e14]: One account, every workspace
+        - heading "Choose your workspace" [level=1] [ref=e16]
+        - paragraph [ref=e17]: Select the platform you want to access. You will continue to its secure sign-in page.
+      - generic [ref=e18]:
+        - link "Most used Personal finance Track expenses, categories, subscriptions, and financial reports. Includes Continue to your finances" [ref=e19] [cursor=pointer]:
+          - /url: /user-login
+          - generic [ref=e20]: Most used
+          - heading "Personal finance" [level=2] [ref=e25]
+          - paragraph [ref=e26]: Track expenses, categories, subscriptions, and financial reports.
+          - list "Includes" [ref=e27]:
+            - listitem [ref=e28]: Expenses
+            - listitem [ref=e29]: Credit cards
+            - listitem [ref=e30]: Bank statements
+            - listitem [ref=e31]: Reports
+          - generic [ref=e32]:
+            - text: Continue to your finances
+            - generic [aria-hidden] [ref=e33]: →
+        - link [ref=e34] [cursor=pointer]:
+          - /url: /nutrition/login
+          - heading "Personal nutrition" [level=2] [ref=e39]
+          - paragraph [ref=e40]: Keep your diet, recipes and daily meals together in a private workspace.
+          - list "Includes" [ref=e41]:
+            - listitem [ref=e42]: Daily meals
+            - listitem [ref=e43]: Recipes
+            - listitem [ref=e44]: Diet plan
+          - generic [ref=e45]:
+            - text: Continue to nutrition
+            - generic [aria-hidden] [ref=e46]: →
+        - link "Admins only Admin platform Manage users, notifications, permissions, and platform administration. Includes Admin sign-in" [ref=e47] [cursor=pointer]:
+          - /url: /login
+          - generic [ref=e48]: Admins only
+          - heading "Admin platform" [level=2] [ref=e53]
+          - paragraph [ref=e54]: Manage users, notifications, permissions, and platform administration.
+          - list "Includes" [ref=e55]:
+            - listitem [ref=e56]: Users
+            - listitem [ref=e57]: Notifications
+            - listitem [ref=e58]: Permissions
+          - generic [ref=e59]:
+            - text: Admin sign-in
+            - generic [aria-hidden] [ref=e60]: →
+      - list [ref=e61]:
+        - listitem [ref=e62]: Encrypted connection
+        - listitem [ref=e67]: Your data stays private
+        - listitem [ref=e72]: Synced with the mobile app
+    - generic [ref=e76]: © 2026 Budget Panel
+  - alert [ref=e77]

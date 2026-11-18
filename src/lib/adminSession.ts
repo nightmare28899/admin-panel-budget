@@ -2,8 +2,10 @@ import { cookies } from "next/headers";
 import { api } from "./api";
 import { isUnauthorizedError } from "./session";
 
+// "error" is a stable i18n message key (see src/i18n/messages.ts), not
+// literal English text — the client resolves it via t() before displaying it.
 export const SESSION_EXPIRED_RESPONSE = {
-  error: "Session expired. Renew or close the session to continue.",
+  error: "sessionExpiredMessage",
   requiresSessionRenewal: true,
 } as const;
 

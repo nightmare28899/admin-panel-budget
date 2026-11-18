@@ -1,0 +1,178 @@
+"use client";
+
+import { useLocale } from "@/i18n/LocaleProvider";
+
+// Mirrors CreditCardManager's layout (header controls, 4 KPI tiles, section
+// title, the card face rail and the selected card's detail panel) with the same
+// sizes, radii and dark palette, so the page doesn't jump when the overview arrives.
+
+function Bone({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-md bg-[var(--bg-3)]/70 motion-reduce:animate-none ${className}`} />;
+}
+
+function KpiTileSkeleton() {
+  return (
+    <div className="rounded-2xl border border-[var(--border-soft)]/80 bg-[var(--bg-1)] p-5">
+      <div className="flex items-start justify-between gap-3">
+        <Bone className="h-3 w-28" />
+        <Bone className="h-8 w-8 rounded-xl" />
+      </div>
+      <Bone className="mt-4 h-7 w-32" />
+      <Bone className="mt-4 h-3 w-24" />
+      <Bone className="mt-2 h-1.5 w-full rounded-full" />
+    </div>
+  );
+}
+
+// One rail face: same h-44 face box as CreditCardFace plus the debt / % used line under it.
+function FaceSkeleton() {
+  return (
+    <div className="min-w-52 max-w-72 flex-1 basis-52">
+      <div className="relative flex h-44 flex-col justify-between overflow-hidden rounded-2xl border border-[var(--border-soft)]/40 bg-gradient-to-br from-slate-800/80 via-slate-800/50 to-slate-900/80 p-4">
+        <div className="pointer-events-none absolute inset-0 animate-pulse bg-gradient-to-br from-white/5 via-transparent to-transparent motion-reduce:animate-none" />
+        <div className="relative flex items-start justify-between">
+          <Bone className="h-4 w-24 bg-[var(--bg-3)]/70" />
+          <Bone className="h-4 w-4 rounded-full bg-[var(--bg-3)]/70" />
+        </div>
+        <div className="relative">
+          <Bone className="h-7 w-10 rounded-md bg-[var(--bg-3)]/70" />
+          <Bone className="mt-3 h-4 w-32 bg-[var(--bg-3)]/70" />
+        </div>
+        <div className="relative flex items-end justify-between">
+          <Bone className="h-3 w-20 bg-[var(--bg-3)]/70" />
+          <Bone className="h-5 w-12 bg-[var(--bg-3)]/70" />
+        </div>
+      </div>
+      <div className="mt-2 flex items-baseline justify-between gap-2 px-1">
+        <Bone className="h-3 w-24" />
+        <Bone className="h-3 w-12" />
+      </div>
+    </div>
+  );
+}
+
+// The selected card's detail panel (CreditCardTile with hideFace + wide): name/bank header,
+// two columns on lg (debt + statement | cutoff + payment rows + installments) and the footer.
+function DetailSkeleton() {
+  return (
+    <div className="flex flex-col overflow-hidden rounded-3xl border border-[var(--border-soft)]/90 bg-[var(--bg-1)]">
+      <div className="flex items-baseline justify-between gap-3 px-4 pt-4">
+        <Bone className="h-5 w-40" />
+        <Bone className="h-3 w-32" />
+      </div>
+
+      <div className="flex-1 space-y-3 px-4 pb-4 pt-3">
+        <div className="grid gap-3 lg:grid-cols-2 lg:gap-x-8">
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between">
+                <Bone className="h-3 w-28" />
+                <Bone className="h-5 w-20 rounded-full" />
+              </div>
+              <div className="mt-2 flex items-baseline justify-between gap-2">
+                <Bone className="h-4 w-24" />
+                <Bone className="h-3 w-28" />
+              </div>
+              <Bone className="mt-3 h-2 w-full rounded-full" />
+            </div>
+            <div className="space-y-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/80 p-3.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-2">
+                  <Bone className="h-2.5 w-32" />
+                  <Bone className="h-3.5 w-40" />
+                </div>
+                <Bone className="h-6 w-20 rounded-full" />
+              </div>
+              <Bone className="h-3 w-full" />
+              <Bone className="h-1.5 w-full rounded-full" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="space-y-3 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)]/80 p-3.5">
+              <div className="flex items-center justify-between gap-3">
+                <Bone className="h-2.5 w-24" />
+                <Bone className="h-6 w-24 rounded-full" />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <Bone className="h-3.5 w-20" />
+                <Bone className="h-3.5 w-28" />
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <Bone className="h-3 w-36" />
+              <Bone className="h-3 w-20" />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <Bone className="h-3 w-40" />
+              <Bone className="h-3 w-24" />
+            </div>
+            <Bone className="h-9 w-full rounded-xl" />
+          </div>
+        </div>
+        <Bone className="h-3 w-28" />
+      </div>
+
+      <div className="flex items-center gap-2 border-t border-[var(--border-soft)]/60 p-4">
+        <Bone className="h-9 flex-1 rounded-xl" />
+        <Bone className="h-9 flex-1 rounded-xl" />
+        <Bone className="h-9 w-8 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+export function CreditCardsPageSkeleton({ cards = 5 }: { cards?: number }) {
+  const { t } = useLocale();
+
+  return (
+    <div aria-busy="true">
+      <span className="sr-only" role="status" aria-live="polite">
+        {t("loadingCreditCards")}
+      </span>
+
+      <div aria-hidden="true">
+        {/* Header: real title so it doesn't flash; placeholders for badge and controls. */}
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-serif text-2xl font-semibold tracking-tight text-[var(--text-1)]">{t("myCards")}</h1>
+              <Bone className="h-6 w-20 rounded-full" />
+            </div>
+            <p className="mt-1 text-sm text-[var(--text-3)]">{t("trackCardsDescription")}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex gap-1 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-3)] p-1">
+              <Bone className="h-7 w-20 rounded-lg" />
+              <Bone className="h-7 w-20 rounded-lg" />
+              <Bone className="h-7 w-20 rounded-lg" />
+            </div>
+            <Bone className="h-9 w-44 rounded-xl" />
+            <Bone className="h-9 w-36 rounded-xl" />
+          </div>
+        </div>
+
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }, (_, index) => (
+            <KpiTileSkeleton key={index} />
+          ))}
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+          <Bone className="h-5 w-56" />
+          <Bone className="h-3 w-40" />
+        </div>
+
+        {/* Desktop: face rail + selected card detail. Mobile/tablet: one face (the stack) + detail. */}
+        <div className="-mx-3 mb-2 hidden gap-4 overflow-hidden px-3 pb-3 pt-4 lg:flex">
+          {Array.from({ length: cards }, (_, index) => (
+            <FaceSkeleton key={index} />
+          ))}
+        </div>
+        <div className="mx-auto mb-5 max-w-sm lg:hidden">
+          <FaceSkeleton />
+        </div>
+        <DetailSkeleton />
+      </div>
+    </div>
+  );
+}
