@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "./DashboardShell";
 import { getAdminMe } from "@/lib/adminMe";
+import { isUnauthorizedApiError } from "@/lib/session";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const cookieStore = await cookies();
@@ -14,8 +15,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     let user;
     try {
         user = (await getAdminMe(token)).user;
-    } catch {
-        redirect("/login");
+    } catch (error) {
+        if (isUnauthorizedApiError(error)) redirect("/login");
+        throw error;
     }
 
     if ((user?.role || "").toLowerCase() !== "admin") {

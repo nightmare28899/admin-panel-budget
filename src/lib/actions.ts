@@ -9,9 +9,14 @@ import {
     SESSION_EXPIRED_MESSAGE,
     isUnauthorizedError,
 } from "./session";
+import {
+    ADMIN_ACCESS_COOKIE,
+    ADMIN_REFRESH_COOKIE,
+    adminSessionCookieOptions,
+} from "./sessionCookies";
 
-const TOKEN_KEY = "admin_token";
-const REFRESH_KEY = "admin_refresh_token";
+const TOKEN_KEY = ADMIN_ACCESS_COOKIE;
+const REFRESH_KEY = ADMIN_REFRESH_COOKIE;
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
@@ -20,21 +25,9 @@ function isAdminRole(role: string | undefined): boolean {
 }
 
 function setSessionCookies(cookieStore: CookieStore, session: LoginResponse) {
-    cookieStore.set(TOKEN_KEY, session.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-    });
-
-    cookieStore.set(REFRESH_KEY, session.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-    });
+    const options = adminSessionCookieOptions();
+    cookieStore.set(TOKEN_KEY, session.accessToken, options);
+    cookieStore.set(REFRESH_KEY, session.refreshToken, options);
 }
 
 function clearSessionCookies(cookieStore: CookieStore) {

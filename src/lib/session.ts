@@ -32,3 +32,13 @@ export function isSessionRenewalRequiredError(
 ): error is SessionRenewalRequiredError {
   return error instanceof SessionRenewalRequiredError;
 }
+
+/** True only for an HTTP 401 (ApiError.status); network/5xx errors are not auth failures. */
+export function isUnauthorizedApiError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    (error as { status: unknown }).status === 401
+  );
+}

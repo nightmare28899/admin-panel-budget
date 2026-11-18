@@ -14,3 +14,16 @@ export function userSessionCookieOptions() {
     maxAge: 60 * 60 * 24 * 7,
   };
 }
+
+export const ADMIN_ACCESS_COOKIE = "admin_token";
+export const ADMIN_REFRESH_COOKIE = "admin_refresh_token";
+
+export function adminSessionCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict" as const,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  };
+}
