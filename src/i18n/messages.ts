@@ -1249,6 +1249,18 @@ const englishMessages = {
   purchaseAcceptedAsExpense: "Purchase registered as an expense",
   purchaseRegisteredAsPayment: "Purchase registered as a card payment",
   purchaseDiscarded: "Purchase discarded",
+  themes: "Themes",
+  themesDescription: "Choose how the panel looks and feels. Your choice is saved on this device.",
+  themePickerLabel: "Theme",
+  themeClassicName: "Classic",
+  themeClassicDescription: "The familiar panel look: compact cards and pill-shaped buttons.",
+  themeAuroraName: "Aurora",
+  themeAuroraDescription: "Deep navy with emerald glow, roomy rounded cards and monospaced figures.",
+  themeAppearanceLabel: "Appearance",
+  themeAppearanceLight: "Light",
+  themeAppearanceDark: "Dark",
+  themePreviewBalance: "Balance",
+  themeActive: "Active",
 } as const;
 
 export type MessageKey = keyof typeof englishMessages;
@@ -1908,6 +1920,18 @@ const spanishMessages: Record<MessageKey, string> = {
   purchaseAcceptedAsExpense: "Compra registrada como gasto",
   purchaseRegisteredAsPayment: "Compra registrada como pago de tarjeta",
   purchaseDiscarded: "Compra descartada",
+  themes: "Temas",
+  themesDescription: "Elige el aspecto del panel. Tu elección se guarda en este dispositivo.",
+  themePickerLabel: "Tema",
+  themeClassicName: "Clásico",
+  themeClassicDescription: "El aspecto habitual del panel: tarjetas compactas y botones en forma de píldora.",
+  themeAuroraName: "Aurora",
+  themeAuroraDescription: "Azul marino profundo con brillo esmeralda, tarjetas amplias y redondeadas y cifras monoespaciadas.",
+  themeAppearanceLabel: "Apariencia",
+  themeAppearanceLight: "Claro",
+  themeAppearanceDark: "Oscuro",
+  themePreviewBalance: "Saldo",
+  themeActive: "Activo",
 };
 
 export const messages = { en: englishMessages, es: spanishMessages };

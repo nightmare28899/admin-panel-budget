@@ -31,7 +31,7 @@ export function Badge({
 
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${PILL_VARIANTS[variant]} ${className}`}
+      className={`inline-flex rounded-[var(--radius-chip)] px-2.5 py-1 text-xs font-medium ${PILL_VARIANTS[variant]} ${className}`}
     >
       {children}
     </span>

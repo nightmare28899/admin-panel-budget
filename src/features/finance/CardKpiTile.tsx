@@ -48,7 +48,7 @@ export function CardKpiTile({
   children?: ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[var(--border-soft)]/80 bg-[var(--bg-1)] p-5 transition hover:border-[var(--border-soft)]/80">
+    <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--card-border)]/80 [background:var(--card-bg)] [box-shadow:var(--tile-shadow)] p-5 transition hover:border-[var(--card-border)]/80">
       <div className="flex items-start justify-between gap-3">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)]">{label}</span>
         <span aria-hidden="true" className={`shrink-0 rounded-xl border p-2 ${CHIP_CLASS[accent]}`}>

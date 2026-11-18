@@ -104,6 +104,17 @@ function createNavItems(
       </>
     ),
   },
+  {
+    label: t("themes"),
+    href: "/finance/themes",
+    icon: <>
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="8.5" cy="10" r="1.2" />
+        <circle cx="12" cy="7.5" r="1.2" />
+        <circle cx="15.5" cy="10" r="1.2" />
+        <path d="M12 21c-1.5 0-2-1.2-1.4-2.3.6-1 .2-2.2-1-2.2H7.5" />
+      </>,
+  },
   ];
 }
 

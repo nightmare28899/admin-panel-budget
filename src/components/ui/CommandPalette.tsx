@@ -24,6 +24,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       { label: t("categories"), href: "/finance/categories" },
       { label: t("reports"), href: "/finance/reports" },
       { label: t("subscriptions"), href: "/finance/subscriptions" },
+      { label: t("themes"), href: "/finance/themes" },
     ],
     [t],
   );

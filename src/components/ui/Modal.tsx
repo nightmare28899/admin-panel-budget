@@ -92,7 +92,7 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`animate-modal-enter relative w-full ${maxWidth} space-y-4 rounded-xl border border-[var(--border)] bg-[var(--bg-2)] p-6 shadow-2xl outline-none`}
+        className={`animate-modal-enter relative w-full ${maxWidth} space-y-4 rounded-[var(--radius-modal)] border border-[var(--modal-border)] bg-[var(--modal-bg)] p-6 [box-shadow:var(--modal-shadow)] outline-none`}
       >
         <h3 id={titleId} className="text-xl font-medium text-[var(--text-1)]">
           {title}

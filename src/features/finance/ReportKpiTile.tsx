@@ -139,7 +139,7 @@ export function ReportKpiTile({
   footer?: ReactNode;
 }) {
   return (
-    <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-5 transition-all duration-300 hover:border-[var(--border-soft)]">
+    <div className="relative flex flex-col justify-between overflow-hidden rounded-[var(--radius-card)] border border-[var(--card-border)] [background:var(--card-bg)] [box-shadow:var(--tile-shadow)] p-5 transition-all duration-300 hover:border-[var(--card-border)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span
@@ -166,7 +166,7 @@ export function ReportKpiTile({
           {unit && (
             <span className="mr-1.5 text-xs font-semibold text-[var(--text-3)]">{unit}</span>
           )}
-          <span className="text-2xl font-bold tracking-tight text-[var(--text-1)]">{value}</span>
+          <span className="text-2xl font-bold tracking-tight text-[var(--text-1)] [font-family:var(--font-number)]">{value}</span>
           {suffix && (
             <span className="ml-1.5 text-xs font-normal text-[var(--text-3)]">{suffix}</span>
           )}
@@ -191,7 +191,7 @@ export function ReportKpiSkeleton({ count = 4 }: { count?: number }) {
         <div
           key={index}
           aria-hidden="true"
-          className="rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-5"
+          className="rounded-[var(--radius-card)] border border-[var(--card-border)] [background:var(--card-bg)] p-5"
         >
           <div className="h-8 w-32 animate-pulse rounded-lg bg-[var(--bg-3)] motion-reduce:animate-none" />
           <div className="mt-4 h-7 w-36 animate-pulse rounded-lg bg-[var(--bg-3)] motion-reduce:animate-none" />

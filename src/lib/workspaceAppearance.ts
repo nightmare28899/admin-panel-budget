@@ -1,6 +1,7 @@
 export type WorkspaceAppearance = "light" | "dark";
 
-const STORAGE_KEY = "budget-panel-appearance";
+export const WORKSPACE_APPEARANCE_STORAGE_KEY = "budget-panel-appearance";
+const STORAGE_KEY = WORKSPACE_APPEARANCE_STORAGE_KEY;
 const listeners = new Set<() => void>();
 let storageWriteFailed = false;
 let fallbackAppearance: WorkspaceAppearance = "light";

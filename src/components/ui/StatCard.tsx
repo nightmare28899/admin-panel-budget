@@ -35,7 +35,7 @@ export function StatCard({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-4 shadow-sm ${className}`}
+      className={`relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--card-border)] [background:var(--card-bg)] p-4 [box-shadow:var(--card-shadow)] ${className}`}
     >
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">

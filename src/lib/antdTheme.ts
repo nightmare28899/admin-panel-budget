@@ -1,5 +1,6 @@
 import { theme as antdTheme, type ThemeConfig } from "antd";
 import type { WorkspaceAppearance } from "./workspaceAppearance";
+import type { WorkspaceThemeVariant } from "./workspaceTheme";
 
 // Hex values derived from the oklch tokens in src/app/globals.css
 // (resolved via canvas pixel readback — do not eyeball these, re-derive
@@ -181,7 +182,89 @@ export const workspaceDarkTheme: ThemeConfig = {
   },
 };
 
-export function getWorkspaceTheme(workspace: Workspace, appearance: WorkspaceAppearance): ThemeConfig {
+// Aurora hex values mirror the [data-theme="aurora"] blocks in globals.css.
+type AuroraPalette = {
+  bg0: string; bg1: string; bg3: string; border: string; borderSoft: string;
+  text1: string; text2: string; text3: string;
+  primary: string; primaryText: string; success: string; warning: string; error: string; info: string;
+};
+
+const AURORA_DARK: AuroraPalette = {
+  bg0: "#0a0e14", bg1: "#101722", bg3: "#1c2837", border: "#2a3a4d", borderSoft: "#1f2d3c",
+  text1: "#e9f1f5", text2: "#b7c6cf", text3: "#8ea1ae",
+  primary: "#10b981", primaryText: "#04130e", success: "#10b981", warning: "#f59e0b", error: "#f43f5e", info: "#22d3ee",
+};
+
+const AURORA_LIGHT: AuroraPalette = {
+  bg0: "#f3f7f8", bg1: "#ffffff", bg3: "#f0f5f6", border: "#bccdd2", borderSoft: "#d6e3e5",
+  text1: "#0e1a20", text2: "#35474f", text3: "#4c5f68",
+  primary: "#047857", primaryText: "#ffffff", success: "#047857", warning: "#92580a", error: "#be123c", info: "#0e7490",
+};
+
+function createAuroraTheme(appearance: WorkspaceAppearance): ThemeConfig {
+  const dark = appearance === "dark";
+  const p = dark ? AURORA_DARK : AURORA_LIGHT;
+  return {
+    algorithm: dark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    inherit: false,
+    token: {
+      colorPrimary: p.primary,
+      colorSuccess: p.success,
+      colorWarning: p.warning,
+      colorError: p.error,
+      colorInfo: p.info,
+      colorBgBase: p.bg0,
+      colorBgContainer: p.bg1,
+      colorBgElevated: p.bg3,
+      colorBgLayout: p.bg0,
+      colorText: p.text1,
+      colorTextSecondary: p.text2,
+      colorTextTertiary: p.text3,
+      colorTextPlaceholder: p.text3,
+      colorBorder: p.border,
+      colorBorderSecondary: p.borderSoft,
+      borderRadius: 14, // matches --radius-control (0.875rem) in globals.css
+      borderRadiusLG: 24, // matches --radius-card (1.5rem)
+      fontFamily: "var(--font-geist-sans), sans-serif",
+    },
+    components: {
+      Button: {
+        fontWeight: 600,
+        primaryColor: p.primaryText,
+        dangerColor: "#ffffff",
+        defaultColor: p.text1,
+        defaultBg: p.bg1,
+        defaultBorderColor: p.border,
+        defaultShadow: "none",
+        primaryShadow: dark ? "0 0 18px -2px rgba(20, 211, 160, 0.45)" : "0 6px 16px -6px rgba(4, 120, 87, 0.5)",
+        dangerShadow: "none",
+        paddingInline: 20,
+        paddingInlineSM: 12,
+        contentFontSize: 14,
+        contentFontSizeSM: 12,
+      },
+      Table: {
+        colorBgContainer: p.bg1,
+        headerBg: p.bg3,
+        footerBg: p.bg3,
+        headerColor: p.text2,
+        headerSplitColor: p.borderSoft,
+        borderColor: p.borderSoft,
+        rowHoverBg: p.bg3,
+        rowExpandedBg: p.bg3,
+      },
+      Modal: { contentBg: p.bg1, headerBg: p.bg1, borderRadiusLG: 24 },
+      Popconfirm: { colorBgElevated: p.bg3 },
+    },
+  };
+}
+
+export function getWorkspaceTheme(
+  workspace: Workspace,
+  appearance: WorkspaceAppearance,
+  variant: WorkspaceThemeVariant = "classic",
+): ThemeConfig {
+  if (variant === "aurora") return createAuroraTheme(appearance);
   const selected = appearance === "dark" ? workspaceDarkTheme : workspaceReferenceTheme;
   return {
     ...selected,

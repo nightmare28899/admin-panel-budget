@@ -113,6 +113,154 @@
   }
 }
 
+/* Theme axis (data-theme) is independent of appearance. Shape/feel tokens
+   default to the classic look and are re-declared on every scope that sets
+   the colors they reference (html, the workspace wrapper, theme previews), so
+   var() chains resolve against that element's own palette. */
+:root,
+[data-workspace],
+[data-theme] {
+  --radius-card: 1rem;
+  --radius-control: 0.5rem;
+  --radius-button: calc(infinity * 1px);
+  --radius-chip: calc(infinity * 1px);
+  --radius-modal: 0.75rem;
+  --card-bg: var(--bg-1);
+  --card-border: var(--border-soft);
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tile-shadow: none;
+  --input-bg: var(--bg-3);
+  --input-border: var(--border-soft);
+  --button-primary-bg: var(--accent);
+  --button-primary-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --button-primary-shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --modal-bg: var(--bg-2);
+  --modal-border: var(--border);
+  --modal-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --theme-font-display: var(--font-display);
+  --theme-font-mono: var(--font-geist-mono);
+  /* KPI figures: inherit the surrounding font unless a theme asks for mono. */
+  --font-number: inherit;
+}
+
+/* Aurora, light appearance: clean cool-gray canvas, white cards, emerald edge. */
+[data-theme="aurora"][data-workspace] {
+  color-scheme: light;
+  --bg-0: #f3f7f8;
+  --bg-1: #ffffff;
+  --bg-2: #e8f0f1;
+  --bg-3: #f0f5f6;
+  --bg-hover: #e8f0f1;
+  --border: #bccdd2;
+  --border-soft: #d6e3e5;
+  --text-1: #0e1a20;
+  --text-2: #35474f;
+  --text-3: #4c5f68;
+  --emerald: #047857;
+  --emerald-dim: #dcf5ea;
+  --emerald-text: #065f46;
+  --gold: #92580a;
+  --gold-dim: #fff1d1;
+  --gold-text: #7a4b06;
+  --rose: #be123c;
+  --rose-dim: #ffe8ec;
+  --rose-text: #9f1239;
+  --info: #0e7490;
+  --info-dim: #e0f4f8;
+  --info-text: #155e75;
+  --accent: #047857;
+  --accent-dim: #dcf5ea;
+  --accent-text: #065f46;
+  --accent-contrast: #ffffff;
+  --violet: #6d28d9;
+  --violet-dim: #ede7fb;
+  --violet-text: #5b21b6;
+  --shell-header-bg: #0a1418;
+  --shell-header-text: #ffffff;
+  --shell-header-muted: #c3d3d8;
+  --shell-header-border: #1e2f35;
+  --radius-card: 1.5rem;
+  --radius-control: 0.875rem;
+  --radius-button: 0.75rem;
+  --radius-chip: calc(infinity * 1px);
+  --radius-modal: 1.5rem;
+  --card-bg: linear-gradient(180deg, rgba(4, 120, 87, 0.05) 0%, rgba(4, 120, 87, 0) 100%), var(--bg-1);
+  --card-border: rgba(4, 120, 87, 0.22);
+  --card-shadow: 0 1px 2px rgba(15, 40, 35, 0.05), 0 10px 28px -14px rgba(4, 120, 87, 0.22);
+  --tile-shadow: 0 1px 2px rgba(15, 40, 35, 0.05), 0 10px 28px -14px rgba(4, 120, 87, 0.22);
+  --input-bg: #f6f9fa;
+  --input-border: rgba(53, 71, 79, 0.2);
+  --button-primary-bg: linear-gradient(135deg, #047857 0%, #056b4e 100%);
+  --button-primary-shadow: 0 6px 16px -6px rgba(4, 120, 87, 0.5);
+  --button-primary-shadow-hover: 0 8px 22px -6px rgba(4, 120, 87, 0.6);
+  --modal-bg: var(--bg-1);
+  --modal-border: rgba(4, 120, 87, 0.25);
+  --modal-shadow: 0 24px 60px -16px rgba(15, 40, 35, 0.35);
+  --theme-font-display: var(--font-plus-jakarta), var(--font-geist-sans), sans-serif;
+  --theme-font-mono: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  --font-number: var(--theme-font-mono);
+}
+
+/* Aurora, dark appearance: near-black navy, teal-lit glass cards, emerald glow. */
+@media screen {
+  [data-theme="aurora"][data-workspace][data-appearance="dark"] {
+    color-scheme: dark;
+    --bg-0: #0a0e14;
+    --bg-1: #101722;
+    --bg-2: #141d2a;
+    --bg-3: #1c2837;
+    --bg-hover: #1c2837;
+    --border: #2a3a4d;
+    --border-soft: #1f2d3c;
+    --text-1: #e9f1f5;
+    --text-2: #b7c6cf;
+    --text-3: #8ea1ae;
+    --emerald: #10b981;
+    --emerald-dim: #0b2e28;
+    --emerald-text: #5eeac0;
+    --gold: #f59e0b;
+    --gold-dim: #33260c;
+    --gold-text: #fcd375;
+    --rose: #f43f5e;
+    --rose-dim: #3a1620;
+    --rose-text: #fda4af;
+    --info: #22d3ee;
+    --info-dim: #0f2f38;
+    --info-text: #7fe6f5;
+    --accent: #10b981;
+    --accent-dim: #0c3a33;
+    --accent-text: #5eeac0;
+    --accent-contrast: #04130e;
+    --violet: #8b5cf6;
+    --violet-dim: #271c4a;
+    --violet-text: #c4b5fd;
+    --shell-header-bg: #0a0e14;
+    --shell-header-text: #e9f1f5;
+    --shell-header-muted: #b7c6cf;
+    --shell-header-border: #1f2d3c;
+    --radius-card: 1.5rem;
+    --radius-control: 0.875rem;
+    --radius-button: 0.75rem;
+    --radius-chip: calc(infinity * 1px);
+    --radius-modal: 1.5rem;
+    --card-bg: linear-gradient(180deg, rgba(20, 211, 160, 0.07) 0%, rgba(20, 211, 160, 0.015) 100%), var(--bg-1);
+    --card-border: rgba(20, 211, 160, 0.18);
+    --card-shadow: 0 0 0 1px rgba(20, 211, 160, 0.04), 0 10px 32px -14px rgba(16, 185, 129, 0.3), 0 2px 6px rgba(0, 0, 0, 0.4);
+    --tile-shadow: 0 0 0 1px rgba(20, 211, 160, 0.04), 0 10px 32px -14px rgba(16, 185, 129, 0.3), 0 2px 6px rgba(0, 0, 0, 0.4);
+    --input-bg: #0b111a;
+    --input-border: rgba(148, 163, 184, 0.2);
+    --button-primary-bg: linear-gradient(135deg, #10b981 0%, #14d3a0 100%);
+    --button-primary-shadow: 0 0 18px -2px rgba(20, 211, 160, 0.45), 0 4px 12px -4px rgba(0, 0, 0, 0.5);
+    --button-primary-shadow-hover: 0 0 26px 0 rgba(20, 211, 160, 0.6), 0 6px 16px -4px rgba(0, 0, 0, 0.5);
+    --modal-bg: var(--bg-2);
+    --modal-border: rgba(20, 211, 160, 0.22);
+    --modal-shadow: 0 24px 70px -12px rgba(0, 0, 0, 0.7), 0 0 40px -16px rgba(20, 211, 160, 0.3);
+    --theme-font-display: var(--font-plus-jakarta), var(--font-geist-sans), sans-serif;
+    --theme-font-mono: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+    --font-number: var(--theme-font-mono);
+  }
+}
+
 html, body {
   width: 100%;
   min-height: 100%;
@@ -130,12 +278,12 @@ html, body {
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-display);
+  --font-mono: var(--theme-font-mono);
+  --font-serif: var(--theme-font-display);
 }
 
 .input {
-  @apply w-full rounded-lg border border-[var(--border-soft)] bg-[var(--bg-3)] px-3 py-2 text-[var(--text-1)] transition-all duration-200 placeholder:text-[var(--text-3)] hover:border-[var(--border)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40;
+  @apply w-full rounded-[var(--radius-control)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--text-1)] transition-all duration-200 placeholder:text-[var(--text-3)] hover:border-[var(--border)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40;
 }
 
 button:focus-visible {

@@ -35,7 +35,7 @@ export function MetricCardsSkeleton({
       {Array.from({ length: count }, (_, index) => (
         <div
           key={index}
-          className="rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-2)] p-4"
+          className="rounded-[var(--radius-card)] border border-[var(--border-soft)] bg-[var(--bg-2)] p-4"
           aria-hidden="true"
         >
           <SkeletonBlock className="mb-3 h-3 w-24" />

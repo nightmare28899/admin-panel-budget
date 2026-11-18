@@ -14,7 +14,7 @@ export function Card({
   return (
     <div
       id={id}
-      className={`relative overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-6 shadow-sm ${className}`}
+      className={`relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--card-border)] [background:var(--card-bg)] p-6 [box-shadow:var(--card-shadow)] ${className}`}
     >
       <div className="relative">
         {title ? (

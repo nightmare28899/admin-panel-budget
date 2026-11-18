@@ -123,3 +123,38 @@ describe("workspace dark theme", () => {
     expect(workspaceDarkTheme.components!.Table!.colorBgContainer).toBe(themeTokens.colorBgContainer);
   });
 });
+
+describe("aurora theme variant", () => {
+  it("keeps classic as the default and unchanged", () => {
+    for (const appearance of ["light", "dark"] as const) {
+      expect(getWorkspaceTheme("finance", appearance, "classic")).toEqual(getWorkspaceTheme("finance", appearance));
+    }
+  });
+
+  it("matches the aurora CSS surfaces and accent in both appearances", () => {
+    const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+    const scopes = {
+      light: css.match(/\[data-theme="aurora"\]\[data-workspace\]\s*\{([^}]+)\}/)![1],
+      dark: css.match(/\[data-theme="aurora"\]\[data-workspace\]\[data-appearance="dark"\]\s*\{([^}]+)\}/)![1],
+    };
+    for (const appearance of ["light", "dark"] as const) {
+      const themeConfig = getWorkspaceTheme("finance", appearance, "aurora");
+      const tokens = themeConfig.token!;
+      expect(themeConfig.algorithm).toBe(appearance === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm);
+      expect(themeConfig.inherit).toBe(false);
+      const pairs = {
+        "bg-0": tokens.colorBgBase, "bg-1": tokens.colorBgContainer, "bg-3": tokens.colorBgElevated,
+        "text-1": tokens.colorText, "text-2": tokens.colorTextSecondary, "text-3": tokens.colorTextTertiary,
+        accent: tokens.colorPrimary,
+      };
+      for (const [name, value] of Object.entries(pairs)) expect(scopes[appearance]).toContain(`--${name}: ${value};`);
+      expect(tokens.borderRadius).toBe(14);
+      expect(themeConfig.components!.Modal!.contentBg).toBe(tokens.colorBgContainer);
+      expect(contrast(themeConfig.components!.Button!.primaryColor!, tokens.colorPrimary!)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("is the same for every workspace", () => {
+    expect(getWorkspaceTheme("admin", "dark", "aurora").token!.colorPrimary).toBe(getWorkspaceTheme("finance", "dark", "aurora").token!.colorPrimary);
+  });
+});
