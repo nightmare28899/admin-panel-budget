@@ -15,7 +15,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     "rounded-full border border-[var(--border)] bg-[var(--bg-3)]/60 text-[var(--text-1)] font-medium hover:border-[var(--text-3)] hover:bg-[var(--bg-3)] active:bg-[var(--bg-2)] disabled:hover:bg-[var(--bg-3)]/60",
   ghost:
     "rounded-full text-[var(--text-2)] font-medium hover:bg-[var(--bg-3)] hover:text-[var(--text-1)] active:bg-[var(--bg-2)]",
-  danger: `rounded-full border border-black/10 bg-[var(--rose)] text-[var(--bg-0)] font-semibold ${LIFT_SHADOW} ${LIFT_SHADOW_HOVER} hover:-translate-y-px hover:brightness-110 active:translate-y-0 active:brightness-95 disabled:hover:translate-y-0 disabled:shadow-none`,
+  danger: `rounded-full border border-black/10 bg-[var(--rose)] text-white font-semibold ${LIFT_SHADOW} ${LIFT_SHADOW_HOVER} hover:-translate-y-px hover:brightness-110 active:translate-y-0 active:brightness-95 disabled:hover:translate-y-0 disabled:shadow-none`,
   success: `rounded-full border border-black/10 bg-[var(--emerald)] text-[var(--bg-0)] font-semibold ${LIFT_SHADOW} ${LIFT_SHADOW_HOVER} hover:-translate-y-px hover:brightness-110 active:translate-y-0 active:brightness-95 disabled:hover:translate-y-0 disabled:shadow-none`,
   tinted:
     "rounded-full border border-[var(--accent)]/30 bg-[var(--accent-dim)] font-semibold text-[var(--accent-text)] hover:bg-[var(--accent)]/25 hover:border-[var(--accent)]/50 active:bg-[var(--accent)]/35",
