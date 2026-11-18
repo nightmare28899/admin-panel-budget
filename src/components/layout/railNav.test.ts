@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRailBadge, isNavItemActive, resolveCurrentPageLabel, toRailItems } from "./railNav";
+import { formatRailBadge, isNavItemActive, railToggleLabelKey, railWidthClass, resolveCurrentPageLabel, toRailItems } from "./railNav";
 
 const items = [
   { label: "Expenses", href: "/finance/expenses" },
@@ -74,5 +74,23 @@ describe("resolveCurrentPageLabel", () => {
   it("falls back to the default title, then undefined", () => {
     expect(resolveCurrentPageLabel("/nope", items, undefined, "Default")).toBe("Default");
     expect(resolveCurrentPageLabel("/nope", items)).toBeUndefined();
+  });
+});
+
+describe("railWidthClass", () => {
+  it("keeps the icon-only width when collapsed", () => {
+    expect(railWidthClass(true)).toBe("lg:w-[88px]");
+  });
+  it("widens to show labels when expanded", () => {
+    expect(railWidthClass(false)).toBe("lg:w-[248px]");
+  });
+});
+
+describe("railToggleLabelKey", () => {
+  it("offers to expand when collapsed", () => {
+    expect(railToggleLabelKey(true)).toBe("expandSidebar");
+  });
+  it("offers to collapse when expanded", () => {
+    expect(railToggleLabelKey(false)).toBe("collapseSidebar");
   });
 });

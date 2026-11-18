@@ -11,7 +11,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { WorkspaceTheme, type Workspace } from "@/components/layout/WorkspaceTheme";
 import { AuroraRail } from "@/components/layout/AuroraRail";
 import { AuroraHeader } from "@/components/layout/AuroraHeader";
-import { resolveCurrentPageLabel } from "@/components/layout/railNav";
+import { railWidthClass, resolveCurrentPageLabel } from "@/components/layout/railNav";
 import { useWorkspaceThemeVariant } from "@/hooks/useWorkspaceThemeVariant";
 
 // Root breadcrumb of the aurora header, per workspace.
@@ -457,7 +457,7 @@ export function AppShell({
       >
         <aside
           id="desktop-sidebar"
-          className="relative z-40 hidden w-[88px] shrink-0 rounded-[28px] border border-[var(--panel-border)] bg-[var(--rail-bg)] [box-shadow:var(--panel-shadow)] lg:flex"
+          className={`relative z-40 hidden shrink-0 overflow-hidden rounded-[28px] border border-[var(--panel-border)] bg-[var(--rail-bg)] [box-shadow:var(--panel-shadow)] transition-[width] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:flex ${railWidthClass(collapsed)}`}
         >
           <AuroraRail
             navItems={navItems}
@@ -466,6 +466,8 @@ export function AppShell({
             profileHref={profileHref}
             onSignOut={onSignOut}
             signingOut={signingOut}
+            collapsed={collapsed}
+            onToggleCollapsed={toggleCollapsed}
           />
         </aside>
 

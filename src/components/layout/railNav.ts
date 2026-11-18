@@ -51,3 +51,13 @@ export function resolveCurrentPageLabel(
 ): string | undefined {
   return pageTitles?.[pathname] || items.find((item) => isNavItemActive(pathname, item))?.label || defaultTitle;
 }
+
+/** Desktop width of the aurora rail: icon-only when collapsed, labelled when expanded. */
+export function railWidthClass(collapsed: boolean): "lg:w-[88px]" | "lg:w-[248px]" {
+  return collapsed ? "lg:w-[88px]" : "lg:w-[248px]";
+}
+
+/** i18n key for the rail's expand/collapse toggle (names the action it performs). */
+export function railToggleLabelKey(collapsed: boolean): "expandSidebar" | "collapseSidebar" {
+  return collapsed ? "expandSidebar" : "collapseSidebar";
+}
