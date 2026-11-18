@@ -14,7 +14,11 @@ function LocalizedProviders({ children, queryClient }: PropsWithChildren<{ query
   const { locale } = useLocale();
 
   return (
-    <ConfigProvider theme={antdSharedTheme} locale={locale === "es" ? esES : enUS}>
+    <ConfigProvider
+      theme={antdSharedTheme}
+      locale={locale === "es" ? esES : enUS}
+      select={{ showSearch: true }}
+    >
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <SessionRenewalProvider>{children}</SessionRenewalProvider>
