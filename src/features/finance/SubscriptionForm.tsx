@@ -154,6 +154,9 @@ export function SubscriptionForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Form.Item name="billingCycle" label={t("billingCycleLabel")} rules={[{ required: true }]}>
           <Select
+            showSearch
+            optionFilterProp="label"
+            allowClear
             options={BILLING_CYCLE_VALUES.map((cycle) => ({
               value: cycle,
               label: t(BILLING_CYCLE_LABEL_KEYS[cycle]),
@@ -170,6 +173,9 @@ export function SubscriptionForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Form.Item name="paymentMethod" label={t("paymentMethodLabel")} rules={[{ required: true }]}>
           <Select
+            showSearch
+            optionFilterProp="label"
+            allowClear
             options={SUBSCRIPTION_PAYMENT_METHOD_VALUES.map((method) => ({
               value: method,
               label: t(PAYMENT_METHOD_LABEL_KEYS[method]),
@@ -186,6 +192,8 @@ export function SubscriptionForm({
       </div>
       <Form.Item name="categoryId" label={t("category")}>
         <Select
+          showSearch
+          optionFilterProp="label"
           allowClear
           placeholder={t("selectCategory")}
           options={categories.map((category) => ({
