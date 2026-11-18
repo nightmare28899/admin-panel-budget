@@ -76,6 +76,9 @@ export function SelectField({
           id={id}
           value={selectValue(value)}
           options={options}
+          showSearch
+          optionFilterProp="label"
+          allowClear
           disabled={disabled}
           placeholder={t("nutSelectPlaceholder")}
           onChange={onChange}

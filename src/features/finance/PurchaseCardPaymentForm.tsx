@@ -33,7 +33,7 @@ export function PurchaseCardPaymentForm({ purchase, cards, loading, error, error
   return <div className="space-y-3">
     <p className="text-sm leading-6 text-[var(--text-2)]">{t("purchasePaymentDescription")}</p>
     <label className="block text-sm">{t("purchasePaymentCard")}
-      <Select className="mt-1 w-full" value={cardId || undefined} placeholder={t("selectCard")} onChange={setCardId} disabled={loading}
+      <Select className="mt-1 w-full" showSearch optionFilterProp="label" allowClear value={cardId || undefined} placeholder={t("selectCard")} onChange={setCardId} disabled={loading}
         options={cards.map((card) => ({ value: card.id, label: `${card.bank} ${card.name} •••• ${card.last4}` }))} />
     </label>
     <label className="block text-sm">{t("purchasePaymentAmount")} ({purchase.currency})
