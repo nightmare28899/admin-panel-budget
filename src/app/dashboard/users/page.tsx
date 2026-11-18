@@ -97,11 +97,13 @@ export default function UsersPage() {
   }, [runServerAction, t]);
 
   useEffect(() => {
-    loadUsers();
+    const task = queueMicrotask(() => void loadUsers());
+    return () => task;
   }, [loadUsers]);
 
   useEffect(() => {
-    setCurrentPage(1);
+    const task = queueMicrotask(() => setCurrentPage(1));
+    return () => task;
   }, [searchQuery, statusFilter]);
 
   useEffect(() => {
@@ -395,7 +397,8 @@ export default function UsersPage() {
 
   useEffect(() => {
     if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
+      const task = queueMicrotask(() => setCurrentPage(totalPages));
+      return () => task;
     }
   }, [currentPage, totalPages]);
 

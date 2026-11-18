@@ -26,11 +26,12 @@ export function useAutoRefresh(
   const refreshRef = useRef(refresh);
   const enabledRef = useRef(enabled);
   const inFlightRef = useRef(false);
-  const lastRunRef = useRef(Date.now());
+  const lastRunRef = useRef(0);
 
   useEffect(() => {
     refreshRef.current = refresh;
     enabledRef.current = enabled;
+    if (lastRunRef.current === 0) lastRunRef.current = Date.now();
   });
 
   const run = useCallback(async () => {

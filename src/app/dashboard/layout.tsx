@@ -11,15 +11,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
         redirect("/login");
     }
 
+    let user;
     try {
-        const profile = await getAdminMe(token);
-        const user = profile.user;
-        if ((user?.role || "").toLowerCase() !== "admin") {
-            redirect("/login");
-        }
-
-        return <DashboardShell user={user ?? {}}>{children}</DashboardShell>;
+        user = (await getAdminMe(token)).user;
     } catch {
         redirect("/login");
     }
+
+    if ((user?.role || "").toLowerCase() !== "admin") {
+        redirect("/login");
+    }
+
+    return <DashboardShell user={user ?? {}}>{children}</DashboardShell>;
 }

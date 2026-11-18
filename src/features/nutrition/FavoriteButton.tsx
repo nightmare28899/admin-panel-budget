@@ -31,14 +31,19 @@ export function FavoriteButton({
   const router = useRouter();
   const [value, setValue] = useState(favorite);
   const [pop, setPop] = useState(false);
-  const busy = useRef(false);
+  const [isBusy, setIsBusy] = useState(false);
+  const busyRef = useRef(false);
 
   // Follow the server once a refresh brings a new value.
-  useEffect(() => setValue(favorite), [favorite]);
+  useEffect(() => {
+    const task = queueMicrotask(() => setValue(favorite));
+    return () => task;
+  }, [favorite]);
 
   const toggle = async () => {
-    if (busy.current) return;
-    busy.current = true;
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setIsBusy(true);
     const previous = value;
     const next = !previous;
     setValue(next);
@@ -55,7 +60,8 @@ export function FavoriteButton({
       onError?.(errorMessage);
     } finally {
       setValue(settleFavorite({ previous, next, success }));
-      busy.current = false;
+      busyRef.current = false;
+      setIsBusy(false);
       if (success) router.refresh();
     }
   };
@@ -66,7 +72,7 @@ export function FavoriteButton({
       variant={value ? "tinted" : "outline"}
       size={size}
       aria-pressed={value}
-      aria-busy={busy.current || undefined}
+      aria-busy={isBusy || undefined}
       className="min-w-[9.5rem] justify-center"
       onClick={() => void toggle()}
     >
