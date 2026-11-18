@@ -1261,6 +1261,10 @@ const englishMessages = {
   themeAppearanceDark: "Dark",
   themePreviewBalance: "Balance",
   themeActive: "Active",
+  dailyAverage: "Daily average",
+  dailyAverageNote: "Over {days} days this month",
+  budgetUsedPill: "{percent}% used",
+  clearFilters: "Clear filters",
 } as const;
 
 export type MessageKey = keyof typeof englishMessages;
@@ -1932,6 +1936,10 @@ const spanishMessages: Record<MessageKey, string> = {
   themeAppearanceDark: "Oscuro",
   themePreviewBalance: "Saldo",
   themeActive: "Activo",
+  dailyAverage: "Promedio diario",
+  dailyAverageNote: "En {days} días de este mes",
+  budgetUsedPill: "{percent}% usado",
+  clearFilters: "Limpiar filtros",
 };
 
 export const messages = { en: englishMessages, es: spanishMessages };

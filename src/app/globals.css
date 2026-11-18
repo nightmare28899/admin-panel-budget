@@ -199,6 +199,12 @@
   --theme-font-display: var(--font-plus-jakarta), var(--font-geist-sans), sans-serif;
   --theme-font-mono: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
   --font-number: var(--theme-font-mono);
+  /* Aurora frame: page backdrop behind the floating rail and main panel. */
+  --frame-bg: #dde8ea;
+  --panel-bg: var(--bg-0);
+  --rail-bg: var(--bg-1);
+  --panel-border: rgba(4, 120, 87, 0.18);
+  --panel-shadow: 0 18px 50px -24px rgba(15, 40, 35, 0.35);
 }
 
 /* Aurora, dark appearance: near-black navy, teal-lit glass cards, emerald glow. */
@@ -258,6 +264,11 @@
     --theme-font-display: var(--font-plus-jakarta), var(--font-geist-sans), sans-serif;
     --theme-font-mono: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
     --font-number: var(--theme-font-mono);
+    --frame-bg: #05080c;
+    --panel-bg: var(--bg-0);
+    --rail-bg: var(--bg-1);
+    --panel-border: rgba(20, 211, 160, 0.14);
+    --panel-shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.8);
   }
 }
 
@@ -350,4 +361,10 @@ button:focus-visible {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Aurora swaps the shell layout after hydration; hide the pre-hydration classic
+   markup for aurora users so the layout never flashes. Classic is unaffected. */
+html[data-theme="aurora"] [data-shell-hydrating] {
+  visibility: hidden;
 }

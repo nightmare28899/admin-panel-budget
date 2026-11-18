@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Empty, List, Popconfirm } from "antd";
+import { Empty, List, Pagination, Popconfirm } from "antd";
 import { CreditCardOutlined, DeleteOutlined, EditOutlined, PictureOutlined } from "@ant-design/icons";
 import type { Expense } from "./finance.types";
 import { toCalendarDate } from "./finance.types";
@@ -11,6 +11,20 @@ import { Button } from "@/components/ui/Button";
 import { InstallmentPlanBadge } from "./InstallmentPlanBadge";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { buildPagination } from "@/lib/pagination";
+import { AuroraAmount } from "@/components/ui/AuroraBlocks";
+
+/** Derived display values shared by the classic and aurora row renderers. */
+function useTransactionRowModel(expense: Expense) {
+  const { formatDate } = useLocale();
+  const { bg, text, icon } = categoryTokens(expense.category);
+  const calendarDate = toCalendarDate(expense.date);
+  const displayDate = calendarDate
+    ? formatDate(`${calendarDate}T12:00:00`, { year: "numeric", month: "short", day: "numeric" })
+    : "—";
+  const isInstallmentRow = expense.isInstallment === true && (expense.installmentCount ?? 0) > 1;
+  const hasFinancingPlan = !isInstallmentRow && Boolean(expense.financingPlan);
+  return { bg, text, icon, displayDate, isInstallmentRow, hasFinancingPlan };
+}
 
 function TransactionRow({
   expense,
@@ -26,14 +40,8 @@ function TransactionRow({
   deletingExpenseId?: string;
 }) {
   const { t, formatDate, formatNumber } = useLocale();
-  const { bg, text, icon } = categoryTokens(expense.category);
+  const { bg, text, icon, displayDate, isInstallmentRow, hasFinancingPlan } = useTransactionRowModel(expense);
   const FallbackIcon = icon.kind === "component" ? icon.component : undefined;
-  const calendarDate = toCalendarDate(expense.date);
-  const displayDate = calendarDate
-    ? formatDate(`${calendarDate}T12:00:00`, { year: "numeric", month: "short", day: "numeric" })
-    : "—";
-  const isInstallmentRow = expense.isInstallment === true && (expense.installmentCount ?? 0) > 1;
-  const hasFinancingPlan = !isInstallmentRow && Boolean(expense.financingPlan);
   const isDeleting = deletingExpenseId === expense.id;
   const deletionPending = deletingExpenseId !== undefined;
 
@@ -148,6 +156,115 @@ function TransactionRow({
   );
 }
 
+const ICON_BUTTON =
+  "flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border-soft)] text-[var(--text-3)] transition-colors hover:border-[var(--border)] hover:text-[var(--text-1)] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] motion-reduce:transition-none";
+
+/** Aurora presentation of one transaction: its own rounded card with icon tile, meta line and square actions. */
+function AuroraTransactionRow({
+  expense,
+  onEdit,
+  onDelete,
+  onReceipt,
+  deletingExpenseId,
+}: {
+  expense: Expense;
+  onEdit: (expense: Expense) => void;
+  onDelete: (id: string) => Promise<void>;
+  onReceipt: (expense: Expense) => void;
+  deletingExpenseId?: string;
+}) {
+  const { t, formatNumber } = useLocale();
+  const { bg, text, icon, displayDate, isInstallmentRow, hasFinancingPlan } = useTransactionRowModel(expense);
+  const FallbackIcon = icon.kind === "component" ? icon.component : undefined;
+  const isDeleting = deletingExpenseId === expense.id;
+  const deletionPending = deletingExpenseId !== undefined;
+  const statement = expense.statementRow?.statementImport;
+
+  return (
+    <li className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-[var(--card-border)] [background:var(--card-bg)] p-4 [box-shadow:var(--card-shadow)]">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
+        <span
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl"
+          style={{ background: bg, color: text }}
+        >
+          {icon.kind === "glyph" ? icon.glyph : FallbackIcon && <FallbackIcon />}
+        </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate text-[15px] font-semibold text-[var(--text-1)]">{expense.title}</p>
+            {expense.category && (
+              <span className="rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: bg, color: text }}>
+                {expense.category.name}
+              </span>
+            )}
+          </div>
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-[family-name:var(--theme-font-mono)] text-xs text-[var(--text-3)]">
+            <span>{displayDate}</span>
+            {expense.merchantName && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="truncate">{expense.merchantName}</span>
+              </>
+            )}
+            {isInstallmentRow && (
+              <Badge variant="neutral">{t("installmentBadge", { index: formatNumber(expense.installmentIndex ?? 1), count: formatNumber(expense.installmentCount ?? 0) })}</Badge>
+            )}
+            {hasFinancingPlan && <InstallmentPlanBadge expense={expense} />}
+            {expense.creditCard && (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                {expense.creditCard.name} •••• {expense.creditCard.last4}
+              </span>
+            )}
+            {expense.statementRow && statement && (
+              <Link href={`/finance/statements/${expense.statementRow.statementImportId}`}>
+                <Badge variant={statement.paymentStatus === "PAID" ? "success" : statement.paymentStatus === "PARTIAL" ? "warning" : "neutral"}>
+                  {statement.paymentStatus === "PAID" ? t("paid") : statement.paymentStatus === "PARTIAL" ? t("partial") : t("unpaid")}
+                </Badge>
+              </Link>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-4">
+        <span className="font-[family-name:var(--theme-font-mono)] text-base font-semibold text-[var(--rose-text)]">
+          <AuroraAmount
+            value={formatNumber(Number(expense.cost), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            unit={`-${expense.currency}`}
+            className="text-lg text-[var(--rose-text)]"
+          />
+        </span>
+        <div className="flex items-center gap-1.5">
+          <button type="button" className={ICON_BUTTON} onClick={() => onEdit(expense)} aria-label={t("editExpenseNamed", { title: expense.title })}>
+            <EditOutlined aria-hidden="true" />
+          </button>
+          {expense.imageUrl && (
+            <button type="button" className={ICON_BUTTON} onClick={() => onReceipt(expense)} aria-label={t("viewReceiptNamed", { title: expense.title })}>
+              <PictureOutlined aria-hidden="true" />
+            </button>
+          )}
+          <Popconfirm
+            title={t("deleteExpenseQuestion")}
+            okButtonProps={{ danger: true, shape: "round", loading: isDeleting, disabled: deletionPending }}
+            cancelButtonProps={{ shape: "round" }}
+            onConfirm={() => onDelete(expense.id)}
+          >
+            <button
+              type="button"
+              className={`${ICON_BUTTON} hover:!text-[var(--rose)]`}
+              disabled={deletionPending}
+              aria-label={t("deleteExpenseNamed", { title: expense.title })}
+            >
+              <DeleteOutlined aria-hidden="true" />
+            </button>
+          </Popconfirm>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 type Props = {
   expenses: Expense[];
   page: number;
@@ -159,6 +276,8 @@ type Props = {
   onDelete: (id: string) => Promise<void>;
   deletingExpenseId?: string;
   onReceipt: (expense: Expense) => void;
+  /** Aurora theme: each transaction is its own card instead of a bordered list row. */
+  aurora?: boolean;
 };
 
 export function ExpenseList({
@@ -172,8 +291,38 @@ export function ExpenseList({
   onDelete,
   deletingExpenseId,
   onReceipt,
+  aurora = false,
 }: Props) {
   const { t, formatNumber } = useLocale();
+
+  if (aurora) {
+    const pagination = buildPagination({
+      t, formatNumber, current: page, pageSize, total,
+      recordKeys: { one: "record", other: "records" },
+      onChange: (nextPage, nextPageSize) => (nextPageSize !== pageSize ? onPageSizeChange(nextPageSize) : onPage(nextPage)),
+    });
+    return (
+      <div>
+        {expenses.length === 0 ? (
+          <Empty description={t("noExpensesMatch")} className="py-10" />
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {expenses.map((expense) => (
+              <AuroraTransactionRow
+                key={expense.id}
+                expense={expense}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                deletingExpenseId={deletingExpenseId}
+                onReceipt={onReceipt}
+              />
+            ))}
+          </ul>
+        )}
+        <Pagination {...pagination} className="mt-4 flex flex-wrap justify-end gap-y-2" />
+      </div>
+    );
+  }
 
   return (
     <List

@@ -1,7 +1,7 @@
 "use client";
 
 import { DatePicker, Input, Select, Spin } from "antd";
-import { ReloadOutlined, SafetyOutlined, WalletOutlined } from "@ant-design/icons";
+import { CalendarOutlined, PlusOutlined, ReloadOutlined, SafetyOutlined, WalletOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ import type {
 import { toCalendarDate } from "./finance.types";
 import { BudgetSettingsModal } from "./BudgetSettingsModal";
 import { resolvePrimaryCurrency } from "./reportMetrics";
+import { averagePerDay, daysElapsedInMonth } from "./expenseMetrics";
 import {
   createExpenseAction,
   deleteExpenseAction,
@@ -32,6 +33,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import { BudgetRing } from "@/components/ui/BudgetRing";
 import { StatCard } from "@/components/ui/StatCard";
+import { AuroraFilterBar, AuroraFilterChips, AuroraKpiCard, AuroraPageHeader } from "@/components/ui/AuroraBlocks";
+import { useWorkspaceThemeVariant } from "@/hooks/useWorkspaceThemeVariant";
 import { MetricCardsSkeleton, TableSkeleton } from "@/components/ui/ContentSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Modal } from "@/components/ui/Modal";
@@ -141,6 +144,9 @@ export function ExpensesView() {
   const latestRequestRef = useRef(0);
   const fingerprintRef = useRef<string>(undefined);
   const { cards: creditCards } = useCreditCards();
+  const aurora = useWorkspaceThemeVariant().variant === "aurora";
+  // Bumped by the aurora "clear" button to remount the uncontrolled filter inputs.
+  const [filtersResetKey, setFiltersResetKey] = useState(0);
 
   const reload = useCallback(
     // `quiet` is for background refreshes: it skips the profile and category
@@ -468,56 +474,111 @@ export function ExpensesView() {
       ].filter(Boolean).join(" · ")
     : "";
   const initialLoading = loading && !list;
+  const spentValue = hasBudgetPeriod
+    ? formatNumber(summary?.spentInBudgetPeriod ?? 0, moneyOptions)
+    : monthTotals && monthCurrency
+      ? formatNumber(monthTotal, moneyOptions)
+      : monthTotals ? formatNumber(0, moneyOptions) : "—";
+  const monthName = formatDate(new Date(), { month: "long", year: "numeric" });
+  const elapsedDays = daysElapsedInMonth();
+  const totalRecords = list?.pagination.totalCount ?? 0;
+  const clearFilters = () => {
+    setFilters({ q: "", from: "", to: "", categoryId: "", creditCardId: "", paymentStatus: "" });
+    setFiltersResetKey((key) => key + 1);
+  };
+  const openNewExpense = () => {
+    setEditing(undefined);
+    setFormError(undefined);
+    setDrawer(true);
+  };
 
   return (
     <>
       <div className="w-full p-4 sm:p-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("yourExpenses")}</h1>
-            <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("expensesDescription")}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {lastUpdated && (
-              <span className="text-xs text-[var(--text-3)]" aria-live="off">
-                {t("updatedAt", {
-                  time: formatDate(lastUpdated, { hour: "2-digit", minute: "2-digit" }),
-                })}
-              </span>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              disabled={refreshing || dialogOpen}
-              aria-busy={refreshing}
-              onClick={() => void refreshNow()}
-            >
-              <ReloadOutlined spin={refreshing} aria-hidden="true" />
-              {t("refresh")}
-            </Button>
-            {TEST_DATA_ENABLED && (
+        {aurora ? (
+          <AuroraPageHeader
+            title={t("yourExpenses")}
+            pill={monthName}
+            subtitle={t("expensesDescription")}
+            actions={
+              <>
+                {lastUpdated && (
+                  <span className="mr-1 font-[family-name:var(--theme-font-mono)] text-[11px] text-[var(--text-3)]" aria-live="off">
+                    {t("updatedAt", {
+                      time: formatDate(lastUpdated, { hour: "2-digit", minute: "2-digit" }),
+                    })}
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={refreshing || dialogOpen}
+                  aria-busy={refreshing}
+                  onClick={() => void refreshNow()}
+                >
+                  <ReloadOutlined spin={refreshing} aria-hidden="true" />
+                  {t("refresh")}
+                </Button>
+                {TEST_DATA_ENABLED && (
+                  <Button type="button" variant="ghost" disabled={testDataPending} onClick={() => setTestDataConfirmationOpen(true)}>
+                    {t("generateTestData")}
+                  </Button>
+                )}
+                <Button type="button" className="uppercase tracking-wider" onClick={openNewExpense}>
+                  <PlusOutlined aria-hidden="true" />
+                  {t("newExpense")}
+                </Button>
+              </>
+            }
+          />
+        ) : (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1 className="font-serif text-2xl font-semibold text-[var(--text-1)]">{t("yourExpenses")}</h1>
+              <p className="mt-0.5 text-sm text-[var(--text-3)]">{t("expensesDescription")}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {lastUpdated && (
+                <span className="text-xs text-[var(--text-3)]" aria-live="off">
+                  {t("updatedAt", {
+                    time: formatDate(lastUpdated, { hour: "2-digit", minute: "2-digit" }),
+                  })}
+                </span>
+              )}
               <Button
                 type="button"
                 variant="outline"
-                disabled={testDataPending}
-                onClick={() => setTestDataConfirmationOpen(true)}
+                disabled={refreshing || dialogOpen}
+                aria-busy={refreshing}
+                onClick={() => void refreshNow()}
               >
-                {t("generateTestData")}
+                <ReloadOutlined spin={refreshing} aria-hidden="true" />
+                {t("refresh")}
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="tinted"
-              onClick={() => {
-                setEditing(undefined);
-                setFormError(undefined);
-                setDrawer(true);
-              }}
-            >
-              {t("newExpense")}
-            </Button>
+              {TEST_DATA_ENABLED && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={testDataPending}
+                  onClick={() => setTestDataConfirmationOpen(true)}
+                >
+                  {t("generateTestData")}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="tinted"
+                onClick={() => {
+                  setEditing(undefined);
+                  setFormError(undefined);
+                  setDrawer(true);
+                }}
+              >
+                {t("newExpense")}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         <SubscriptionDueBanner />
 
@@ -554,7 +615,69 @@ export function ExpensesView() {
         )}
 
 
-        {initialLoading ? (
+        {aurora ? (
+          initialLoading ? (
+            <MetricCardsSkeleton count={3} className="mb-6 md:grid-cols-3" />
+          ) : (
+            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <AuroraKpiCard
+                tone="teal"
+                icon={<WalletOutlined />}
+                label={spentLabel}
+                sublabel={hasBudgetPeriod ? periodLabel : undefined}
+                amount={spentValue}
+                unit={hasBudgetPeriod ? currencyLabel : monthCurrency}
+                progress={hasBudgetPeriod ? summary?.percentage ?? 0 : undefined}
+                footnote={
+                  hasBudgetPeriod ? undefined : (
+                    <span className="first-letter:uppercase">
+                      {monthName}
+                      {otherMonthTotals.map((item) => ` · ${item.currency} ${formatNumber(item.total, moneyOptions)}`).join("")}
+                    </span>
+                  )
+                }
+              />
+              {hasBudgetPeriod ? (
+                <AuroraKpiCard
+                  tone="violet"
+                  icon={<SafetyOutlined />}
+                  label={t("budgetRemaining")}
+                  pill={t("budgetUsedPill", { percent: formatNumber(Math.round(summary?.percentage ?? 0)) })}
+                  amount={formatNumber(summary?.remaining ?? 0, moneyOptions)}
+                  unit={currencyLabel}
+                  progress={summary?.percentage ?? 0}
+                  footnote={periodLabel}
+                  action={
+                    <Button type="button" variant="outline" size="sm" onClick={openBudgetModal}>
+                      {t("editBudget")}
+                    </Button>
+                  }
+                />
+              ) : (
+                <AuroraKpiCard
+                  tone="violet"
+                  icon={<SafetyOutlined />}
+                  label={t("noBudgetConfigured")}
+                  amount="—"
+                  footnote={t("noBudgetHint")}
+                  action={
+                    <Button type="button" variant="outline" size="sm" onClick={openBudgetModal}>
+                      {t("configureBudget")}
+                    </Button>
+                  }
+                />
+              )}
+              <AuroraKpiCard
+                tone="teal"
+                icon={<CalendarOutlined />}
+                label={t("dailyAverage")}
+                amount={monthTotals && monthCurrency ? formatNumber(averagePerDay(monthTotal, elapsedDays), moneyOptions) : "—"}
+                unit={monthCurrency}
+                footnote={t("dailyAverageNote", { days: formatNumber(elapsedDays) })}
+              />
+            </div>
+          )
+        ) : initialLoading ? (
           <MetricCardsSkeleton count={2} className="mb-4 md:grid-cols-3" />
         ) : (
           <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -563,13 +686,7 @@ export function ExpensesView() {
               icon={<WalletOutlined />}
               label={spentLabel}
               unit={hasBudgetPeriod ? currencyLabel : monthCurrency}
-              value={
-                hasBudgetPeriod
-                  ? formatNumber(summary?.spentInBudgetPeriod ?? 0, moneyOptions)
-                  : monthTotals && monthCurrency
-                    ? formatNumber(monthTotal, moneyOptions)
-                    : monthTotals ? formatNumber(0, moneyOptions) : "—"
-              }
+              value={spentValue}
               extraPlacement="below"
               extra={
                 hasBudgetPeriod ? (
@@ -626,11 +743,30 @@ export function ExpensesView() {
         )}
 
         <section className="mb-4">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-[var(--text-1)]">{t("expenseHistory")}</h2>
-          </div>
-          <div className="mb-3 flex flex-wrap gap-2">
+          {aurora ? (
+            <>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <h2 className="font-[family-name:var(--theme-font-display)] text-xl font-bold text-[var(--text-1)]">{t("expenseHistory")}</h2>
+                  <span className="rounded-full border border-[var(--border-soft)] bg-[var(--bg-3)] px-2.5 py-1 font-[family-name:var(--theme-font-mono)] text-[11px] text-[var(--text-3)]">
+                    {formatNumber(totalRecords)} {t(totalRecords === 1 ? "record" : "records")}
+                  </span>
+                </div>
+                <AuroraFilterChips<ExpensePaymentStatus | "">
+                  label={t("filterPaymentStatus")}
+                  value={filters.paymentStatus}
+                  options={[
+                    { value: "", label: t("all") },
+                    { value: "PAID", label: t("paid") },
+                    { value: "PARTIAL", label: t("partial") },
+                    { value: "UNPAID", label: t("unpaid") },
+                  ]}
+                  onChange={(value) => setFilters((current) => ({ ...current, paymentStatus: value }))}
+                />
+              </div>
+              <AuroraFilterBar clearLabel={t("clearFilters")} onClear={clearFilters}>
             <Input.Search
+              key={`search-${filtersResetKey}`}
               aria-label={t("searchExpenses")}
               placeholder={t("searchExpenses")}
               allowClear
@@ -640,6 +776,7 @@ export function ExpensesView() {
               style={{ width: 220 }}
             />
             <DatePicker.RangePicker
+              key={`range-${filtersResetKey}`}
               aria-label={t("filterDateRange")}
               placeholder={[t("from"), t("to")]}
               allowClear
@@ -652,6 +789,7 @@ export function ExpensesView() {
               }
             />
             <Select
+              key={`category-${filtersResetKey}`}
               aria-label={t("filterCategory")}
               allowClear
               placeholder={t("category")}
@@ -660,6 +798,73 @@ export function ExpensesView() {
                 value: category.id,
                 label: category.name,
               }))}
+              value={filters.categoryId || undefined}
+              onChange={(value) =>
+                setFilters((current) => ({
+                  ...current,
+                  categoryId: value ?? "",
+                }))
+              }
+            />
+            <Select
+              aria-label={t("filterByCard")}
+              allowClear
+              placeholder={t("allCards")}
+              style={{ width: 200 }}
+              value={filters.creditCardId || undefined}
+              options={creditCards.map((card) => ({
+                value: card.id,
+                label: `${card.bank} · ${card.name} •••• ${card.last4}`,
+              }))}
+              onChange={(value) =>
+                setFilters((current) => ({
+                  ...current,
+                  creditCardId: value ?? "",
+                }))
+              }
+            />
+              </AuroraFilterBar>
+            </>
+          ) : (
+            <>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-[var(--text-1)]">{t("expenseHistory")}</h2>
+          </div>
+          <div className="mb-3 flex flex-wrap gap-2">
+            <Input.Search
+              key={`search-${filtersResetKey}`}
+              aria-label={t("searchExpenses")}
+              placeholder={t("searchExpenses")}
+              allowClear
+              onSearch={(value) =>
+                setFilters((current) => ({ ...current, q: value }))
+              }
+              style={{ width: 220 }}
+            />
+            <DatePicker.RangePicker
+              key={`range-${filtersResetKey}`}
+              aria-label={t("filterDateRange")}
+              placeholder={[t("from"), t("to")]}
+              allowClear
+              onChange={(dates: [Dayjs | null, Dayjs | null] | null) =>
+                setFilters((current) => ({
+                  ...current,
+                  from: dates?.[0] ? dates[0].format("YYYY-MM-DD") : "",
+                  to: dates?.[1] ? dates[1].format("YYYY-MM-DD") : "",
+                }))
+              }
+            />
+            <Select
+              key={`category-${filtersResetKey}`}
+              aria-label={t("filterCategory")}
+              allowClear
+              placeholder={t("category")}
+              style={{ width: 180 }}
+              options={categories.map((category) => ({
+                value: category.id,
+                label: category.name,
+              }))}
+              value={filters.categoryId || undefined}
               onChange={(value) =>
                 setFilters((current) => ({
                   ...current,
@@ -702,6 +907,8 @@ export function ExpensesView() {
               }
             />
           </div>
+            </>
+          )}
           {initialLoading ? (
             <TableSkeleton rows={7} columns={5} />
           ) : (
@@ -720,6 +927,7 @@ export function ExpensesView() {
               onDelete={deleteExpense}
               deletingExpenseId={deletingExpenseId}
               onReceipt={(expense) => void openReceipt(expense)}
+              aurora={aurora}
             />
           )}
         </section>

@@ -9,6 +9,17 @@ import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { WorkspaceTheme, type Workspace } from "@/components/layout/WorkspaceTheme";
+import { AuroraRail } from "@/components/layout/AuroraRail";
+import { AuroraHeader } from "@/components/layout/AuroraHeader";
+import { resolveCurrentPageLabel } from "@/components/layout/railNav";
+import { useWorkspaceThemeVariant } from "@/hooks/useWorkspaceThemeVariant";
+
+// Root breadcrumb of the aurora header, per workspace.
+const AURORA_ROOT_LABEL_KEYS: Record<Workspace, "personalFinance" | "nutritionWorkspace" | "adminPanel"> = {
+  finance: "personalFinance",
+  nutrition: "nutritionWorkspace",
+  admin: "adminPanel",
+};
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
@@ -35,6 +46,15 @@ function getSidebarCollapsedSnapshot(): boolean {
 
 function getSidebarCollapsedServerSnapshot(): boolean {
   return true;
+}
+
+// True only after hydration. Aurora swaps the shell layout from client state, so
+// the server-rendered (classic) markup is hidden by CSS for aurora users until
+// this flips; classic users never see a visibility change.
+const subscribeNever = () => () => {};
+
+function useHydrated() {
+  return useSyncExternalStore(subscribeNever, () => true, () => false);
 }
 
 function setSidebarCollapsed(next: boolean) {
@@ -374,6 +394,9 @@ export function AppShell({
   );
   const pathname = usePathname();
   const title = pageTitles?.[pathname] || defaultTitle;
+  const { variant } = useWorkspaceThemeVariant();
+  const aurora = variant === "aurora";
+  const hydrating = useHydrated() ? undefined : "";
 
   const toggleCollapsed = () => setSidebarCollapsed(!collapsed);
 
@@ -389,9 +412,91 @@ export function AppShell({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [headerSearch]);
 
-  const shell = (
+  const mobileDrawer = (
+      <div
+        aria-hidden={!mobileSidebarOpen}
+        inert={!mobileSidebarOpen}
+        className={`workspace-mobile-sidebar fixed inset-0 z-50 ${aurora ? "lg:hidden" : "md:hidden"} ${mobileSidebarOpen ? "visible opacity-100" : "invisible pointer-events-none opacity-0"}`}
+      >
+          <button
+            aria-label={t("closeSidebarBackdrop")}
+            className="absolute inset-0 cursor-pointer bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <aside className={`relative my-3 ml-3 flex h-[calc(100%-1.5rem)] w-80 max-w-[88vw] flex-col overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-4 shadow-2xl transition-transform duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"}`}>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-medium text-[var(--text-2)]">{t("navigation")}</p>
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                className="cursor-pointer rounded-lg border border-[var(--border-soft)] px-2.5 py-1 text-sm text-[var(--text-2)] transition-colors hover:bg-[var(--bg-3)]"
+                aria-label={t("closeSidebar")}
+              >
+                ✕
+              </button>
+            </div>
+            <SidebarContent
+              navItems={navItems}
+              workspaceItems={workspaceItems}
+              user={user}
+              profileHref={profileHref}
+              onSignOut={onSignOut}
+              signingOut={signingOut}
+              onNavigate={() => setMobileSidebarOpen(false)}
+              brandSubtitle={brandSubtitle}
+              activeDot={activeDot}
+            />
+          </aside>
+      </div>
+  );
+
+  const auroraShell = (
     <HeaderSlotContext.Provider value={{ setHeaderSlot }}>
-      <div className="relative grid h-dvh w-full grid-cols-[auto_minmax(0,1fr)] grid-rows-[72px_minmax(0,1fr)] overflow-hidden bg-[var(--shell-header-bg)] px-2 pb-2 font-sans text-[var(--text-2)] sm:px-3 sm:pb-3">
+      <div
+        data-shell-hydrating={hydrating}
+        className="relative flex h-dvh w-full gap-3 overflow-hidden bg-[var(--frame-bg)] p-2 font-sans text-[var(--text-2)] sm:gap-4 sm:p-4"
+      >
+        <aside
+          id="desktop-sidebar"
+          className="relative z-40 hidden w-[88px] shrink-0 rounded-[28px] border border-[var(--panel-border)] bg-[var(--rail-bg)] [box-shadow:var(--panel-shadow)] lg:flex"
+        >
+          <AuroraRail
+            navItems={navItems}
+            workspaceItems={workspaceItems}
+            user={user}
+            profileHref={profileHref}
+            onSignOut={onSignOut}
+            signingOut={signingOut}
+          />
+        </aside>
+
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-[var(--panel-border)] bg-[var(--panel-bg)] [box-shadow:var(--panel-shadow)]">
+          <AuroraHeader
+            rootLabel={t(AURORA_ROOT_LABEL_KEYS[workspace ?? "admin"])}
+            pageLabel={resolveCurrentPageLabel(pathname, [...navItems, ...(workspaceItems ?? [])], pageTitles, defaultTitle)}
+            lead={headerLead}
+            pill={brandSubtitle}
+            search={headerSearch}
+            onOpenSearch={() => setPaletteOpen(true)}
+            onOpenSidebar={() => setMobileSidebarOpen(true)}
+            showThemeSwitcher={Boolean(workspace)}
+            slot={headerSlot}
+            actions={headerActions}
+          />
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className={`min-h-full w-full ${mainClassName}`}>{children}</div>
+          </main>
+        </div>
+
+        {mobileDrawer}
+
+        <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      </div>
+    </HeaderSlotContext.Provider>
+  );
+
+  const classicShell = (
+    <HeaderSlotContext.Provider value={{ setHeaderSlot }}>
+      <div data-shell-hydrating={hydrating} className="relative grid h-dvh w-full grid-cols-[auto_minmax(0,1fr)] grid-rows-[72px_minmax(0,1fr)] overflow-hidden bg-[var(--shell-header-bg)] px-2 pb-2 font-sans text-[var(--text-2)] sm:px-3 sm:pb-3">
         <aside
           id="desktop-sidebar"
           className={`relative z-40 col-start-1 row-start-2 hidden min-h-0 shrink-0 overflow-hidden rounded-l-[28px] border-r border-[var(--border-soft)] bg-[var(--bg-2)] transition-[width] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:flex ${
@@ -462,45 +567,14 @@ export function AppShell({
           </main>
         </div>
 
-        <div
-          aria-hidden={!mobileSidebarOpen}
-          inert={!mobileSidebarOpen}
-          className={`workspace-mobile-sidebar fixed inset-0 z-50 md:hidden ${mobileSidebarOpen ? "visible opacity-100" : "invisible pointer-events-none opacity-0"}`}
-        >
-            <button
-              aria-label={t("closeSidebarBackdrop")}
-              className="absolute inset-0 cursor-pointer bg-black/60 backdrop-blur-sm"
-              onClick={() => setMobileSidebarOpen(false)}
-            />
-            <aside className={`relative my-3 ml-3 flex h-[calc(100%-1.5rem)] w-80 max-w-[88vw] flex-col overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-1)] p-4 shadow-2xl transition-transform duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"}`}>
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-medium text-[var(--text-2)]">{t("navigation")}</p>
-                <button
-                  onClick={() => setMobileSidebarOpen(false)}
-                  className="cursor-pointer rounded-lg border border-[var(--border-soft)] px-2.5 py-1 text-sm text-[var(--text-2)] transition-colors hover:bg-[var(--bg-3)]"
-                  aria-label={t("closeSidebar")}
-                >
-                  ✕
-                </button>
-              </div>
-              <SidebarContent
-                navItems={navItems}
-                workspaceItems={workspaceItems}
-                user={user}
-                profileHref={profileHref}
-                onSignOut={onSignOut}
-                signingOut={signingOut}
-                onNavigate={() => setMobileSidebarOpen(false)}
-                brandSubtitle={brandSubtitle}
-                activeDot={activeDot}
-              />
-            </aside>
-        </div>
+        {mobileDrawer}
 
         <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       </div>
     </HeaderSlotContext.Provider>
   );
+
+  const shell = aurora ? auroraShell : classicShell;
 
   return workspace ? <WorkspaceTheme workspace={workspace}>{shell}</WorkspaceTheme> : shell;
 }
